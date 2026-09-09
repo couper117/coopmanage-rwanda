@@ -21,6 +21,7 @@ this table, it is added here first and then used.
 | Accountant | Umubaruramari | |
 | Secretary | Umunyamabanga | |
 | Inventory officer | Ushinzwe ububiko | |
+| Viewer | Ureba | Read-only role. *Ureba gusa* where the restriction needs emphasis |
 | System administrator | Ushinzwe sisitemu | |
 | Buyer | Umuguzi | Plural: *Abaguzi* |
 | Chairperson | Perezida wa koperative | |

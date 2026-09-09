@@ -118,8 +118,9 @@ Monorepo, both applications running, empty but real.
 - Strict TypeScript, ESLint, Prettier, pre-commit hook, shared `tsconfig.base.json`
 - Zod-validated environment configuration; `.env.example`; the process refuses to boot on a bad value
 - Docker Postgres on port 5435; Prisma initialised; migration **M1** creating the reference tables
-  (`Permission`, `Role`, `RolePermission`, `CooperativeType`, `UnitOfMeasure`) and seeding them.
-  Table-to-phase mapping is fixed by `database.md` §15
+  (`Permission`, `Role`, `RolePermission`, `CooperativeType`) and seeding them. Units of measure
+  follow in Phase 2, because they reference the cooperative table. Table-to-phase mapping is fixed
+  by `database.md` §15
 - Express application: helmet, CORS allow-list, compression, request id, Pino logging, rate limiter,
   the response envelope, the error handler, `/health` and `/health/ready`
 - React application: Vite, Tailwind with the full token set from `ui-system.md`, the router, the
@@ -170,7 +171,9 @@ by the automated route sweep, and platform access is written to the audit log.
 - Search, filters, sorting, pagination, CSV export
 - Status transitions with reason and audit
 - Shares ledger and contributions, each posting its linked finance entry
-- Member profile: summary figures, timeline, documents
+- Member profile: summary figures and timeline. The blocks whose tables arrive later appear when
+  they do: quantity supplied in Phase 6, attached documents in Phase 9. Until then the profile
+  names them as not yet available rather than showing a zero
 - The members table, the member form, and the "Add member" quick action
 
 **Exit:** a member can be registered with a name and a joining date and nothing else — no phone, no

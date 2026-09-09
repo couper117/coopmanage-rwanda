@@ -17,8 +17,8 @@ and it is the authority whenever a group heading and a phase disagree.
 | Timestamps | `timestamptz`, `created_at` and `updated_at` on every mutable table |
 | Dates without time | `date` for accounting dates such as `occurred_at`, `joined_on`, `paid_on` |
 | Tenant column | Every tenant-owned **root** table carries `cooperative_id` with a foreign key and an index |
-| Child tables | A row that cannot exist without its parent (`SaleItem`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`, `AnnouncementRecipient`, `RolePermission`) inherits tenancy through the parent and carries no `cooperative_id`. It is only ever reached by loading the tenant-scoped parent first, never queried by its own id |
-| Deletion | `RESTRICT` by default. `CASCADE` only for rows that cannot exist alone (sale items, agenda items, role permissions) |
+| Child tables | `SaleItem`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision` and `AnnouncementRecipient` cannot exist without their parent, inherit tenancy through it, and carry no `cooperative_id`. Each is reached only by loading the tenant-scoped parent first, never queried by its own id. `RolePermission` is the same shape but hangs off platform-level `Role`, so it has no tenancy to inherit |
+| Deletion | `RESTRICT` by default. `CASCADE` only for the child rows named in the row below, which cannot exist without their parent |
 | Soft state | Business records use a `status` enum. Financial and stock rows are voided and reversed, never deleted |
 | Enums | PostgreSQL enums via Prisma for closed sets; lookup tables where cooperatives may add values |
 | Naming | `snake_case` in the database via `@map`, `camelCase` in Prisma models |
@@ -279,14 +279,16 @@ then mark the original `VOID`. Both rows stay visible in the history with a clea
 
 ---
 
-## 7. Catalogue, warehouses and inventory (M1 for units, M6 for the rest)
+## 7. Catalogue, warehouses and inventory (M2 for units, M6 for the rest)
 
 ### UnitOfMeasure
 `id`, `cooperative_id` null (null = system-wide seeded unit), `key` (KG, TONNE, LITRE, UNIT, PIECE,
 BOX, BAG, SACK, CRATE, BUNCH, HOUR, TRIP), `name_en`, `name_rw`, `symbol`, `precision` int default 2,
 `base_unit_id` null, `factor_to_base` numeric(18,6) null, `is_active`.
-Unique (cooperative_id, key). Cooperatives may add their own units; nothing in the system assumes
-kilograms.
+Uniqueness needs two partial indexes, because in PostgreSQL two NULLs do not compare equal and a
+plain `unique (cooperative_id, key)` would therefore allow duplicate system units: one on
+`(key)` where `cooperative_id IS NULL`, and one on `(cooperative_id, key)` where it is not null.
+Cooperatives may add their own units; nothing in the system assumes kilograms.
 
 ### ProductCategory
 `id`, `cooperative_id` CASCADE, `name`, `name_rw` null, `parent_id` null self-reference RESTRICT,
@@ -499,8 +501,9 @@ dependency order inside one transaction.
 - Migrations are additive first: add a nullable column, backfill, then add the constraint. A
   destructive migration must be accompanied by a written rollback note in the pull request.
 - `prisma migrate deploy` runs in the release pipeline before the new backend starts.
-- Backups: Supabase daily automated backups with 7-day retention on production, plus an on-demand
-  `pg_dump` script, `scripts/backup-db.mjs`, delivered in Phase 18. The restore procedure is
+- Backups: Supabase daily automated backups with 7-day retention on production, plus `scripts/backup-db.mjs`,
+  delivered in Phase 18, which serves both the weekly scheduled dump described in
+  `docs/deployment.md` and the on-demand `npm run db:backup`. The restore procedure is
   written down in `docs/deployment.md` and is verified once per release. No claim that backups exist
   will be made in the product interface until this is actually configured.
 
@@ -514,8 +517,8 @@ implies a different phase is wrong.
 
 | Migration | Phase | Tables created |
 | --- | --- | --- |
-| M1 | 1 | `Permission`, `Role`, `RolePermission`, `CooperativeType`, `UnitOfMeasure` |
-| M2 | 2 | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog` |
+| M1 | 1 | `Permission`, `Role`, `RolePermission`, `CooperativeType` |
+| M2 | 2 | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog`, `UnitOfMeasure` |
 | M3 | 3 | `CooperativeSetting`, `SystemSetting` |
 | M4 | 4 | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey` |
 | M6 | 6 | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification` |
@@ -524,6 +527,12 @@ implies a different phase is wrong.
 | M9 | 9 | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision` |
 | M10 | 12 | `Announcement`, `AnnouncementRecipient`, `SmsMessage` |
 | M11 | 14 | `AssistantConversation`, `AssistantMessage` |
+
+**Columns that point forward are added later, not created early.** A few tables carry optional links
+to tables that a later migration creates: `FinanceTransaction` (M4) links to `Buyer` and `Sale`
+(M7) and to `Document` (M9), and `InventoryTransaction` (M6) links to `Buyer` and `Sale` (M7). Each
+such column and its foreign key is added by the later migration that creates the target, following
+the additive rule in section 14. Nothing forward-references a table that does not yet exist.
 
 Three orderings are worth stating explicitly, because each one caused a contradiction in the first
 draft of this document:
@@ -535,6 +544,9 @@ draft of this document:
   same database transaction, and contributions ship in Phase 4. Phase 4 therefore also delivers
   `lib/money.ts` and its unit tests, because nothing may write a monetary value before that module
   is proven. Phase 5 builds the ledger, summaries, void and export on top.
+- **`UnitOfMeasure` is created in M2, not M1.** It carries a nullable `cooperative_id` foreign key,
+  so it cannot precede `Cooperative`. Phase 1 seeds only the permission, role and cooperative-type
+  reference data; the system units are seeded in Phase 2 alongside the tenant tables.
 - **`Notification` is created in M6.** The low-stock scan in Phase 6 is the first thing that writes a
   notification, and its de-duplication depends on the `(cooperative_id, dedupe_key)` unique
   constraint. Phase 12 delivers the notification centre, not the table.

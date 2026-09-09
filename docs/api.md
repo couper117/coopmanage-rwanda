@@ -165,10 +165,11 @@ Every row lists the permission the backend enforces. `—` means public or self-
 `GET /members` filters: `q`, `status`, `position`, `gender`, `district`, `sector`, `joinedFrom`,
 `joinedTo`, `hasPhone`. `/members/:id/summary` returns the figures behind the member profile, and each
 block is gated separately by the rule in `permissions.md` §4: shares need `shares:view`,
-contributions need `contributions:view`, payments received need `finance:view`, and quantity
-supplied needs `inventory:view`. Blocks the caller may not see are omitted, and the payload names
-which ones were withheld so the interface can say so rather than display a misleading zero. The
-timeline filters its entries by the same rule.
+contributions need `contributions:view`, payments received need `finance:view`, quantity supplied
+needs `inventory:view` and attached documents need `documents:view`. Blocks the caller may not
+see are omitted, and the payload names which ones were withheld so the interface can say so
+rather than display a misleading zero. Blocks whose tables arrive in a later phase are reported
+the same way until then. The timeline filters its entries by the same rule.
 
 There is no `DELETE /members/:id`. Deactivation is the only exit path.
 
@@ -350,7 +351,7 @@ Formats: `pdf`, `csv`, `xlsx`.
 | `/search` | Global search results | `search:use` |
 | `/settings/cooperative` | Cooperative profile | `cooperative:view` |
 | `/settings/staff` | Staff and roles | `staff:view` |
-| `/settings/preferences` | Cooperative-wide settings and thresholds | `settings:manage` |
+| `/settings/preferences` | Cooperative-wide settings and thresholds | `cooperative:view`, editing needs `settings:manage` |
 | `/settings/audit` | Audit log | `audit:view` |
 | `/profile` | Own account and language | authenticated |
 | `/admin/*` | Platform administration, including platform settings | `platform:*` |

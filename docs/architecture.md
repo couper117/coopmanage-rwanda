@@ -166,7 +166,8 @@ roles, and it is evaluated as: `role permissions + GRANT overrides − DENY over
 - Quantities: `numeric(14,3)`, so litres and kilograms with fractions are exact.
 - No arithmetic on money is ever performed with JavaScript `number`. `lib/money.ts` wraps
   `Prisma.Decimal` and exposes `add`, `sub`, `mul`, `sum`, `compare` and a formatter. Its unit tests
-  are part of the definition of done for Phase 5.
+  are part of the definition of done for Phase 4, which is the first phase that writes a monetary
+  value.
 - Amounts cross the API boundary as **strings** (`"250000.00"`), not JSON numbers, so that no value
   passes through an IEEE-754 double. The frontend formats them with `Intl.NumberFormat` and never
   computes totals it could ask the server for.

@@ -36,7 +36,7 @@ Keys are `resource:action`, lower case, colon separated.
 | `notifications:view` | Read and dismiss own notifications |
 | `cooperative:view` | See cooperative profile |
 | `cooperative:update` | Edit cooperative profile and branding |
-| `settings:manage` | Change cooperative settings, units, thresholds, modules |
+| `settings:manage` | Change cooperative-wide settings, thresholds and enabled modules. Unit editing is `units:manage` |
 | `staff:view` | List staff and their roles |
 | `staff:invite` | Invite a new staff user |
 | `staff:manage` | Change staff role, deactivate staff, set overrides |
@@ -199,8 +199,11 @@ not repeated per route.
 - **Assistant.** Each query tool declares the permission it needs. The tool list offered to the
   model is built per request from the caller's permissions, so an unauthorised tool cannot be
   called even if the model asks for it.
-- **Member profile.** The financial panels (contributions, payments) require `contributions:view`
-  and `finance:view` respectively; the profile renders without them.
+- **Member profile.** Each block of `/members/:id/summary` is gated by the permission covering its
+  data: shares by `shares:view`, contributions by `contributions:view`, payments received by
+  `finance:view`, quantity supplied by `inventory:view`, and attached documents by
+  `documents:view`. The profile renders without any of them, and names the blocks it withheld
+  rather than showing a zero. The member timeline filters its entries by the same rule.
 
 ---
 
