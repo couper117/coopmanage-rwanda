@@ -100,7 +100,7 @@ returns unfiltered data.
 | Mutating endpoints | 60 per minute per user |
 | Read endpoints | 300 per minute per user |
 | File upload | 20 per hour per user |
-| `POST /assistant/ask` | 20 per hour per user |
+| `POST /assistant/ask` | 20 per hour per user and 200 per day per cooperative |
 | `POST /sms/send` | 10 per hour per cooperative |
 
 ---
@@ -152,18 +152,23 @@ Every row lists the permission the backend enforces. `—` means public or self-
 | GET | `/members/:id` | `members:view` |
 | PATCH | `/members/:id` | `members:update` |
 | POST | `/members/:id/status` | `members:deactivate` |
-| GET | `/members/:id/summary` | `members:view` |
-| GET | `/members/:id/timeline` | `members:view` |
+| GET | `/members/:id/summary` | `members:view`, sections composed (see below) |
+| GET | `/members/:id/timeline` | `members:view`, entries filtered by permission |
 | GET | `/members/stats` | `members:view` |
 | GET | `/members/export` | `members:export` |
 | GET | `/members/:id/shares` | `shares:view` |
 | POST | `/members/:id/shares` | `shares:manage` |
+| POST | `/members/:id/shares/:shareId/void` | `shares:manage` |
 | GET | `/members/:id/contributions` | `contributions:view` |
 | POST | `/members/:id/contributions` | `contributions:create` |
 
 `GET /members` filters: `q`, `status`, `position`, `gender`, `district`, `sector`, `joinedFrom`,
-`joinedTo`, `hasPhone`. `/members/:id/summary` returns shares held, contributions total, quantity
-supplied per product and payments received — the figures behind the member profile.
+`joinedTo`, `hasPhone`. `/members/:id/summary` returns the figures behind the member profile, and each
+block is gated separately by the rule in `permissions.md` §4: shares need `shares:view`,
+contributions need `contributions:view`, payments received need `finance:view`, and quantity
+supplied needs `inventory:view`. Blocks the caller may not see are omitted, and the payload names
+which ones were withheld so the interface can say so rather than display a misleading zero. The
+timeline filters its entries by the same rule.
 
 There is no `DELETE /members/:id`. Deactivation is the only exit path.
 
@@ -202,8 +207,10 @@ void and re-entry, which leaves both rows in the history.
 | PATCH | `/products/:id` | `products:manage` |
 | GET | `/product-categories` | `products:view` |
 | POST | `/product-categories` | `products:manage` |
+| PATCH | `/product-categories/:id` | `products:manage` |
 | GET | `/units` | `products:view` |
 | POST | `/units` | `units:manage` |
+| PATCH | `/units/:id` | `units:manage` |
 | GET | `/warehouses` | `inventory:view` |
 | POST | `/warehouses` | `warehouses:manage` |
 | PATCH | `/warehouses/:id` | `warehouses:manage` |
@@ -285,9 +292,11 @@ Formats: `pdf`, `csv`, `xlsx`.
 | GET | `/notifications` | `notifications:view` |
 | POST | `/notifications/:id/read` | `notifications:view` |
 | POST | `/notifications/read-all` | `notifications:view` |
+| POST | `/notifications/:id/dismiss` | `notifications:view` |
 | GET | `/announcements` | `announcements:view` |
 | POST | `/announcements` | `announcements:manage` |
 | POST | `/announcements/:id/publish` | `announcements:manage` |
+| POST | `/announcements/:id/archive` | `announcements:manage` |
 | POST | `/sms/send` | `sms:send` |
 | GET | `/sms/messages` | `sms:send` |
 
@@ -304,6 +313,8 @@ Formats: `pdf`, `csv`, `xlsx`.
 | GET | `/admin/users` | `platform:users:view` |
 | POST | `/admin/users` | `platform:users:manage` |
 | PATCH | `/admin/users/:id` | `platform:users:manage` |
+| GET | `/admin/settings` | `platform:settings:manage` |
+| PUT | `/admin/settings/:key` | `platform:settings:manage` |
 | GET | `/admin/audit` | `platform:audit:view` |
 | GET | `/admin/health` | `platform:health:view` |
 | GET | `/health` | — |
@@ -320,13 +331,14 @@ Formats: `pdf`, `csv`, `xlsx`.
 | `/members`, `/members/new`, `/members/:id`, `/members/:id/edit` | Members | `members:view` / `members:create` / `members:update` |
 | `/finance` | Money in, money out, balance | `finance:view` |
 | `/finance/transactions`, `/finance/transactions/new` | Ledger and entry | `finance:view` / `finance:create` |
-| `/finance/categories` | Categories | `finance:categories:manage` |
+| `/finance/categories` | Categories | `finance:view`, editing needs `finance:categories:manage` |
 | `/contributions` | Member contributions | `contributions:view` |
 | `/inventory` | Stock overview | `inventory:view` |
 | `/inventory/products`, `/inventory/products/:id` | Catalogue | `products:view` |
 | `/inventory/movements` | Movement history | `inventory:view` |
 | `/inventory/receive`, `/inventory/issue`, `/inventory/adjust`, `/inventory/transfer` | Stock actions | matching permission |
-| `/inventory/warehouses` | Locations | `warehouses:manage` |
+| `/inventory/warehouses` | Locations | `inventory:view`, editing needs `warehouses:manage` |
+| `/inventory/units` | Units of measure | `products:view`, editing needs `units:manage` |
 | `/sales`, `/sales/new`, `/sales/:id` | Sales | `sales:view` / `sales:create` |
 | `/buyers`, `/buyers/:id` | Buyers | `buyers:view` |
 | `/reports`, `/reports/:type` | Reports | `reports:view` |
@@ -338,10 +350,10 @@ Formats: `pdf`, `csv`, `xlsx`.
 | `/search` | Global search results | `search:use` |
 | `/settings/cooperative` | Cooperative profile | `cooperative:view` |
 | `/settings/staff` | Staff and roles | `staff:view` |
-| `/settings/preferences` | Units, categories, thresholds | `settings:manage` |
+| `/settings/preferences` | Cooperative-wide settings and thresholds | `settings:manage` |
 | `/settings/audit` | Audit log | `audit:view` |
 | `/profile` | Own account and language | authenticated |
-| `/admin/*` | Platform administration | `platform:*` |
+| `/admin/*` | Platform administration, including platform settings | `platform:*` |
 
 ---
 

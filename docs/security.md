@@ -72,7 +72,8 @@ browser, so ordinary endpoints are not CSRF-exposed. The one cookie-authenticate
 ## 8. Rate limiting and abuse
 
 Limits are listed in `api.md` §1. Login and password reset are limited per IP and per account.
-Assistant and SMS endpoints are limited per cooperative because they cost money. Limits return `429`
+The assistant is limited per user and again per cooperative, and SMS per cooperative, because both
+cost money. Limits return `429`
 with a `Retry-After` header rather than failing silently.
 
 ## 9. Logging and privacy

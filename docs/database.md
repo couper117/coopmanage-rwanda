@@ -1,7 +1,8 @@
 # CoopManage Rwanda — Database Design
 
 PostgreSQL 16, accessed exclusively through Prisma ORM.
-Status: **Phase 0 baseline.** Tables are created by migration in the phase noted against each group.
+Status: **Phase 0 baseline.** Section 15 gives the migration plan: which tables each phase creates,
+and it is the authority whenever a group heading and a phase disagree.
 
 ---
 
@@ -15,14 +16,24 @@ Status: **Phase 0 baseline.** Tables are created by migration in the phase noted
 | Quantities | `numeric(14,3)` — supports litres, kilograms and fractional units exactly |
 | Timestamps | `timestamptz`, `created_at` and `updated_at` on every mutable table |
 | Dates without time | `date` for accounting dates such as `occurred_at`, `joined_on`, `paid_on` |
-| Tenant column | Every tenant-owned table carries `cooperative_id` with a foreign key and an index |
+| Tenant column | Every tenant-owned **root** table carries `cooperative_id` with a foreign key and an index |
+| Child tables | A row that cannot exist without its parent (`SaleItem`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`, `AnnouncementRecipient`, `RolePermission`) inherits tenancy through the parent and carries no `cooperative_id`. It is only ever reached by loading the tenant-scoped parent first, never queried by its own id |
 | Deletion | `RESTRICT` by default. `CASCADE` only for rows that cannot exist alone (sale items, agenda items, role permissions) |
 | Soft state | Business records use a `status` enum. Financial and stock rows are voided and reversed, never deleted |
 | Enums | PostgreSQL enums via Prisma for closed sets; lookup tables where cooperatives may add values |
 | Naming | `snake_case` in the database via `@map`, `camelCase` in Prisma models |
 
-Every unique constraint on tenant-owned data is **composite with `cooperative_id`**. Two
-cooperatives may both have a product called "Ibirayi" and a member coded `COOP-00001`.
+Every unique constraint on tenant-owned data is **composite with `cooperative_id`**, or with a
+column that already implies it. Two cooperatives may both have a product called "Ibirayi" and a
+member coded `COOP-00001`.
+
+Two constraints are deliberately not composite, and both are safe:
+
+- `StockLevel` is unique on `(product_id, warehouse_id)`. A product belongs to exactly one
+  cooperative, so the pair already determines the tenant. The row still carries `cooperative_id`
+  for indexing and for the tenant filter.
+- `Document.storage_key` is globally unique. It is a random key in a shared object store, where
+  collisions across tenants must be impossible, so global uniqueness is the point.
 
 ---
 
@@ -32,7 +43,8 @@ cooperatives may both have a product called "Ibirayi" and a member coded `COOP-0
                     ┌──────────────┐
                     │ Cooperative  │───┐ tenant root
                     └──────┬───────┘   │
-   CooperativeType ────────┘           │ every box below carries cooperative_id
+   CooperativeType ────────┘           │ tenant-owned boxes below carry cooperative_id;
+                                       │ User, Role and Permission are platform-level
                                        │
   ┌────────────────────────────────────┴──────────────────────────────────┐
   │                                                                        │
@@ -61,7 +73,7 @@ cooperatives may both have a product called "Ibirayi" and a member coded `COOP-0
 
 ---
 
-## 3. Identity and access (Phase 2)
+## 3. Identity and access (migrations M1 and M2)
 
 ### User
 Platform-level identity. A user may serve more than one cooperative.
@@ -124,7 +136,7 @@ Effective set = role permissions ∪ GRANT − DENY.
 
 ---
 
-## 4. Cooperative and configuration (Phase 3)
+## 4. Cooperative and configuration (M1, M2 and M3)
 
 ### CooperativeType
 `id`, `key` unique (AGRICULTURE, DAIRY, COFFEE, LIVESTOCK, HANDICRAFTS, TRADING, TRANSPORT,
@@ -145,6 +157,7 @@ nothing more. Cooperative type must never gate a core feature.
 | address_line, phone, email, logo_url | text null | |
 | founded_on | date null | |
 | status | enum(ACTIVE, SUSPENDED, ARCHIVED) default ACTIVE | |
+| is_demo | boolean default false | the whole cooperative is demonstration data |
 | currency | text default 'RWF' | |
 | timezone | text default 'Africa/Kigali' | |
 | default_locale | enum(EN, RW) default RW | |
@@ -163,7 +176,7 @@ footer text, and other per-tenant toggles that do not deserve a column.
 
 ---
 
-## 5. Members (Phase 4)
+## 5. Members (M4)
 
 ### Member
 | Column | Type | Notes |
@@ -183,7 +196,6 @@ footer text, and other per-tenant toggles that do not deserve a column.
 | status | enum(ACTIVE, INACTIVE, SUSPENDED, EXITED) default ACTIVE | |
 | exited_on | date null, exit_reason text null | |
 | photo_url | text null, notes text null | |
-| is_demo | boolean default false | marks seeded demonstration data |
 | created_by_id / updated_by_id | uuid → User | |
 | created_at / updated_at | timestamptz | |
 
@@ -220,7 +232,7 @@ view. There is exactly one source of truth for the money.
 
 ---
 
-## 6. Finance (Phase 5)
+## 6. Finance (M4 — the tables land in Phase 4 because contributions post into them; the finance module itself is Phase 5)
 
 ### FinanceCategory
 `id`, `cooperative_id` CASCADE, `kind` enum(INCOME, EXPENSE), `name`, `name_rw` null, `code` null,
@@ -267,7 +279,7 @@ then mark the original `VOID`. Both rows stay visible in the history with a clea
 
 ---
 
-## 7. Catalogue, warehouses and inventory (Phase 6)
+## 7. Catalogue, warehouses and inventory (M1 for units, M6 for the rest)
 
 ### UnitOfMeasure
 `id`, `cooperative_id` null (null = system-wide seeded unit), `key` (KG, TONNE, LITRE, UNIT, PIECE,
@@ -285,7 +297,7 @@ kilograms.
 `category_id` null RESTRICT, `unit_id` RESTRICT, `type` enum(GOODS, SERVICE),
 `track_inventory` boolean default true, `min_stock_level` numeric(14,3) null,
 `default_purchase_price` numeric(14,2) null, `default_sale_price` numeric(14,2) null,
-`description`, `is_active` boolean default true, `is_demo`, timestamps.
+`description`, `is_active` boolean default true, timestamps.
 Unique (cooperative_id, sku); index (cooperative_id, is_active), trigram index on name.
 
 ### Warehouse
@@ -331,12 +343,12 @@ no separate deliveries table is needed, and stock and member history can never d
 
 ---
 
-## 8. Buyers and sales (Phase 7)
+## 8. Buyers and sales (M7)
 
 ### Buyer
 `id`, `cooperative_id`, `name`, `organization` null, `contact_person` null, `phone` null,
 `email` null, `tin` null, `province`/`district`/`sector` null, `address` null, `notes` null,
-`is_active`, `is_demo`, timestamps. Unique (cooperative_id, name). Trigram index on name.
+`is_active`, timestamps. Unique (cooperative_id, name). Trigram index on name.
 
 ### Sale
 | Column | Type | Notes |
@@ -370,7 +382,7 @@ sale writes compensating `SALE_RETURN` movements rather than deleting anything.
 
 ---
 
-## 9. Meetings (Phase 9)
+## 9. Meetings (M9)
 
 - **Meeting**: `id`, `cooperative_id`, `title`, `type` enum(GENERAL_ASSEMBLY, BOARD, COMMITTEE,
   EXTRAORDINARY, OTHER), `scheduled_for` timestamptz, `ends_at` null, `location`, `status`
@@ -388,7 +400,7 @@ sale writes compensating `SALE_RETURN` movements rather than deleting anything.
 
 ---
 
-## 10. Documents (Phase 9)
+## 10. Documents (M9)
 
 **Document**: `id`, `cooperative_id`, `title`, `category` enum(REGISTRATION, FINANCIAL, MEMBER,
 CONTRACT, CERTIFICATE, MEETING_MINUTES, REPORT, OTHER), `file_name`, `storage_key` unique,
@@ -400,7 +412,7 @@ Indexes (cooperative_id, category), (cooperative_id, created_at), GIN on tags.
 
 ---
 
-## 11. Communication (Phase 12)
+## 11. Communication (Notification in M6, the rest in M10)
 
 - **Announcement**: `id`, `cooperative_id`, `title`, `body`, `audience` enum(ALL_MEMBERS, STAFF,
   SELECTED_MEMBERS), `status` enum(DRAFT, PUBLISHED, ARCHIVED), `published_at`, `expires_at`,
@@ -411,7 +423,8 @@ Indexes (cooperative_id, category), (cooperative_id, created_at), GIN on tags.
   `status` enum(QUEUED, SENT, DELIVERED, FAILED), `provider_message_id` null, `error_message` null,
   `segments` int, `cost_amount` numeric(14,2) null, `announcement_id` null, `meeting_id` null,
   `sent_by_id`, `created_at`, `sent_at`. Index (cooperative_id, created_at), (status).
-- **Notification**: `id`, `cooperative_id`, `user_id` null (null = every staff member of the
+- **Notification** (M6, because the Phase 6 low-stock scan is the first thing that writes one):
+`id`, `cooperative_id`, `user_id` null (null = every staff member of the
   cooperative), `type` enum(LOW_STOCK, MEETING_REMINDER, REPORT_READY, MEMBER_INCOMPLETE, DOCUMENT,
   TASK, SYSTEM), `severity` enum(INFO, WARNING, CRITICAL), **`message_key`** text,
   **`message_params`** jsonb, `entity_type` null, `entity_id` null, `action_url` null,
@@ -426,7 +439,7 @@ notification created while the interface was in English still reads correctly in
 
 ## 12. Audit, idempotency, reports
 
-### AuditLog (Phase 2, appended to by every later phase)
+### AuditLog (M2, appended to by every later phase)
 `id`, `cooperative_id` null (null = platform action), `actor_user_id` null RESTRICT,
 `actor_label` text (name and email captured at the time, so the log survives a user rename),
 `action` text (`member.created`, `finance.transaction.voided`), `entity_type`, `entity_id` null,
@@ -438,20 +451,21 @@ in production is granted `INSERT` and `SELECT` on it only. `before`/`after` are 
 same redaction list as the logger so password hashes and tokens never land in the audit trail.
 Indexes: (cooperative_id, created_at desc), (entity_type, entity_id), (actor_user_id, created_at).
 
-### IdempotencyKey (Phase 13, honoured by Phase 5–7 endpoints from the start)
+### IdempotencyKey (M4). Created with the finance tables because Phase 5 honours it from its first
+endpoint; Phase 13 adds the client behaviour that relies on it, not the table.
 `id`, `cooperative_id`, `user_id`, `key`, `endpoint`, `request_hash`,
 `response_status` int null, `response_body` jsonb null,
 `state` enum(IN_PROGRESS, COMPLETED), `created_at`, `expires_at`.
 Unique (cooperative_id, key). A replay with a matching hash returns the stored response; a replay
 with a different hash is a `409 IDEMPOTENCY_KEY_REUSED`.
 
-### ReportRun (Phase 8)
+### ReportRun (M8)
 `id`, `cooperative_id`, `type`, `params` jsonb, `format` enum(PDF, CSV, XLSX),
 `status` enum(PENDING, READY, FAILED), `storage_key` null, `error_message` null,
 `generated_by_id`, `created_at`, `completed_at`. Lets a finished report raise a notification and be
 downloaded again without regenerating it.
 
-### AssistantConversation / AssistantMessage (Phase 14)
+### AssistantConversation / AssistantMessage (M11)
 Conversation: `id`, `cooperative_id`, `user_id`, `title`, timestamps.
 Message: `id`, `conversation_id` CASCADE, `role` enum(USER, ASSISTANT), `content`,
 `tool_calls` jsonb null, `data_snapshot` jsonb null, `created_at`.
@@ -470,9 +484,12 @@ traced back to the query that produced it.
    3 warehouses, 9 buyers, twelve months of income and expenses, inventory movements, sales,
    meetings with attendance and decisions, documents and audit history.
 
-Every demonstration row carries `is_demo = true` and the cooperative name is suffixed in the
-interface with a "Demonstration data" badge, so nobody mistakes it for live records. A
-`npm run db:demo:purge` script removes every `is_demo` row in dependency order.
+Demonstration data is flagged **once, on the cooperative** (`Cooperative.is_demo`), not on every
+row. Everything else is reachable from that cooperative by foreign key, so a per-row flag would be
+redundant and would inevitably be forgotten on some table. The interface shows a "Demonstration
+data" badge beside the cooperative name everywhere it appears, so nobody mistakes it for live
+records, and `npm run db:demo:purge` deletes the flagged cooperative and its dependants in
+dependency order inside one transaction.
 
 ---
 
@@ -482,7 +499,45 @@ interface with a "Demonstration data" badge, so nobody mistakes it for live reco
 - Migrations are additive first: add a nullable column, backfill, then add the constraint. A
   destructive migration must be accompanied by a written rollback note in the pull request.
 - `prisma migrate deploy` runs in the release pipeline before the new backend starts.
-- Backups: Supabase daily automated backups with 7-day retention on production, plus a documented
-  `pg_dump` script in `scripts/backup-db.mjs` for on-demand snapshots. The restore procedure is
+- Backups: Supabase daily automated backups with 7-day retention on production, plus an on-demand
+  `pg_dump` script, `scripts/backup-db.mjs`, delivered in Phase 18. The restore procedure is
   written down in `docs/deployment.md` and is verified once per release. No claim that backups exist
   will be made in the product interface until this is actually configured.
+
+---
+
+## 15. Migration plan
+
+Tables are created in dependency order, not in feature order. Where a feature in phase *N* writes to
+a table, that table exists by phase *N*. This table is the authority; a group heading above that
+implies a different phase is wrong.
+
+| Migration | Phase | Tables created |
+| --- | --- | --- |
+| M1 | 1 | `Permission`, `Role`, `RolePermission`, `CooperativeType`, `UnitOfMeasure` |
+| M2 | 2 | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog` |
+| M3 | 3 | `CooperativeSetting`, `SystemSetting` |
+| M4 | 4 | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey` |
+| M6 | 6 | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification` |
+| M7 | 7 | `Buyer`, `Sale`, `SaleItem` |
+| M8 | 8 | `ReportRun` |
+| M9 | 9 | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision` |
+| M10 | 12 | `Announcement`, `AnnouncementRecipient`, `SmsMessage` |
+| M11 | 14 | `AssistantConversation`, `AssistantMessage` |
+
+Three orderings are worth stating explicitly, because each one caused a contradiction in the first
+draft of this document:
+
+- **`Cooperative` is created in M2, not M3.** `CooperativeStaff` is the tenant gate and cannot exist
+  without it, and Phase 2 needs the gate. Phase 3 adds the cooperative *module* — profile editing,
+  settings, staff administration — on a table that already exists.
+- **The finance tables are created in M4, not M5.** A contribution posts a linked income row in the
+  same database transaction, and contributions ship in Phase 4. Phase 4 therefore also delivers
+  `lib/money.ts` and its unit tests, because nothing may write a monetary value before that module
+  is proven. Phase 5 builds the ledger, summaries, void and export on top.
+- **`Notification` is created in M6.** The low-stock scan in Phase 6 is the first thing that writes a
+  notification, and its de-duplication depends on the `(cooperative_id, dedupe_key)` unique
+  constraint. Phase 12 delivers the notification centre, not the table.
+
+There is no M5. Phase 5 adds indexes and seeded categories but creates no new table, which is the
+expected shape when a phase builds a module on tables an earlier phase had to create.

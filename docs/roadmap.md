@@ -105,7 +105,8 @@ Each phase ends with the same gate. A phase is **not** complete until all seven 
 Inspect the environment, decide the architecture, write it down before writing application code.
 
 Delivered: `architecture.md`, `database.md`, `permissions.md`, `api.md`, `ui-system.md`,
-`roadmap.md`, `glossary.md`, repository initialised, toolchain and database availability confirmed.
+`glossary.md`, `security.md`, `deployment.md`, `roadmap.md`. Repository initialised, toolchain
+versions pinned, and PostgreSQL 16 verified running with the three required extensions.
 
 ---
 
@@ -116,8 +117,9 @@ Monorepo, both applications running, empty but real.
 - npm workspaces; `apps/backend`, `apps/frontend`, `packages/shared`
 - Strict TypeScript, ESLint, Prettier, pre-commit hook, shared `tsconfig.base.json`
 - Zod-validated environment configuration; `.env.example`; the process refuses to boot on a bad value
-- Docker Postgres on port 5435; Prisma initialised; the first migration creating the identity,
-  cooperative and reference tables; seed of permissions, roles, types and units
+- Docker Postgres on port 5435; Prisma initialised; migration **M1** creating the reference tables
+  (`Permission`, `Role`, `RolePermission`, `CooperativeType`, `UnitOfMeasure`) and seeding them.
+  Table-to-phase mapping is fixed by `database.md` §15
 - Express application: helmet, CORS allow-list, compression, request id, Pino logging, rate limiter,
   the response envelope, the error handler, `/health` and `/health/ready`
 - React application: Vite, Tailwind with the full token set from `ui-system.md`, the router, the
@@ -161,6 +163,9 @@ by the automated route sweep, and platform access is written to the audit log.
 
 ### Phase 4 — Members
 
+- `lib/money.ts` with full unit-test coverage, and migration **M4** including the finance tables,
+  because a contribution posts a linked income row. Nothing writes a monetary value before the
+  money module is proven
 - Member CRUD with code allocation inside the insert transaction
 - Search, filters, sorting, pagination, CSV export
 - Status transitions with reason and audit
@@ -176,8 +181,7 @@ list, filter and search in under 300 ms.
 
 ### Phase 5 — Finance
 
-- `lib/money.ts` with full unit-test coverage before anything uses it
-- Categories, transactions, void and reversal, idempotency
+- Categories, transactions, void and reversal, idempotency, all on the M4 tables
 - Summaries by day, week, month and custom range; category breakdown; trends
 - CSV and Excel export
 - Finance overview screen: money in, money out, balance; the ledger table; the record dialogs
@@ -193,7 +197,8 @@ the balance returns to its prior value; a repeated `Idempotency-Key` creates exa
 - Products, categories, units, warehouses
 - Receive, issue, adjust, transfer; reversal; movement history
 - Conditional-update stock decrement; `StockLevel` rebuild command
-- Low-stock scan job and de-duplicated notifications
+- `Notification` table (M6) and the low-stock scan job writing de-duplicated notifications. The
+  notification centre itself is Phase 12; this phase only writes the rows
 - Stock overview, movement table, and the receive and issue quick actions
 
 **Exit:** a concurrency test firing twenty simultaneous issues against a stock of ten leaves the
@@ -210,8 +215,8 @@ movement history reproduces the stored levels exactly.
 - Printable receipt
 - Sales list, sale form with product picker and live line totals, buyer profile
 
-**Exit:** a forced failure injected at the last step of confirmation leaves no sale, no stock
-movement and no finance row; cancelling a confirmed sale restores stock through compensating
+**Exit:** a forced failure injected at the last step of confirmation leaves the sale still in
+draft, with no stock movement and no finance row; cancelling a confirmed sale restores stock through compensating
 movements rather than deletions.
 
 ---
@@ -241,11 +246,15 @@ a disguised executable is rejected on upload.
 ### Phase 10 — Dashboard and insights
 
 - KPI tiles, recent activity, needs attention, quick actions, all permission-filtered
-- The four charts from `ui-system.md` §10 and nothing else
+- The three charts and one low-stock list from `ui-system.md` §10, and nothing else
 - Cooperative health: GOOD, WATCH or ATTENTION with a sentence naming the figures behind it
+- Global search across members, products, buyers, sales, documents and meetings, with results
+  filtered per resource against the caller's permissions before ranking
 
 **Exit:** every dashboard figure is traceable to a query; a manager can state the cooperative's
-position within ten seconds of the page loading; the dashboard is one API round trip.
+position within ten seconds of the page loading; the dashboard is one API round trip; searching a
+member name returns that member and their related records, and returns nothing the caller may not
+see.
 
 ---
 
@@ -332,8 +341,8 @@ migrations verified from empty, and no known broken functionality.
 ### Phase 18 — Production preparation
 
 Production environment variables, Supabase database and storage, migration deployment, seed
-strategy, Vercel and Railway configuration, backup and restore procedure verified once, monitoring
-and log retention, and the deployment runbook.
+strategy, Vercel and Railway configuration, `scripts/backup-db.mjs` with the restore procedure
+executed once for real, monitoring and log retention, and the deployment runbook.
 
 **Exit:** a clean deployment from an empty production database succeeds, the restore procedure has
 actually been executed, and no secret is exposed.

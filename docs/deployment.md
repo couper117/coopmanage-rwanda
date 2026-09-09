@@ -49,7 +49,8 @@ backup taken immediately before the release.
 ## 4. Backup and restore
 
 **Production.** Supabase automated daily backups with 7-day point-in-time recovery, plus a weekly
-`pg_dump` to separate object storage with 90-day retention, run from `scripts/backup-db.mjs`.
+`pg_dump` to separate object storage with 90-day retention, run from `scripts/backup-db.mjs`, which
+is delivered in Phase 18.
 
 **On demand.** `npm run db:backup` writes a compressed custom-format dump named with a UTC
 timestamp.

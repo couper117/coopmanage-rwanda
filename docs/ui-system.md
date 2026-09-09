@@ -172,7 +172,7 @@ Static panels are defined by a 1 px border, never a shadow.
 └──────────┴──────────────────────────────────────────────────┘
 ```
 
-The sidebar sits on `--primary-800` with white text, grouped as: **Overview** (Dashboard, Reports),
+The sidebar sits on `--primary-800` with white text, grouped as: **Overview** (Dashboard, Ask CoopManage, Reports),
 **Cooperative** (Members, Contributions, Meetings, Documents, Announcements), **Operations**
 (Inventory, Products, Sales, Buyers), **Money** (Finance), **Administration** (Staff, Settings,
 Audit). Items the user lacks permission for are not rendered, and an empty group disappears.
@@ -205,7 +205,7 @@ styled entirely by our own tokens. One icon library: **lucide-react**, 16 px in 
 | --- | --- |
 | `Button` | Variants `primary`, `secondary`, `ghost`, `danger`, `link`. Heights 32 / 36 / 40. Loading state replaces the leading icon with a spinner, keeps the label, and disables the control |
 | `IconButton` | Square, 32 / 36. Requires `aria-label` |
-| `Input` `Textarea` `Select` | 36 px height, 1 px `--border-strong`, 6 px radius, 12 px inset. Focus: border `--primary-600` and a 3 px ring at 22 % |
+| `Input` `Textarea` `Select` | 36 px height, 1 px `--border-strong`, 6 px radius, 12 px inset. On focus the border becomes `--primary-600`, in addition to the standard focus ring |
 | `Combobox` | Type-ahead over server-searched options. Used for member, product and buyer pickers |
 | `DatePicker` / `DateRangePicker` | Text entry plus calendar. Presets: today, this week, this month, last month, this quarter, this year, custom |
 | `FormField` | Label, optional hint, control, error. Error is red text with an icon and is bound by `aria-describedby` |
@@ -306,7 +306,9 @@ the end of every phase.
 
 - Body text meets 4.5:1 and large text 3:1 against its background. Every token pair in this document
   has been chosen against that threshold.
-- Visible focus everywhere: a 2 px `--primary-600` ring with a 2 px offset, never removed.
+- Visible focus everywhere and identical on every control: a 2 px `--primary-600` ring at a 2 px
+  offset, applied on `:focus-visible` and never removed. Inputs additionally recolour their border,
+  which is an addition to the ring, never a replacement for it.
 - Semantic HTML: real `<table>`, `<th scope>`, `<button>`, `<nav>`, `<main>`, one `<h1>` per page and
   no skipped heading levels.
 - Dialogs trap focus, close on Escape, restore focus to the trigger and are labelled by their title.
@@ -322,14 +324,15 @@ the end of every phase.
 
 ## 10. Charts
 
-A chart earns its place only by answering a question a manager actually asks. Phase 10 ships four:
+A chart earns its place only by answering a question a manager actually asks. Phase 10 ships three
+charts and one list:
 
 | Question | Chart |
 | --- | --- |
 | Is money coming in faster than it goes out? | Twelve-month income against expenses, grouped bars |
 | Are we selling more or less than before? | Six-month sales value, line with the previous period ghosted |
 | Where does the money go? | Expenses by category for the period, horizontal bars, top six then "Other" |
-| Is any product about to run out? | Not a chart. A list of products below their minimum, with the number of units left |
+| Is any product about to run out? | Deliberately not a chart. A list of products below their minimum, with the quantity left |
 
 Rules: direct labels rather than a legend where there are three or fewer series; axes start at zero
 for bars; no pie chart above three slices; no dual axes; no animation beyond a 150 ms fade on load;

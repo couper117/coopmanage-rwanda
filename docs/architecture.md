@@ -87,7 +87,7 @@ may call Prisma directly; what is *not* negotiable is that controllers never do.
 auth  users  roles  cooperatives  staff  members  shares  contributions
 finance  categories  products  inventory  warehouses  units
 buyers  sales  reports  documents  meetings  announcements
-notifications  sms  audit  search  assistant  admin  health
+dashboard  search  notifications  sms  audit  assistant  admin  health
 ```
 
 Each module is a self-contained folder under `apps/backend/src/modules/`. Adding a cooperative-type
@@ -178,16 +178,17 @@ roles, and it is evaluated as: `role permissions + GRANT overrides − DENY over
 ## 7. Transactional integrity
 
 Any operation touching more than one row runs inside `prisma.$transaction` with an explicit
-timeout. The canonical case is confirming a sale:
+timeout. The canonical case is confirming a sale. A sale is created as a draft first, so
+confirmation operates on rows that already exist and any failure rolls back to a still-valid draft:
 
 ```
 BEGIN
-  insert Sale
-  insert SaleItem[]
-  for each item: check StockLevel >= quantity, decrement StockLevel, insert InventoryTransaction
-  insert FinanceTransaction (income) when payment recorded at point of sale
+  lock Sale FOR UPDATE, assert status = DRAFT
+  for each SaleItem: decrement StockLevel conditionally, insert InventoryTransaction (SALE_OUT)
+  insert FinanceTransaction (income) when payment is taken at the point of sale
+  update Sale set status = CONFIRMED, confirmed_at = now()
   insert AuditLog
-COMMIT   -- any failure rolls back everything
+COMMIT   -- any failure leaves the untouched draft: no stock moved, no money posted
 ```
 
 Stock is protected against concurrent oversell by decrementing with a conditional update

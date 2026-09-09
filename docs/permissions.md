@@ -161,16 +161,16 @@ Design notes on specific choices:
 - **The secretary cannot see finance.** Section 3 of the brief gives the secretary members,
   meetings, documents, announcements and permitted reports. Contribution *visibility* is included
   because the secretary registers members and needs to see whether fees were paid, but recording
-  and voting money stays with the accountant and manager.
+  and voiding money stays with the accountant and manager.
 - **The inventory officer holds `members:view`** because stock received from a member must be
   attributed to that member.
 - **`sms:send` is deliberately narrow.** It costs money and reaches people outside the system.
 
 ### System administrator
 
-The system administrator is a platform role, not a cooperative role. It holds every
-`platform:*` permission and, inside any cooperative, only:
-`cooperative:view`, `staff:view`, `audit:view`, `reports:view`, `platform:health:view`.
+The system administrator is a platform role, not a cooperative role. It holds every `platform:*` permission. Those keys are platform-scoped and are not evaluated inside
+a cooperative at all. Within any individual cooperative it holds only `cooperative:view`,
+`staff:view`, `audit:view` and `reports:view`.
 
 It explicitly does **not** hold `finance:create`, `finance:void`, `inventory:*` write, `sales:*`
 write or `documents:view`. A platform operator has no business posting a cooperative's transactions
