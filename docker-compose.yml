@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16
+    container_name: coopmanage-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coopmanage
+      POSTGRES_PASSWORD: coopmanage
+      POSTGRES_DB: coopmanage
+    ports:
+      - "5435:5432"
+    volumes:
+      - coopmanage-pgdata:/var/lib/postgresql/data
+      - ./scripts/db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coopmanage -d coopmanage"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  coopmanage-pgdata:
