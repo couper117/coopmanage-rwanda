@@ -1,0 +1,31 @@
+{
+  "skipToContent": "Simbukira ku bikubiyemo",
+  "mainNavigation": "Ibyerekezo by'ingenzi",
+  "openMenu": "Fungura urutonde",
+  "closeMenu": "Funga urutonde",
+  "groups": {
+    "overview": "Incamake",
+    "cooperative": "Koperative",
+    "operations": "Ibikorwa",
+    "money": "Imari",
+    "administration": "Ubuyobozi"
+  },
+  "items": {
+    "dashboard": "Incamake",
+    "assistant": "Baza CoopManage",
+    "reports": "Raporo",
+    "members": "Abanyamuryango",
+    "contributions": "Imisanzu",
+    "meetings": "Inama",
+    "documents": "Inyandiko",
+    "announcements": "Amatangazo",
+    "inventory": "Ububiko",
+    "products": "Ibicuruzwa",
+    "sales": "Amagurisha",
+    "buyers": "Abaguzi",
+    "finance": "Amafaranga",
+    "staff": "Abakozi",
+    "settings": "Igenamiterere",
+    "audit": "Urutonde rw'ibikorwa"
+  }
+}

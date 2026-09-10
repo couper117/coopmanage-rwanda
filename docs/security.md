@@ -8,15 +8,15 @@ aspiration.
 
 ## 1. Threat model
 
-| Asset | Threat | Primary control |
-| --- | --- | --- |
-| Another cooperative's records | A staff user guessing or replaying identifiers | Tenant resolution plus tenant-scoped repositories, `404` on mismatch |
-| Financial records | Silent alteration or deletion to hide a discrepancy | Void-and-reverse only, append-only audit log, no delete endpoint |
-| Member personal data | Bulk extraction | Permission-gated export, rate limits, export written to the audit log |
-| Private documents | Direct object access without a session | Random storage keys, no public bucket, streamed through an authorised endpoint |
-| Accounts | Credential stuffing and brute force | Argon2id, per-IP and per-account rate limits, progressive lockout |
-| Sessions | Refresh token theft | Hashed rotating refresh tokens with family revocation on reuse |
-| The database | Injection | Prisma parameterisation, no string-built SQL, allow-listed sort and filter fields |
+| Asset                         | Threat                                              | Primary control                                                                   |
+| ----------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Another cooperative's records | A staff user guessing or replaying identifiers      | Tenant resolution plus tenant-scoped repositories, `404` on mismatch              |
+| Financial records             | Silent alteration or deletion to hide a discrepancy | Void-and-reverse only, append-only audit log, no delete endpoint                  |
+| Member personal data          | Bulk extraction                                     | Permission-gated export, rate limits, export written to the audit log             |
+| Private documents             | Direct object access without a session              | Random storage keys, no public bucket, streamed through an authorised endpoint    |
+| Accounts                      | Credential stuffing and brute force                 | Argon2id, per-IP and per-account rate limits, progressive lockout                 |
+| Sessions                      | Refresh token theft                                 | Hashed rotating refresh tokens with family revocation on reuse                    |
+| The database                  | Injection                                           | Prisma parameterisation, no string-built SQL, allow-listed sort and filter fields |
 
 The realistic adversary is not a nation state. It is a curious or disgruntled staff member of one
 cooperative, an attacker with a stolen laptop, and an automated credential-stuffing bot.
@@ -97,6 +97,12 @@ or is still the example value.
 `npm audit` and a lockfile-diff review in CI. Pinned major versions, no automatic upgrades on
 deploy. Dependencies are added deliberately; a dependency that saves twenty lines is not worth its
 supply-chain surface.
+
+Two advisories are currently accepted rather than fixed, both inside the Prisma command-line tool,
+which is a development dependency and is not part of any deployed artefact: `deepmerge-ts` reached
+through `@prisma/config`, and `mysql2`, a driver this project never loads because it uses
+PostgreSQL. The only remedy npm offers is a downgrade to Prisma 6, which trades a development-only
+issue for an out-of-date data layer. Both are re-examined at Phase 15 and on every Prisma upgrade.
 
 ## 12. Phase 15 audit checklist
 

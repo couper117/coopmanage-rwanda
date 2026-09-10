@@ -1,0 +1,45 @@
+{
+  "appName": "CoopManage Rwanda",
+  "appTagline": "Gucunga koperative byoroshye",
+  "actions": {
+    "add": "Kongeramo",
+    "save": "Kubika",
+    "cancel": "Kureka",
+    "edit": "Guhindura",
+    "delete": "Gusiba",
+    "confirm": "Kwemeza",
+    "close": "Gufunga",
+    "search": "Gushakisha",
+    "filter": "Kuyungurura",
+    "clearFilters": "Gukuraho ibyungurujwe",
+    "export": "Gukuramo",
+    "print": "Gucapa",
+    "retry": "Ongera ugerageze",
+    "back": "Subira inyuma",
+    "next": "Ibikurikira",
+    "previous": "Ibibanza",
+    "viewAll": "Reba byose"
+  },
+  "state": {
+    "loading": "Biratunganywa",
+    "saving": "Birabikwa",
+    "noResults": "Nta bisubizo bibonetse",
+    "optional": "bidasabwa",
+    "required": "birasabwa"
+  },
+  "connection": {
+    "online": "Muri sisitemu",
+    "offline": "Nta murandasi",
+    "checking": "Turareba umurandasi",
+    "degraded": "Hari ikibazo cy'umurandasi",
+    "offlineHelp": "Nta murandasi ufite. Ibyo wanditse birabikwa kugeza umurandasi ugarutse.",
+    "degradedHelp": "Sisitemu ntiyitaba. Turakomeza kugerageza."
+  },
+  "language": {
+    "label": "Ururimi",
+    "en": "Icyongereza",
+    "rw": "Ikinyarwanda",
+    "switchTo": "Hindura ujye mu {{language}}"
+  },
+  "currency": { "code": "RWF" }
+}

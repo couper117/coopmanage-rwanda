@@ -1,0 +1,45 @@
+{
+  "appName": "CoopManage Rwanda",
+  "appTagline": "Cooperative management made simple",
+  "actions": {
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "clearFilters": "Clear filters",
+    "export": "Export",
+    "print": "Print",
+    "retry": "Try again",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewAll": "View all"
+  },
+  "state": {
+    "loading": "Loading",
+    "saving": "Saving",
+    "noResults": "No results found",
+    "optional": "optional",
+    "required": "required"
+  },
+  "connection": {
+    "online": "Connected",
+    "offline": "No connection",
+    "checking": "Checking connection",
+    "degraded": "Connection problems",
+    "offlineHelp": "You are offline. Your work is kept until the connection returns.",
+    "degradedHelp": "The server is not responding. We will keep trying."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "switchTo": "Switch to {{language}}"
+  },
+  "currency": { "code": "RWF" }
+}

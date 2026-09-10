@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import './theme.css';
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-surface-sunken);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Figures line up in columns everywhere they appear. */
+  table,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * One focus treatment for the whole application: a 2px primary ring at a 2px offset, applied on
+   * :focus-visible so a mouse click does not paint a ring but a keyboard tab always does.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::placeholder {
+    color: var(--color-ink-disabled);
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  /* Lets a keyboard user reach the main content without tabbing the whole sidebar. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-overlay);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

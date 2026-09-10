@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 0 complete.** Phase 1 is next.
+Status: **Phase 1 complete.** Phase 2 is next.
 
 ---
 
@@ -110,7 +110,7 @@ versions pinned, and PostgreSQL 16 verified running with the three required exte
 
 ---
 
-### Phase 1 — Project foundation
+### Phase 1 — Project foundation ✅
 
 Monorepo, both applications running, empty but real.
 
@@ -129,8 +129,15 @@ Monorepo, both applications running, empty but real.
 - i18next wired with English and Kinyarwanda namespace files, the language switcher, persistence,
   and the CI key-parity check
 
-**Exit:** `npm run dev` starts both applications, the shell renders in both languages, the health
-endpoint reports the database as reachable, and the quality gate is green.
+**Exit:** met. `npm run dev` starts both applications; the shell renders in English and
+Kinyarwanda; readiness reports the database reachable with its latency; migrations apply to an
+empty database and the seed is idempotent; the compiled server runs from `dist`; and lint,
+typecheck, 109 tests and the production build are all green.
+
+Two deviations from the plan, both recorded where they matter. The frontend runs on port 5175
+because 5173 and 5174 belong to other projects on this machine. Prisma 7 requires a driver adapter
+and a `prisma.config.ts`, which changed how the database URL reaches the client; this is written up
+in `architecture.md` section 16.
 
 ---
 

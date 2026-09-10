@@ -1,0 +1,92 @@
+// CoopManage Rwanda — database schema.
+// Documented in docs/database.md. Tables are introduced by the migration plan in section 15;
+// this file grows one migration at a time rather than being written all at once.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// M1 (Phase 1) — reference data.
+// Seeded, not user-created. Roles and permissions are the vocabulary the whole
+// authorization system is written in, so they exist before anything else.
+// ---------------------------------------------------------------------------
+
+enum PermissionScope {
+  COOPERATIVE
+  PLATFORM
+}
+
+enum RoleScope {
+  COOPERATIVE
+  PLATFORM
+}
+
+model Permission {
+  id            String          @id @default(uuid()) @db.Uuid
+  key           String          @unique
+  resource      String
+  action        String
+  scope         PermissionScope
+  descriptionEn String          @map("description_en")
+  descriptionRw String          @map("description_rw")
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  roles RolePermission[]
+
+  @@index([scope])
+  @@map("permissions")
+}
+
+model Role {
+  id            String   @id @default(uuid()) @db.Uuid
+  key           String   @unique
+  nameEn        String   @map("name_en")
+  nameRw        String   @map("name_rw")
+  descriptionEn String   @map("description_en")
+  descriptionRw String   @map("description_rw")
+  scope         RoleScope
+  isSystem      Boolean  @default(true) @map("is_system")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+// Child of Role, which is platform-level, so it carries no cooperative_id.
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model CooperativeType {
+  id                  String   @id @default(uuid()) @db.Uuid
+  key                 String   @unique
+  nameEn              String   @map("name_en")
+  nameRw              String   @map("name_rw")
+  descriptionEn       String   @map("description_en")
+  descriptionRw       String   @map("description_rw")
+  iconKey             String   @map("icon_key")
+  defaultUnitKeys     String[] @map("default_unit_keys")
+  suggestedCategories Json     @map("suggested_categories")
+  sortOrder           Int      @map("sort_order")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("cooperative_types")
+}

@@ -1,0 +1,16 @@
+{
+  "invalid_type": "This value is not valid.",
+  "too_small": "This value is too short or too small.",
+  "too_big": "This value is too long or too large.",
+  "invalid_format": "This is not in the expected format.",
+  "invalid_union": "This value is not one of the allowed options.",
+  "invalid_value": "This is not one of the allowed options.",
+  "unrecognized_keys": "Unexpected information was sent.",
+  "custom": "This value is not valid.",
+  "required": "This field is required.",
+  "email": "Enter a valid email address.",
+  "phone": "Enter a valid phone number.",
+  "decimalScale": "Use at most {{scale}} decimal places.",
+  "positiveAmount": "Enter an amount greater than zero.",
+  "dateRange": "The end date must be on or after the start date."
+}

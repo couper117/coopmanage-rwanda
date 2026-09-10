@@ -39,38 +39,38 @@ that need one directly. Nothing in a component uses a raw hex value.
 
 Warm-neutral grey with a faint green undertone, so it sits with the primary rather than fighting it.
 
-| Token | Hex | Use |
-| --- | --- | --- |
-| `--surface` | `#FFFFFF` | Cards, tables, dialogs, inputs |
-| `--surface-sunken` | `#F6F8F7` | Application background |
+| Token              | Hex       | Use                                    |
+| ------------------ | --------- | -------------------------------------- |
+| `--surface`        | `#FFFFFF` | Cards, tables, dialogs, inputs         |
+| `--surface-sunken` | `#F6F8F7` | Application background                 |
 | `--surface-subtle` | `#EFF2F1` | Table header, hover row, disabled fill |
-| `--border` | `#E6EAE8` | Default 1 px separators |
-| `--border-strong` | `#D8DEDB` | Input borders, table outer edge |
-| `--text-primary` | `#101413` | Body copy, figures |
-| `--text-secondary` | `#4A5551` | Labels, secondary cells |
-| `--text-muted` | `#67736F` | Hints, timestamps, placeholders |
-| `--text-disabled` | `#8B9793` | Disabled control text |
+| `--border`         | `#E6EAE8` | Default 1 px separators                |
+| `--border-strong`  | `#D8DEDB` | Input borders, table outer edge        |
+| `--text-primary`   | `#101413` | Body copy, figures                     |
+| `--text-secondary` | `#4A5551` | Labels, secondary cells                |
+| `--text-muted`     | `#67736F` | Hints, timestamps, placeholders        |
+| `--text-disabled`  | `#8B9793` | Disabled control text                  |
 
 ### Primary — "Amashyamba" green
 
-| Step | Hex | Use |
-| --- | --- | --- |
-| 50 | `#ECF5F0` | Selected row, subtle tint |
-| 100 | `#D3E8DD` | Badge background |
-| 200 | `#A8D2BC` | Chart fill, sparkline area |
-| 400 | `#429676` | Chart series, hover accents |
-| 600 | `#12634A` | **Primary buttons, links, active nav, focus ring** |
-| 700 | `#0D4F3B` | Button hover, pressed |
-| 800 | `#0A3E2F` | Sidebar background |
-| 900 | `#072B21` | Sidebar deep areas, print headers |
+| Step | Hex       | Use                                                |
+| ---- | --------- | -------------------------------------------------- |
+| 50   | `#ECF5F0` | Selected row, subtle tint                          |
+| 100  | `#D3E8DD` | Badge background                                   |
+| 200  | `#A8D2BC` | Chart fill, sparkline area                         |
+| 400  | `#429676` | Chart series, hover accents                        |
+| 600  | `#12634A` | **Primary buttons, links, active nav, focus ring** |
+| 700  | `#0D4F3B` | Button hover, pressed                              |
+| 800  | `#0A3E2F` | Sidebar background                                 |
+| 900  | `#072B21` | Sidebar deep areas, print headers                  |
 
 ### Accent — clay
 
 Used sparingly: the second chart series, member-related highlights, the demonstration-data badge.
 Never for primary actions.
 
-| Token | Hex |
-| --- | --- |
+| Token          | Hex       |
+| -------------- | --------- |
 | `--accent-100` | `#F6E7DC` |
 | `--accent-500` | `#B4622C` |
 | `--accent-600` | `#97501F` |
@@ -79,12 +79,12 @@ Never for primary actions.
 
 Each has a foreground, a background and a border so alerts and badges need no opacity tricks.
 
-| Meaning | Foreground | Background | Border |
-| --- | --- | --- | --- |
-| Success / money in | `#0F6B3E` | `#E8F5ED` | `#B7E0C7` |
-| Warning / watch | `#8A5606` | `#FDF3E2` | `#F0D9A8` |
-| Danger / money out | `#A4271D` | `#FDECEA` | `#F3C3BD` |
-| Info / neutral notice | `#14509B` | `#EAF1FE` | `#C3D8F8` |
+| Meaning               | Foreground | Background | Border    |
+| --------------------- | ---------- | ---------- | --------- |
+| Success / money in    | `#0F6B3E`  | `#E8F5ED`  | `#B7E0C7` |
+| Warning / watch       | `#8A5606`  | `#FDF3E2`  | `#F0D9A8` |
+| Danger / money out    | `#A4271D`  | `#FDECEA`  | `#F3C3BD` |
+| Info / neutral notice | `#14509B`  | `#EAF1FE`  | `#C3D8F8` |
 
 Income green and expense red are the **only** places colour carries financial direction, and both
 always appear alongside a sign or a word, never alone.
@@ -116,18 +116,18 @@ fallback stack. No second display face.
 All figures use `font-variant-numeric: tabular-nums` so columns of money align. This is applied
 globally to table cells, statistic tiles and the `<Money>` component.
 
-| Role | Size / line | Weight | Tracking |
-| --- | --- | --- | --- |
-| Page title | 20 / 28 | 600 | −0.01em |
-| Section heading | 16 / 24 | 600 | 0 |
-| Card title | 14 / 20 | 600 | 0 |
-| Body | 14 / 20 | 400 | 0 |
-| Body small, table cell secondary | 13 / 18 | 400 | 0 |
-| Form label | 13 / 18 | 500 | 0 |
-| Table column header | 12 / 16 | 600 | 0.04em, uppercase |
-| Caption, hint, timestamp | 12 / 16 | 400 | 0 |
-| Statistic figure | 24 / 30 | 600 | −0.02em, tabular |
-| Large statistic (dashboard hero) | 30 / 36 | 600 | −0.02em, tabular |
+| Role                             | Size / line | Weight | Tracking          |
+| -------------------------------- | ----------- | ------ | ----------------- |
+| Page title                       | 20 / 28     | 600    | −0.01em           |
+| Section heading                  | 16 / 24     | 600    | 0                 |
+| Card title                       | 14 / 20     | 600    | 0                 |
+| Body                             | 14 / 20     | 400    | 0                 |
+| Body small, table cell secondary | 13 / 18     | 400    | 0                 |
+| Form label                       | 13 / 18     | 500    | 0                 |
+| Table column header              | 12 / 16     | 600    | 0.04em, uppercase |
+| Caption, hint, timestamp         | 12 / 16     | 400    | 0                 |
+| Statistic figure                 | 24 / 30     | 600    | −0.02em, tabular  |
+| Large statistic (dashboard hero) | 30 / 36     | 600    | −0.02em, tabular  |
 
 Base size is 14 px, not 16 px: this is a dense data application and 14 px is the size at which a
 table of twenty rows and eight columns stays readable without scrolling. Body text in long-form
@@ -140,11 +140,11 @@ areas such as meeting minutes and announcements steps up to 15 px with a 65-char
 Spacing is a 4 px grid: `4 8 12 16 20 24 32 40 48 64`. Page gutter 24 px on desktop, 16 px on
 mobile. Vertical rhythm between page sections is 24 px; inside a panel, 16 px.
 
-| Radius | Value | Applied to |
-| --- | --- | --- |
-| `sm` | 4 px | Badges, checkboxes, small buttons |
-| `md` | 6 px | Buttons, inputs, selects |
-| `lg` | 8 px | Panels, cards, dialogs, popovers |
+| Radius | Value | Applied to                        |
+| ------ | ----- | --------------------------------- |
+| `sm`   | 4 px  | Badges, checkboxes, small buttons |
+| `md`   | 6 px  | Buttons, inputs, selects          |
+| `lg`   | 8 px  | Panels, cards, dialogs, popovers  |
 
 Nothing is more rounded than 8 px, except avatars, which are circular.
 
@@ -182,11 +182,11 @@ search, the language switcher, the connection indicator, notifications and the u
 
 **Responsive.** Three intentional layouts rather than one shrinking layout.
 
-| Breakpoint | Layout |
-| --- | --- |
-| ≥ 1280 px | Full sidebar, multi-column forms, full tables |
-| 768–1279 px | Sidebar collapses to a 64 px icon rail; forms go to one column; tables drop low-priority columns |
-| < 768 px | Sidebar becomes an off-canvas drawer; tables become stacked record cards with the two or three fields that matter; primary action becomes a fixed bottom bar |
+| Breakpoint  | Layout                                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ≥ 1280 px   | Full sidebar, multi-column forms, full tables                                                                                                                |
+| 768–1279 px | Sidebar collapses to a 64 px icon rail; forms go to one column; tables drop low-priority columns                                                             |
+| < 768 px    | Sidebar becomes an off-canvas drawer; tables become stacked record cards with the two or three fields that matter; primary action becomes a fixed bottom bar |
 
 Tables are never horizontally scrolled on a phone. Each list defines its mobile card shape
 explicitly: for members that is name, member code and status; for transactions it is description,
@@ -201,33 +201,33 @@ behaviour that is genuinely hard to get right (dialog, dropdown, popover, tabs, 
 styled entirely by our own tokens. One icon library: **lucide-react**, 16 px in dense contexts,
 18 px in navigation, `stroke-width: 1.75`. No other icon set.
 
-| Component | Specification |
-| --- | --- |
-| `Button` | Variants `primary`, `secondary`, `ghost`, `danger`, `link`. Heights 32 / 36 / 40. Loading state replaces the leading icon with a spinner, keeps the label, and disables the control |
-| `IconButton` | Square, 32 / 36. Requires `aria-label` |
-| `Input` `Textarea` `Select` | 36 px height, 1 px `--border-strong`, 6 px radius, 12 px inset. On focus the border becomes `--primary-600`, in addition to the standard focus ring |
-| `Combobox` | Type-ahead over server-searched options. Used for member, product and buyer pickers |
-| `DatePicker` / `DateRangePicker` | Text entry plus calendar. Presets: today, this week, this month, last month, this quarter, this year, custom |
-| `FormField` | Label, optional hint, control, error. Error is red text with an icon and is bound by `aria-describedby` |
-| `MoneyInput` | Thousands separators as you type, "RWF" suffix, emits a decimal string |
-| `QuantityInput` | Number plus unit label taken from the product |
-| `DataTable` | Sticky header, sortable columns, per-column alignment (money and quantities right), row hover, selectable rows, empty state, loading skeleton, pagination footer, density toggle. Row 44 px, compact 36 px |
-| `Panel` | Bordered surface with optional header, description and actions. The default container |
-| `StatTile` | Label, figure, optional comparison with direction word plus arrow, optional sparkline. No icon in a coloured circle |
-| `Badge` | `neutral`, `success`, `warning`, `danger`, `info`, `accent`. Text plus a 6 px dot, so meaning never rests on colour |
-| `Alert` | Inline, four semantic variants, optional action |
-| `Dialog` | Radix, focus trapped, Escape closes, labelled by its title, 480 / 640 / 800 px widths |
-| `ConfirmDialog` | Titled question, consequence sentence, typed confirmation for high-value financial actions |
-| `Drawer` | Right-side panel for record detail without losing list context |
-| `Toast` | Bottom-right, four seconds, action link, screen-reader live region |
-| `EmptyState` | Heading, one explanatory sentence, primary action. Small line icon, never an illustration |
-| `Skeleton` | Shape-matched placeholders for table rows, tiles and detail panels |
-| `Pagination` | Range summary, page size selector, first / previous / next / last |
-| `Tabs`, `Breadcrumb`, `Tooltip`, `DropdownMenu`, `Switch`, `Checkbox`, `Radio`, `Avatar`, `Progress` | Standard, token-styled |
-| `Money` | Formats a decimal string. `250,000 RWF` |
-| `DateDisplay` | Locale-aware, with the absolute date in a tooltip when a relative form is shown |
-| `PermissionGate` | Renders children only when the permission is held |
-| `ConnectionIndicator` | Online, reconnecting or offline, with plain-language text |
+| Component                                                                                            | Specification                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`                                                                                             | Variants `primary`, `secondary`, `ghost`, `danger`, `link`. Heights 32 / 36 / 40. Loading state replaces the leading icon with a spinner, keeps the label, and disables the control                        |
+| `IconButton`                                                                                         | Square, 32 / 36. Requires `aria-label`                                                                                                                                                                     |
+| `Input` `Textarea` `Select`                                                                          | 36 px height, 1 px `--border-strong`, 6 px radius, 12 px inset. On focus the border becomes `--primary-600`, in addition to the standard focus ring                                                        |
+| `Combobox`                                                                                           | Type-ahead over server-searched options. Used for member, product and buyer pickers                                                                                                                        |
+| `DatePicker` / `DateRangePicker`                                                                     | Text entry plus calendar. Presets: today, this week, this month, last month, this quarter, this year, custom                                                                                               |
+| `FormField`                                                                                          | Label, optional hint, control, error. Error is red text with an icon and is bound by `aria-describedby`                                                                                                    |
+| `MoneyInput`                                                                                         | Thousands separators as you type, "RWF" suffix, emits a decimal string                                                                                                                                     |
+| `QuantityInput`                                                                                      | Number plus unit label taken from the product                                                                                                                                                              |
+| `DataTable`                                                                                          | Sticky header, sortable columns, per-column alignment (money and quantities right), row hover, selectable rows, empty state, loading skeleton, pagination footer, density toggle. Row 44 px, compact 36 px |
+| `Panel`                                                                                              | Bordered surface with optional header, description and actions. The default container                                                                                                                      |
+| `StatTile`                                                                                           | Label, figure, optional comparison with direction word plus arrow, optional sparkline. No icon in a coloured circle                                                                                        |
+| `Badge`                                                                                              | `neutral`, `success`, `warning`, `danger`, `info`, `accent`. Text plus a 6 px dot, so meaning never rests on colour                                                                                        |
+| `Alert`                                                                                              | Inline, four semantic variants, optional action                                                                                                                                                            |
+| `Dialog`                                                                                             | Radix, focus trapped, Escape closes, labelled by its title, 480 / 640 / 800 px widths                                                                                                                      |
+| `ConfirmDialog`                                                                                      | Titled question, consequence sentence, typed confirmation for high-value financial actions                                                                                                                 |
+| `Drawer`                                                                                             | Right-side panel for record detail without losing list context                                                                                                                                             |
+| `Toast`                                                                                              | Bottom-right, four seconds, action link, screen-reader live region                                                                                                                                         |
+| `EmptyState`                                                                                         | Heading, one explanatory sentence, primary action. Small line icon, never an illustration                                                                                                                  |
+| `Skeleton`                                                                                           | Shape-matched placeholders for table rows, tiles and detail panels                                                                                                                                         |
+| `Pagination`                                                                                         | Range summary, page size selector, first / previous / next / last                                                                                                                                          |
+| `Tabs`, `Breadcrumb`, `Tooltip`, `DropdownMenu`, `Switch`, `Checkbox`, `Radio`, `Avatar`, `Progress` | Standard, token-styled                                                                                                                                                                                     |
+| `Money`                                                                                              | Formats a decimal string. `250,000 RWF`                                                                                                                                                                    |
+| `DateDisplay`                                                                                        | Locale-aware, with the absolute date in a tooltip when a relative form is shown                                                                                                                            |
+| `PermissionGate`                                                                                     | Renders children only when the permission is held                                                                                                                                                          |
+| `ConnectionIndicator`                                                                                | Online, reconnecting or offline, with plain-language text                                                                                                                                                  |
 
 ### Money formatting
 
@@ -282,12 +282,12 @@ category. Recording an expense should take under fifteen seconds.
 
 Every list, panel and page defines four states, and none of them is a blank screen.
 
-| State | Treatment |
-| --- | --- |
-| Loading | Shape-matched skeletons. Never a centred spinner on a full page after first load |
-| Empty (no data yet) | Heading, one sentence of guidance, primary action. "No members yet. Add your first cooperative member to start building your records." |
-| Empty (no results for filters) | Different message, plus a "Clear filters" action. Never confused with the first case |
-| Error | Plain sentence about what failed and what to do, plus "Try again". Technical detail behind a disclosure for support, never in the main message |
+| State                          | Treatment                                                                                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Loading                        | Shape-matched skeletons. Never a centred spinner on a full page after first load                                                               |
+| Empty (no data yet)            | Heading, one sentence of guidance, primary action. "No members yet. Add your first cooperative member to start building your records."         |
+| Empty (no results for filters) | Different message, plus a "Clear filters" action. Never confused with the first case                                                           |
+| Error                          | Plain sentence about what failed and what to do, plus "Try again". Technical detail behind a disclosure for support, never in the main message |
 
 Error copy names the action and the remedy: "We could not save this expense. Check your connection
 and try again." Never a bare status code.
@@ -327,12 +327,12 @@ the end of every phase.
 A chart earns its place only by answering a question a manager actually asks. Phase 10 ships three
 charts and one list:
 
-| Question | Chart |
-| --- | --- |
-| Is money coming in faster than it goes out? | Twelve-month income against expenses, grouped bars |
-| Are we selling more or less than before? | Six-month sales value, line with the previous period ghosted |
-| Where does the money go? | Expenses by category for the period, horizontal bars, top six then "Other" |
-| Is any product about to run out? | Deliberately not a chart. A list of products below their minimum, with the quantity left |
+| Question                                    | Chart                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Is money coming in faster than it goes out? | Twelve-month income against expenses, grouped bars                                       |
+| Are we selling more or less than before?    | Six-month sales value, line with the previous period ghosted                             |
+| Where does the money go?                    | Expenses by category for the period, horizontal bars, top six then "Other"               |
+| Is any product about to run out?            | Deliberately not a chart. A list of products below their minimum, with the quantity left |
 
 Rules: direct labels rather than a legend where there are three or fewer series; axes start at zero
 for bars; no pie chart above three slices; no dual axes; no animation beyond a 150 ms fade on load;
@@ -364,9 +364,9 @@ design:
 - Kinyarwanda labels commonly run 20–40 % longer than English. No button, tab, column header or
   navigation item may have a fixed width, and every layout is reviewed in Kinyarwanda before a phase
   closes.
-- A shared glossary in `docs/glossary.md` fixes the terminology once — member (*umunyamuryango*),
-  cooperative (*koperative*), income (*amafaranga yinjiye*), expenses (*amafaranga yasohotse*),
-  balance (*amafaranga asigaye*), stock (*ububiko*), sale (*igurisha*), meeting (*inama*) — so the
+- A shared glossary in `docs/glossary.md` fixes the terminology once — member (_umunyamuryango_),
+  cooperative (_koperative_), income (_amafaranga yinjiye_), expenses (_amafaranga yasohotse_),
+  balance (_amafaranga asigaye_), stock (_ububiko_), sale (_igurisha_), meeting (_inama_) — so the
   same concept is never named two ways in two screens.
 - Where a precise Kinyarwanda accounting term would be unfamiliar to a rural cooperative secretary,
   the simpler and more widely understood wording wins.

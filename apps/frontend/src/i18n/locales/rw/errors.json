@@ -1,0 +1,30 @@
+{
+  "unexpected": {
+    "title": "Hari ikitagenze neza",
+    "body": "Ntibyakunze kurangira. Ongera ugerageze.",
+    "reference": "Nomero y'ikibazo: {{requestId}}"
+  },
+  "notFound": "Ntabwo twabonye icyo washakaga.",
+  "routeNotFound": "Iyi paji ntibaho.",
+  "unauthenticated": "Banza winjire kugira ngo ukomeze.",
+  "forbidden": "Nta burenganzira ufite bwo gukora ibi.",
+  "noCooperativeAccess": "Nta burenganzira ufite kuri iyi koperative.",
+  "validationFailed": "Hari amakuru atari yo. Reba ahagaragajwe.",
+  "malformedJson": "Ubutumwa ntibwashoboye gusomwa. Ongera ugerageze.",
+  "conflict": "Iryo hinduka ripingana n'ibyari byabitswe.",
+  "duplicateResource": "Ibyo bisanzwe bihari.",
+  "rateLimited": "Wagerageje kenshi cyane. Tegereza gato hanyuma wongere ugerageze.",
+  "internal": "Hari ikitagenze neza iwacu. Ongera ugerageze.",
+  "serviceUnavailable": "Serivisi ntiraboneka kuri ubu.",
+  "databaseUnavailable": "Ntitwashoboye kugera ku bubiko bw'amakuru.",
+  "networkUnavailable": "Ntitwashoboye kugera kuri sisitemu. Reba umurandasi wawe hanyuma wongere ugerageze.",
+  "page": {
+    "notFoundTitle": "Paji ntiyabonetse",
+    "notFoundBody": "Paji wasabye ntibaho, cyangwa yarimuwe.",
+    "backToDashboard": "Subira ku ncamake"
+  },
+  "boundary": {
+    "title": "Iyi paji ntiyashoboye kugaragara",
+    "body": "Ibindi bice bya sisitemu biracyakora. Ushobora gusubira ku ncamake cyangwa kongera kugerageza."
+  }
+}

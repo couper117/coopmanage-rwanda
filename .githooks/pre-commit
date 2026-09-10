@@ -1,0 +1,59 @@
+#!/bin/sh
+# CoopManage Rwanda pre-commit hook.
+#
+# Installed by `npm install` via the root "prepare" script, which points core.hooksPath here.
+# It checks only what is staged, so it stays fast enough that nobody is tempted to skip it.
+# The full gate (lint, typecheck, test, build) belongs to the phase review, not to every commit.
+
+set -e
+
+staged() {
+  git diff --cached --name-only --diff-filter=ACM
+}
+
+fail() {
+  echo ""
+  echo "pre-commit: $1"
+  echo "Fix it, or run 'git commit --no-verify' if you genuinely need to bypass this."
+  exit 1
+}
+
+# 1. Never commit a real environment file. .env.example is the only one allowed.
+for file in $(staged); do
+  case "$file" in
+    .env|.env.*|*/.env|*/.env.*)
+      case "$file" in
+        *.example) ;;
+        *) fail "$file looks like a real environment file. Secrets must never be committed." ;;
+      esac
+      ;;
+  esac
+done
+
+# 2. Catch the obvious shapes of a leaked credential before it reaches history.
+SECRET_PATTERN='(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{32,}|ghp_[A-Za-z0-9]{36})'
+for file in $(staged); do
+  [ -f "$file" ] || continue
+  case "$file" in
+    .githooks/*) continue ;;
+  esac
+  if grep -Eq "$SECRET_PATTERN" "$file" 2>/dev/null; then
+    fail "$file appears to contain a credential."
+  fi
+done
+
+# 3. Format and lint the staged source files.
+CODE_FILES=$(staged | grep -E '\.(ts|tsx|js|mjs)$' || true)
+ALL_FILES=$(staged | grep -E '\.(ts|tsx|js|mjs|json|md|css|ya?ml)$' || true)
+
+if [ -n "$ALL_FILES" ]; then
+  echo "$ALL_FILES" | xargs npx prettier --check ||
+    fail "Formatting differs from Prettier. Run 'npm run format'."
+fi
+
+if [ -n "$CODE_FILES" ]; then
+  echo "$CODE_FILES" | xargs npx eslint --max-warnings 0 ||
+    fail "ESLint reported problems."
+fi
+
+exit 0

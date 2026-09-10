@@ -7,17 +7,18 @@ claimed to be configured until that phase records it as verified.
 
 ## 1. Environments
 
-| | Development | Production |
-| --- | --- | --- |
-| Frontend | Vite dev server, `http://localhost:5173` | Vercel static build |
-| Backend | `tsx watch`, `http://localhost:4000` | Railway Node service |
-| Database | Docker `postgres:16`, host port **5435** | Supabase PostgreSQL |
-| Storage | Local `./storage` directory | Supabase Storage, private bucket |
-| SMS | Mock provider, logs to the database | Configured provider adapter |
-| Email | Console transport | SMTP from the environment |
+|          | Development                              | Production                       |
+| -------- | ---------------------------------------- | -------------------------------- |
+| Frontend | Vite dev server, `http://localhost:5175` | Vercel static build              |
+| Backend  | `tsx watch`, `http://localhost:4000`     | Railway Node service             |
+| Database | Docker `postgres:16`, host port **5435** | Supabase PostgreSQL              |
+| Storage  | Local `./storage` directory              | Supabase Storage, private bucket |
+| SMS      | Mock provider, logs to the database      | Configured provider adapter      |
+| Email    | Console transport                        | SMTP from the environment        |
 
-Host port 5435 avoids the ports already occupied on this machine by other projects
-(5432, 5433, 5434).
+Host port 5435 avoids the PostgreSQL ports already occupied on this machine by other projects
+(5432, 5433, 5434), and web port 5175 avoids their Vite servers on 5173 and 5174. Vite runs with
+`strictPort`, so a clash fails loudly instead of silently moving to another port.
 
 ## 2. Environment variables
 

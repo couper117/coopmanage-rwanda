@@ -1,0 +1,7 @@
+{
+  "pending": {
+    "title": "{{module}} is not available yet",
+    "body": "This part of CoopManage is still being built. It arrives in phase {{phase}}.",
+    "backToDashboard": "Back to dashboard"
+  }
+}

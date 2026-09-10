@@ -1,0 +1,9 @@
+{
+  "title": "Dashboard",
+  "description": "How your cooperative is doing today",
+  "empty": {
+    "title": "Your cooperative's figures will appear here",
+    "body": "Once members, money and stock are recorded, this page shows totals, recent activity and anything that needs attention.",
+    "action": "Set up your cooperative"
+  }
+}

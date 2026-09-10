@@ -1,0 +1,97 @@
+/**
+ * CoopManage Rwanda design tokens.
+ *
+ * Tailwind CSS v4 is configured in CSS. Every token is declared once here and becomes both a
+ * utility class and a custom property, so no component ever writes a raw colour value.
+ * The values are specified in docs/ui-system.md.
+ */
+
+@theme {
+  /* Typography ---------------------------------------------------------- */
+  --font-sans:
+    'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --text-2xs: 0.6875rem; /* 11px, table micro-labels */
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem; /* 12px, captions and column headers */
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.8125rem; /* 13px, secondary cells and form labels */
+  --text-sm--line-height: 1.125rem;
+  --text-base: 0.875rem; /* 14px, body. This is a dense data application. */
+  --text-base--line-height: 1.25rem;
+  --text-md: 0.9375rem; /* 15px, long-form reading */
+  --text-md--line-height: 1.5rem;
+  --text-lg: 1rem; /* 16px, section headings */
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem; /* 20px, page titles */
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem; /* 24px, statistics */
+  --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.875rem; /* 30px, dashboard hero figure */
+  --text-3xl--line-height: 2.25rem;
+
+  /* Neutrals ------------------------------------------------------------ */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f6f8f7;
+  --color-surface-subtle: #eff2f1;
+  --color-line: #e6eae8;
+  --color-line-strong: #d8dedb;
+
+  --color-ink: #101413;
+  --color-ink-secondary: #4a5551;
+  --color-ink-muted: #67736f;
+  --color-ink-disabled: #8b9793;
+  --color-ink-inverse: #ffffff;
+
+  /* Primary: Amashyamba green ------------------------------------------- */
+  --color-primary-50: #ecf5f0;
+  --color-primary-100: #d3e8dd;
+  --color-primary-200: #a8d2bc;
+  --color-primary-400: #429676;
+  --color-primary-600: #12634a;
+  --color-primary-700: #0d4f3b;
+  --color-primary-800: #0a3e2f;
+  --color-primary-900: #072b21;
+
+  /* Accent: clay. Used sparingly and never for a primary action. --------- */
+  --color-accent-100: #f6e7dc;
+  --color-accent-500: #b4622c;
+  --color-accent-600: #97501f;
+
+  /* Semantic ------------------------------------------------------------ */
+  --color-success-fg: #0f6b3e;
+  --color-success-bg: #e8f5ed;
+  --color-success-line: #b7e0c7;
+  --color-warning-fg: #8a5606;
+  --color-warning-bg: #fdf3e2;
+  --color-warning-line: #f0d9a8;
+  --color-danger-fg: #a4271d;
+  --color-danger-bg: #fdecea;
+  --color-danger-line: #f3c3bd;
+  --color-info-fg: #14509b;
+  --color-info-bg: #eaf1fe;
+  --color-info-line: #c3d8f8;
+
+  /* Charts: muted, distinguishable in common colour blindness, readable in grey. */
+  --color-chart-1: #12634a;
+  --color-chart-2: #b4622c;
+  --color-chart-3: #2e5ea8;
+  --color-chart-4: #7a8b34;
+  --color-chart-5: #8a5fa8;
+  --color-chart-6: #a03b52;
+
+  /* Shape. Nothing is more rounded than 8px. ---------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Elevation is only for content that floats above the page. ----------- */
+  --shadow-overlay: 0 8px 24px -6px rgb(16 20 19 / 0.14), 0 2px 6px -2px rgb(16 20 19 / 0.08);
+  --shadow-sticky: 0 1px 0 0 #e6eae8, 0 4px 8px -6px rgb(16 20 19 / 0.1);
+
+  /* Layout -------------------------------------------------------------- */
+  --spacing-sidebar: 15.5rem; /* 248px */
+  --spacing-sidebar-rail: 4rem; /* 64px */
+  --spacing-topbar: 3.5rem; /* 56px */
+  --spacing-content: 90rem; /* 1440px */
+}

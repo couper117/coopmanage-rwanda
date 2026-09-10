@@ -8,12 +8,12 @@ Last updated: 2026-09-09
 ## 1. Purpose and constraints
 
 CoopManage Rwanda is a multi-tenant web platform that digitises the **office and management
-operations** of Rwandan cooperatives. It is operated by cooperative *staff*, not by members.
+operations** of Rwandan cooperatives. It is operated by cooperative _staff_, not by members.
 
 Three constraints shape every architectural decision:
 
 1. **Members are offline.** Farmers and ordinary members have no accounts, no smartphones and no
-   internet. Every member record is created and maintained *on their behalf* by staff. Phone
+   internet. Every member record is created and maintained _on their behalf_ by staff. Phone
    numbers are optional everywhere, including in the database schema.
 2. **Money and stock must be correct.** All monetary and quantity mutations are written inside
    database transactions, use `numeric` types, and are reversible rather than deletable.
@@ -69,17 +69,17 @@ permission strings from drifting apart in two places.
 
 Requests flow in exactly one direction. A layer may call the layer below it and never the one above.
 
-| Layer | Directory | Responsibility | Forbidden |
-| --- | --- | --- | --- |
-| Route | `modules/<m>/<m>.routes.ts` | Path, HTTP verb, middleware chain | Business logic, Prisma |
-| Middleware | `middleware/` | Auth, tenant resolution, permission checks, rate limits, uploads | Domain rules |
-| Validator | `modules/<m>/<m>.schema.ts` | Zod schemas for params, query, body | Database access |
-| Controller | `modules/<m>/<m>.controller.ts` | Read validated input, call service, shape response | Calculations, Prisma |
-| Service | `modules/<m>/<m>.service.ts` | Business rules, transactions, invariants, audit events | `req` / `res` objects |
-| Repository | `modules/<m>/<m>.repository.ts` | Prisma queries, always tenant-scoped | Business rules |
+| Layer      | Directory                       | Responsibility                                                   | Forbidden              |
+| ---------- | ------------------------------- | ---------------------------------------------------------------- | ---------------------- |
+| Route      | `modules/<m>/<m>.routes.ts`     | Path, HTTP verb, middleware chain                                | Business logic, Prisma |
+| Middleware | `middleware/`                   | Auth, tenant resolution, permission checks, rate limits, uploads | Domain rules           |
+| Validator  | `modules/<m>/<m>.schema.ts`     | Zod schemas for params, query, body                              | Database access        |
+| Controller | `modules/<m>/<m>.controller.ts` | Read validated input, call service, shape response               | Calculations, Prisma   |
+| Service    | `modules/<m>/<m>.service.ts`    | Business rules, transactions, invariants, audit events           | `req` / `res` objects  |
+| Repository | `modules/<m>/<m>.repository.ts` | Prisma queries, always tenant-scoped                             | Business rules         |
 
 Repositories exist only where query logic is non-trivial or reused. For simple modules the service
-may call Prisma directly; what is *not* negotiable is that controllers never do.
+may call Prisma directly; what is _not_ negotiable is that controllers never do.
 
 ### Module list
 
@@ -129,7 +129,7 @@ one of them failing must not be enough to leak data.
    with Cooperative A's credentials against Cooperative B's record ids and asserts `404`. New
    endpoints are added to that list; the suite fails the build if a route is missing from it.
 
-Postgres row-level security is deliberately *not* used in V1. With a single application-level
+Postgres row-level security is deliberately _not_ used in V1. With a single application-level
 connection pool it would require per-request `SET LOCAL`, which interacts badly with Prisma's
 transaction handling. The four layers above are enforceable and testable; RLS remains available as
 a later hardening step and the schema is designed so that adding it needs no data migration.
@@ -300,7 +300,7 @@ V1 is **offline-tolerant, not offline-first**. Concretely:
 - Only safe operations retry automatically: `GET` always, and mutations only when they carry an
   idempotency key.
 
-Queued offline *writes* are explicitly out of scope for V1. Replaying a queue of financial
+Queued offline _writes_ are explicitly out of scope for V1. Replaying a queue of financial
 transactions without a server-side deduplication contract is how systems create duplicate money,
 and the idempotency table plus reversal-only accounting are the foundations that a later
 offline-first phase would build on.
@@ -324,13 +324,13 @@ rather than a prompt instruction.
 
 ## 14. Environments and deployment
 
-| Concern | Development | Production |
-| --- | --- | --- |
-| Database | Docker `postgres:16` on port 5435 | Supabase PostgreSQL |
-| Storage | Local `./storage` directory | Supabase Storage (S3 API) |
-| SMS | Mock provider writing to the database and log | Configurable provider adapter |
-| Frontend | Vite dev server, port 5173 | Vercel static build |
-| Backend | `tsx watch`, port 4000 | Railway (Node service) |
+| Concern  | Development                                   | Production                    |
+| -------- | --------------------------------------------- | ----------------------------- |
+| Database | Docker `postgres:16` on port 5435             | Supabase PostgreSQL           |
+| Storage  | Local `./storage` directory                   | Supabase Storage (S3 API)     |
+| SMS      | Mock provider writing to the database and log | Configurable provider adapter |
+| Frontend | Vite dev server, port 5175                    | Vercel static build           |
+| Backend  | `tsx watch`, port 4000                        | Railway (Node service)        |
 
 All configuration comes from environment variables validated by Zod at boot; the process refuses to
 start on a missing or malformed variable rather than failing later at request time. `.env` is
@@ -350,24 +350,29 @@ gitignored and `.env.example` carries placeholders only.
 
 ## 16. Toolchain and pinned versions
 
-Checked against the npm registry on 2026-09-09. Majors are pinned deliberately; the project does not
+Installed versions, verified on 2026-09-10. Majors are pinned deliberately; the project does not
 float to whatever is newest at install time.
 
-| Package | Version | Note |
-| --- | --- | --- |
-| Node | ≥ 20, developed on 26 | `engines` enforced |
-| TypeScript | 5.9.x | See the note below |
-| Prisma / @prisma/client | 7.10.x | Prisma 8 is still a release candidate |
-| Express | 5.2.x | Version 5 forwards rejected promises to the error handler, so no `asyncHandler` wrapper is needed |
-| Zod | 4.6.x | Version 4 renamed several validators; schemas are written against the v4 API |
-| Pino 10, Helmet 8, argon2 0.45, express-rate-limit | current | |
-| React | 19.3.x | |
-| Vite | 8.2.x | |
-| Tailwind CSS | 4.3.x | CSS-first `@theme` configuration, no `tailwind.config.ts` |
-| TanStack Query | 5.102.x | |
-| React Hook Form 7.87, Zustand 5, i18next 26, react-i18next 17 | current | |
-| Radix UI primitives, lucide-react, recharts 3 | current | |
-| Vitest 5, Supertest 7, Playwright 1.63, ESLint 10 (flat config) | current | |
+| Package                                                                      | Installed                           | Note                                                                                              |
+| ---------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Node                                                                         | 26 locally, `engines` requires ≥ 20 |                                                                                                   |
+| TypeScript                                                                   | 5.9.3                               | See the note below                                                                                |
+| Prisma and `@prisma/client`                                                  | 7.10.0                              | Prisma 8 is still a release candidate                                                             |
+| `@prisma/adapter-pg`                                                         | 7.10.0                              | Required: see the Prisma 7 note below                                                             |
+| Express                                                                      | 5.2.1                               | Version 5 forwards rejected promises to the error handler, so no `asyncHandler` wrapper is needed |
+| Zod                                                                          | 4.6.0                               |                                                                                                   |
+| Pino 10.3, Helmet 8.3, express-rate-limit 8.7                                | current                             |                                                                                                   |
+| React and React DOM                                                          | 19.3.0                              |                                                                                                   |
+| React Router                                                                 | 7.18.3                              |                                                                                                   |
+| Vite                                                                         | 6.4.3                               |                                                                                                   |
+| Tailwind CSS                                                                 | 4.3.3                               | CSS-first `@theme` configuration, no `tailwind.config.ts`                                         |
+| TanStack Query                                                               | 5.102.8                             |                                                                                                   |
+| React Hook Form 7.87, Zustand 5.0, i18next 24.2, react-i18next 15.7          | current                             |                                                                                                   |
+| Radix UI primitives, lucide-react 0.460                                      | current                             | One icon library, no exceptions                                                                   |
+| Vitest 5.0, Supertest 7.2, ESLint 9.39 (flat config), typescript-eslint 8.70 | current                             |                                                                                                   |
+
+Playwright is not installed yet. End-to-end tests arrive in Phase 17, and adding the browser
+download before there is a flow worth driving would only slow every install.
 
 **TypeScript 5.9 rather than 7.0.** TypeScript 7 is available and is the native compiler rewrite. It
 is deliberately not adopted in the foundation phase: the project's correctness depends on strict
@@ -375,6 +380,22 @@ type checking plus the ESLint TypeScript plugin, Vite and Prisma's generated cli
 and a compiler rewrite is the wrong thing to be debugging while building the domain. The upgrade is
 revisited at Phase 17, when the test suite can prove the move changed nothing.
 
+**Prisma 7 connects through a driver adapter.** Version 7 removed `url` and `directUrl` from the
+`datasource` block. The connection string now reaches the migration and introspection commands
+through `apps/backend/prisma.config.ts`, and reaches the runtime client through `@prisma/adapter-pg`
+in `src/lib/prisma.ts`, where the pool size and connection timeout are set in application code. The
+seed script constructs its own adapter for the same reason.
+
+**Two accepted dependency advisories.** `npm audit` reports four high findings, all inside the
+Prisma **CLI**, which is a development dependency: `deepmerge-ts` reached through `@prisma/config`,
+and `mysql2`, a driver this project never loads because it uses PostgreSQL. The only offered remedy
+is a downgrade to Prisma 6, which is a worse position than the advisory. Neither package is present
+in the deployed runtime. This is reviewed again at Phase 15 and on every Prisma upgrade.
+
 **PostgreSQL extensions.** `citext` for case-insensitive email, `pg_trgm` for member, product and
 buyer search, and `pgcrypto` for `gen_random_uuid()`. Created by `scripts/db-init/01-extensions.sql`
 on first container start and by the first Prisma migration in deployed environments.
+
+**Ports on this machine.** PostgreSQL 5435, API 4000, web 5175. Ports 5173 and 5174 are taken by
+other projects, and Vite runs with `strictPort` so a silent fallback cannot leave the browser
+talking to the wrong application.

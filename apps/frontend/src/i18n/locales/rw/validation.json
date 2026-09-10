@@ -1,0 +1,16 @@
+{
+  "invalid_type": "Iki gaciro ntabwo ari cyo.",
+  "too_small": "Iki gaciro ni gito cyane.",
+  "too_big": "Iki gaciro ni kinini cyane.",
+  "invalid_format": "Ibi ntibyanditswe uko bisabwa.",
+  "invalid_union": "Iki gaciro ntikiri mu byemewe.",
+  "invalid_value": "Iki ntikiri mu byemewe.",
+  "unrecognized_keys": "Hoherejwe amakuru atateganyijwe.",
+  "custom": "Iki gaciro ntabwo ari cyo.",
+  "required": "Iki gice kirasabwa.",
+  "email": "Andika imeyili nyayo.",
+  "phone": "Andika nimero ya telefone nyayo.",
+  "decimalScale": "Koresha ibice {{scale}} gusa nyuma y'akadomo.",
+  "positiveAmount": "Andika umubare uri hejuru ya zeru.",
+  "dateRange": "Itariki yo kurangiriraho igomba kuba ari nyuma y'iyo watangiriyeho."
+}

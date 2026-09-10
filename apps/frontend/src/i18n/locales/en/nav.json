@@ -1,0 +1,31 @@
+{
+  "skipToContent": "Skip to main content",
+  "mainNavigation": "Main navigation",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "groups": {
+    "overview": "Overview",
+    "cooperative": "Cooperative",
+    "operations": "Operations",
+    "money": "Money",
+    "administration": "Administration"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "assistant": "Ask CoopManage",
+    "reports": "Reports",
+    "members": "Members",
+    "contributions": "Contributions",
+    "meetings": "Meetings",
+    "documents": "Documents",
+    "announcements": "Announcements",
+    "inventory": "Inventory",
+    "products": "Products",
+    "sales": "Sales",
+    "buyers": "Buyers",
+    "finance": "Finance",
+    "staff": "Staff",
+    "settings": "Settings",
+    "audit": "Audit log"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "coopmanage-rwanda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cooperative management platform for Rwandan cooperatives",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/shared",
+    "apps/backend",
+    "apps/frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm run dev -w @coopmanage/backend\" \"npm run dev -w @coopmanage/frontend\"",
+    "build": "npm run build -w @coopmanage/shared && npm run build -w @coopmanage/backend && npm run build -w @coopmanage/frontend",
+    "typecheck": "npm run typecheck -w @coopmanage/shared && npm run typecheck -w @coopmanage/backend && npm run typecheck -w @coopmanage/frontend",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test -w @coopmanage/shared && npm run test -w @coopmanage/backend && npm run test -w @coopmanage/frontend",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run db:migrate -w @coopmanage/backend",
+    "db:deploy": "npm run db:deploy -w @coopmanage/backend",
+    "db:seed": "npm run db:seed -w @coopmanage/backend",
+    "db:studio": "npm run db:studio -w @coopmanage/backend",
+    "db:reset": "npm run db:reset -w @coopmanage/backend",
+    "prepare": "git config core.hooksPath .githooks || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "allowScripts": {
+    "prisma@7.10.0": true,
+    "@prisma/engines@7.10.0": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "fsevents@2.3.3": true
+  }
+}

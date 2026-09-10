@@ -13,8 +13,8 @@ Status: **Phase 0 baseline.** Implemented in Phase 2, extended by each later pha
    code change.
 3. **The backend is the only authority.** The frontend receives the caller's effective permission
    list to hide menus and disable buttons. That is presentation. Every endpoint re-checks.
-4. **Permission plus tenancy are separate gates.** Holding `finance:view` says *what* you may do.
-   Your `CooperativeStaff` row says *where*. Both are required, and tenancy is checked first, so a
+4. **Permission plus tenancy are separate gates.** Holding `finance:view` says _what_ you may do.
+   Your `CooperativeStaff` row says _where_. Both are required, and tenancy is checked first, so a
    valid permission never leaks the existence of another cooperative's records.
 5. **One source of truth.** The permission catalogue lives in
    `packages/shared/src/permissions.ts` and is seeded into the `Permission` table. Code, database
@@ -28,71 +28,71 @@ Keys are `resource:action`, lower case, colon separated.
 
 ### Cooperative scope
 
-| Key | Grants |
-| --- | --- |
-| `dashboard:view` | Open the dashboard and its summary cards |
-| `search:use` | Global search across permitted resources |
-| `assistant:use` | Ask CoopManage |
-| `notifications:view` | Read and dismiss own notifications |
-| `cooperative:view` | See cooperative profile |
-| `cooperative:update` | Edit cooperative profile and branding |
-| `settings:manage` | Change cooperative-wide settings, thresholds and enabled modules. Unit editing is `units:manage` |
-| `staff:view` | List staff and their roles |
-| `staff:invite` | Invite a new staff user |
-| `staff:manage` | Change staff role, deactivate staff, set overrides |
-| `audit:view` | Read the cooperative audit log |
-| `members:view` | List and open member records |
-| `members:create` | Register a member |
-| `members:update` | Edit member details |
-| `members:deactivate` | Deactivate, suspend or mark a member as exited |
-| `members:export` | Export member lists to CSV |
-| `shares:view` | See share holdings and history |
-| `shares:manage` | Record share purchase, transfer or redemption |
-| `contributions:view` | See contributions |
-| `contributions:create` | Record a contribution |
-| `contributions:void` | Void a contribution and its finance entry |
-| `finance:view` | See transactions, balances and financial summaries |
-| `finance:create` | Record income and expenses |
-| `finance:void` | Void and reverse a posted transaction |
-| `finance:export` | Export financial data |
-| `finance:categories:manage` | Create and edit income/expense categories |
-| `products:view` | See the product catalogue |
-| `products:manage` | Create and edit products and categories |
-| `units:manage` | Create and edit units of measure |
-| `warehouses:manage` | Create and edit storage locations |
-| `inventory:view` | See stock levels and movement history |
-| `inventory:receive` | Record stock received, including from members |
-| `inventory:issue` | Record stock issued |
-| `inventory:adjust` | Record a stock adjustment with a reason |
-| `inventory:transfer` | Move stock between warehouses |
-| `buyers:view` | See buyers and their history |
-| `buyers:manage` | Create and edit buyers |
-| `sales:view` | See sales and receipts |
-| `sales:create` | Create and edit a draft sale |
-| `sales:confirm` | Confirm a sale, moving stock and money |
-| `sales:cancel` | Cancel a confirmed sale with compensating entries |
-| `reports:view` | Open the report catalogue and preview reports |
-| `reports:export` | Download reports as PDF, CSV or Excel |
-| `documents:view` | List, preview and download documents |
-| `documents:upload` | Upload documents |
-| `documents:archive` | Archive a document |
-| `meetings:view` | See meetings, agendas, attendance and decisions |
-| `meetings:manage` | Create and edit meetings, attendance and decisions |
-| `announcements:view` | Read announcements |
-| `announcements:manage` | Create, publish and archive announcements |
-| `sms:send` | Send SMS to selected members |
+| Key                         | Grants                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `dashboard:view`            | Open the dashboard and its summary cards                                                         |
+| `search:use`                | Global search across permitted resources                                                         |
+| `assistant:use`             | Ask CoopManage                                                                                   |
+| `notifications:view`        | Read and dismiss own notifications                                                               |
+| `cooperative:view`          | See cooperative profile                                                                          |
+| `cooperative:update`        | Edit cooperative profile and branding                                                            |
+| `settings:manage`           | Change cooperative-wide settings, thresholds and enabled modules. Unit editing is `units:manage` |
+| `staff:view`                | List staff and their roles                                                                       |
+| `staff:invite`              | Invite a new staff user                                                                          |
+| `staff:manage`              | Change staff role, deactivate staff, set overrides                                               |
+| `audit:view`                | Read the cooperative audit log                                                                   |
+| `members:view`              | List and open member records                                                                     |
+| `members:create`            | Register a member                                                                                |
+| `members:update`            | Edit member details                                                                              |
+| `members:deactivate`        | Deactivate, suspend or mark a member as exited                                                   |
+| `members:export`            | Export member lists to CSV                                                                       |
+| `shares:view`               | See share holdings and history                                                                   |
+| `shares:manage`             | Record share purchase, transfer or redemption                                                    |
+| `contributions:view`        | See contributions                                                                                |
+| `contributions:create`      | Record a contribution                                                                            |
+| `contributions:void`        | Void a contribution and its finance entry                                                        |
+| `finance:view`              | See transactions, balances and financial summaries                                               |
+| `finance:create`            | Record income and expenses                                                                       |
+| `finance:void`              | Void and reverse a posted transaction                                                            |
+| `finance:export`            | Export financial data                                                                            |
+| `finance:categories:manage` | Create and edit income/expense categories                                                        |
+| `products:view`             | See the product catalogue                                                                        |
+| `products:manage`           | Create and edit products and categories                                                          |
+| `units:manage`              | Create and edit units of measure                                                                 |
+| `warehouses:manage`         | Create and edit storage locations                                                                |
+| `inventory:view`            | See stock levels and movement history                                                            |
+| `inventory:receive`         | Record stock received, including from members                                                    |
+| `inventory:issue`           | Record stock issued                                                                              |
+| `inventory:adjust`          | Record a stock adjustment with a reason                                                          |
+| `inventory:transfer`        | Move stock between warehouses                                                                    |
+| `buyers:view`               | See buyers and their history                                                                     |
+| `buyers:manage`             | Create and edit buyers                                                                           |
+| `sales:view`                | See sales and receipts                                                                           |
+| `sales:create`              | Create and edit a draft sale                                                                     |
+| `sales:confirm`             | Confirm a sale, moving stock and money                                                           |
+| `sales:cancel`              | Cancel a confirmed sale with compensating entries                                                |
+| `reports:view`              | Open the report catalogue and preview reports                                                    |
+| `reports:export`            | Download reports as PDF, CSV or Excel                                                            |
+| `documents:view`            | List, preview and download documents                                                             |
+| `documents:upload`          | Upload documents                                                                                 |
+| `documents:archive`         | Archive a document                                                                               |
+| `meetings:view`             | See meetings, agendas, attendance and decisions                                                  |
+| `meetings:manage`           | Create and edit meetings, attendance and decisions                                               |
+| `announcements:view`        | Read announcements                                                                               |
+| `announcements:manage`      | Create, publish and archive announcements                                                        |
+| `sms:send`                  | Send SMS to selected members                                                                     |
 
 ### Platform scope
 
-| Key | Grants |
-| --- | --- |
-| `platform:cooperatives:view` | List every cooperative on the platform |
+| Key                            | Grants                                   |
+| ------------------------------ | ---------------------------------------- |
+| `platform:cooperatives:view`   | List every cooperative on the platform   |
 | `platform:cooperatives:manage` | Create, suspend and archive cooperatives |
-| `platform:users:view` | List platform users |
-| `platform:users:manage` | Create, suspend and reset platform users |
-| `platform:settings:manage` | Edit platform-wide settings |
-| `platform:health:view` | System health and diagnostics |
-| `platform:audit:view` | Read audit logs across all cooperatives |
+| `platform:users:view`          | List platform users                      |
+| `platform:users:manage`        | Create, suspend and reset platform users |
+| `platform:settings:manage`     | Edit platform-wide settings              |
+| `platform:health:view`         | System health and diagnostics            |
+| `platform:audit:view`          | Read audit logs across all cooperatives  |
 
 ---
 
@@ -100,66 +100,66 @@ Keys are `resource:action`, lower case, colon separated.
 
 `●` granted, `−` not granted.
 
-| Permission | Manager | Accountant | Secretary | Inventory officer | Viewer |
-| --- | :--: | :--: | :--: | :--: | :--: |
-| dashboard:view | ● | ● | ● | ● | ● |
-| search:use | ● | ● | ● | ● | ● |
-| assistant:use | ● | ● | ● | ● | ● |
-| notifications:view | ● | ● | ● | ● | ● |
-| cooperative:view | ● | ● | ● | ● | ● |
-| cooperative:update | ● | − | − | − | − |
-| settings:manage | ● | − | − | − | − |
-| staff:view | ● | − | ● | − | − |
-| staff:invite | ● | − | − | − | − |
-| staff:manage | ● | − | − | − | − |
-| audit:view | ● | − | − | − | − |
-| members:view | ● | ● | ● | ● | ● |
-| members:create | ● | − | ● | − | − |
-| members:update | ● | − | ● | − | − |
-| members:deactivate | ● | − | ● | − | − |
-| members:export | ● | ● | ● | − | − |
-| shares:view | ● | ● | ● | − | ● |
-| shares:manage | ● | ● | − | − | − |
-| contributions:view | ● | ● | ● | − | ● |
-| contributions:create | ● | ● | − | − | − |
-| contributions:void | ● | ● | − | − | − |
-| finance:view | ● | ● | − | − | ● |
-| finance:create | ● | ● | − | − | − |
-| finance:void | ● | ● | − | − | − |
-| finance:export | ● | ● | − | − | − |
-| finance:categories:manage | ● | ● | − | − | − |
-| products:view | ● | ● | − | ● | ● |
-| products:manage | ● | − | − | ● | − |
-| units:manage | ● | − | − | ● | − |
-| warehouses:manage | ● | − | − | ● | − |
-| inventory:view | ● | ● | − | ● | ● |
-| inventory:receive | ● | − | − | ● | − |
-| inventory:issue | ● | − | − | ● | − |
-| inventory:adjust | ● | − | − | ● | − |
-| inventory:transfer | ● | − | − | ● | − |
-| buyers:view | ● | ● | − | ● | ● |
-| buyers:manage | ● | − | − | ● | − |
-| sales:view | ● | ● | − | ● | ● |
-| sales:create | ● | ● | − | − | − |
-| sales:confirm | ● | ● | − | − | − |
-| sales:cancel | ● | − | − | − | − |
-| reports:view | ● | ● | ● | ● | ● |
-| reports:export | ● | ● | ● | ● | − |
-| documents:view | ● | ● | ● | ● | ● |
-| documents:upload | ● | ● | ● | − | − |
-| documents:archive | ● | − | ● | − | − |
-| meetings:view | ● | ● | ● | ● | ● |
-| meetings:manage | ● | − | ● | − | − |
-| announcements:view | ● | ● | ● | ● | ● |
-| announcements:manage | ● | − | ● | − | − |
-| sms:send | ● | − | ● | − | − |
+| Permission                | Manager | Accountant | Secretary | Inventory officer | Viewer |
+| ------------------------- | :-----: | :--------: | :-------: | :---------------: | :----: |
+| dashboard:view            |    ●    |     ●      |     ●     |         ●         |   ●    |
+| search:use                |    ●    |     ●      |     ●     |         ●         |   ●    |
+| assistant:use             |    ●    |     ●      |     ●     |         ●         |   ●    |
+| notifications:view        |    ●    |     ●      |     ●     |         ●         |   ●    |
+| cooperative:view          |    ●    |     ●      |     ●     |         ●         |   ●    |
+| cooperative:update        |    ●    |     −      |     −     |         −         |   −    |
+| settings:manage           |    ●    |     −      |     −     |         −         |   −    |
+| staff:view                |    ●    |     −      |     ●     |         −         |   −    |
+| staff:invite              |    ●    |     −      |     −     |         −         |   −    |
+| staff:manage              |    ●    |     −      |     −     |         −         |   −    |
+| audit:view                |    ●    |     −      |     −     |         −         |   −    |
+| members:view              |    ●    |     ●      |     ●     |         ●         |   ●    |
+| members:create            |    ●    |     −      |     ●     |         −         |   −    |
+| members:update            |    ●    |     −      |     ●     |         −         |   −    |
+| members:deactivate        |    ●    |     −      |     ●     |         −         |   −    |
+| members:export            |    ●    |     ●      |     ●     |         −         |   −    |
+| shares:view               |    ●    |     ●      |     ●     |         −         |   ●    |
+| shares:manage             |    ●    |     ●      |     −     |         −         |   −    |
+| contributions:view        |    ●    |     ●      |     ●     |         −         |   ●    |
+| contributions:create      |    ●    |     ●      |     −     |         −         |   −    |
+| contributions:void        |    ●    |     ●      |     −     |         −         |   −    |
+| finance:view              |    ●    |     ●      |     −     |         −         |   ●    |
+| finance:create            |    ●    |     ●      |     −     |         −         |   −    |
+| finance:void              |    ●    |     ●      |     −     |         −         |   −    |
+| finance:export            |    ●    |     ●      |     −     |         −         |   −    |
+| finance:categories:manage |    ●    |     ●      |     −     |         −         |   −    |
+| products:view             |    ●    |     ●      |     −     |         ●         |   ●    |
+| products:manage           |    ●    |     −      |     −     |         ●         |   −    |
+| units:manage              |    ●    |     −      |     −     |         ●         |   −    |
+| warehouses:manage         |    ●    |     −      |     −     |         ●         |   −    |
+| inventory:view            |    ●    |     ●      |     −     |         ●         |   ●    |
+| inventory:receive         |    ●    |     −      |     −     |         ●         |   −    |
+| inventory:issue           |    ●    |     −      |     −     |         ●         |   −    |
+| inventory:adjust          |    ●    |     −      |     −     |         ●         |   −    |
+| inventory:transfer        |    ●    |     −      |     −     |         ●         |   −    |
+| buyers:view               |    ●    |     ●      |     −     |         ●         |   ●    |
+| buyers:manage             |    ●    |     −      |     −     |         ●         |   −    |
+| sales:view                |    ●    |     ●      |     −     |         ●         |   ●    |
+| sales:create              |    ●    |     ●      |     −     |         −         |   −    |
+| sales:confirm             |    ●    |     ●      |     −     |         −         |   −    |
+| sales:cancel              |    ●    |     −      |     −     |         −         |   −    |
+| reports:view              |    ●    |     ●      |     ●     |         ●         |   ●    |
+| reports:export            |    ●    |     ●      |     ●     |         ●         |   −    |
+| documents:view            |    ●    |     ●      |     ●     |         ●         |   ●    |
+| documents:upload          |    ●    |     ●      |     ●     |         −         |   −    |
+| documents:archive         |    ●    |     −      |     ●     |         −         |   −    |
+| meetings:view             |    ●    |     ●      |     ●     |         ●         |   ●    |
+| meetings:manage           |    ●    |     −      |     ●     |         −         |   −    |
+| announcements:view        |    ●    |     ●      |     ●     |         ●         |   ●    |
+| announcements:manage      |    ●    |     −      |     ●     |         −         |   −    |
+| sms:send                  |    ●    |     −      |     ●     |         −         |   −    |
 
 Design notes on specific choices:
 
 - **The accountant may confirm a sale but not cancel one.** Cancelling reverses stock and money
   together and is the higher-risk action, so it stays with the manager.
 - **The secretary cannot see finance.** Section 3 of the brief gives the secretary members,
-  meetings, documents, announcements and permitted reports. Contribution *visibility* is included
+  meetings, documents, announcements and permitted reports. Contribution _visibility_ is included
   because the secretary registers members and needs to see whether fees were paid, but recording
   and voiding money stays with the accountant and manager.
 - **The inventory officer holds `members:view`** because stock received from a member must be
