@@ -79,6 +79,8 @@
   --color-chart-4: #7a8b34;
   --color-chart-5: #8a5fa8;
   --color-chart-6: #a03b52;
+  --color-chart-7: #4e7c8c;
+  --color-chart-8: #86713c;
 
   /* Shape. Nothing is more rounded than 8px. ---------------------------- */
   --radius-sm: 4px;
@@ -87,7 +89,7 @@
 
   /* Elevation is only for content that floats above the page. ----------- */
   --shadow-overlay: 0 8px 24px -6px rgb(16 20 19 / 0.14), 0 2px 6px -2px rgb(16 20 19 / 0.08);
-  --shadow-sticky: 0 1px 0 0 #e6eae8, 0 4px 8px -6px rgb(16 20 19 / 0.1);
+  --shadow-sticky: 0 1px 0 0 var(--color-line), 0 4px 8px -6px rgb(16 20 19 / 0.1);
 
   /* Layout -------------------------------------------------------------- */
   --spacing-sidebar: 15.5rem; /* 248px */

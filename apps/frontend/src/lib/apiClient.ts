@@ -1,4 +1,10 @@
-import type { ApiErrorBody, ApiResponse, ErrorCode, MessageParams } from '@coopmanage/shared'
+import type {
+  ApiErrorBody,
+  ApiResponse,
+  ErrorCode,
+  MessageParams,
+  PageMeta,
+} from '@coopmanage/shared'
 import { HEADERS } from '@coopmanage/shared'
 import { currentLanguage } from '@/i18n'
 
@@ -47,6 +53,19 @@ export class ApiError extends Error {
       code: 'SERVICE_UNAVAILABLE',
       messageKey: 'errors.networkUnavailable',
       message: 'Could not reach the server.',
+    })
+  }
+
+  /**
+   * A successful status carrying something that is not our envelope. In practice this is a proxy
+   * or gateway page returned with a 2xx, and it must not reach a caller as a TypeError.
+   */
+  static malformedResponse(status: number): ApiError {
+    return new ApiError({
+      status,
+      code: 'INTERNAL_ERROR',
+      messageKey: 'errors.internal',
+      message: 'The server returned a response we could not read.',
     })
   }
 }
@@ -103,13 +122,14 @@ function toApiError(status: number, payload: unknown): ApiError {
 }
 
 /**
- * The single place a network request is made. Everything else goes through a feature's query hook,
- * which goes through here, so headers, error shape and language handling cannot drift.
+ * Performs the request and returns the whole envelope. Every call in the application goes through
+ * here, so headers, error shape, language handling and abort behaviour cannot drift between
+ * features.
  */
-export async function apiRequest<TData>(
+async function request<TData, TMeta = unknown>(
   path: string,
-  options: RequestOptions = {},
-): Promise<TData> {
+  options: RequestOptions,
+): Promise<{ data: TData; meta: TMeta | undefined }> {
   const { method = 'GET', body, cooperativeId, idempotencyKey, signal, query } = options
 
   const headers: Record<string, string> = {
@@ -130,48 +150,53 @@ export async function apiRequest<TData>(
       ...(signal ? { signal } : {}),
     })
   } catch (error) {
+    // An abort is the caller's own decision, not a failure to report to the user.
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw ApiError.network()
   }
 
-  if (response.status === 204) return undefined as TData
+  if (response.status === 204) {
+    return { data: undefined as TData, meta: undefined }
+  }
 
   const text = await response.text()
   let payload: unknown = null
+  let parsed = false
   if (text.length > 0) {
     try {
       payload = JSON.parse(text)
+      parsed = true
     } catch {
-      payload = null
+      parsed = false
     }
   }
 
   if (!response.ok) throw toApiError(response.status, payload)
 
-  return (payload as ApiResponse<TData>).data
+  // A 2xx that is empty, unparseable, or not shaped like our envelope. Returning it would put
+  // `undefined` where a caller expects data and surface later as an unrelated crash.
+  if (!parsed || typeof payload !== 'object' || payload === null || !('data' in payload)) {
+    throw ApiError.malformedResponse(response.status)
+  }
+
+  const envelope = payload as ApiResponse<TData, TMeta>
+  return { data: envelope.data, meta: envelope.meta }
+}
+
+/** Reads a single resource and unwraps the envelope. */
+export async function apiRequest<TData>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<TData> {
+  const { data } = await request<TData>(path, options)
+  return data
 }
 
 /** Reads a collection endpoint, keeping the pagination metadata alongside the rows. */
 export async function apiRequestCollection<TItem>(
   path: string,
   options: RequestOptions = {},
-): Promise<{ items: TItem[]; meta: unknown }> {
-  const { query, ...rest } = options
-  const url = buildUrl(path, query)
-  const response = await fetch(url, {
-    method: rest.method ?? 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Accept-Language': currentLanguage(),
-      ...(rest.cooperativeId ? { [HEADERS.cooperativeId]: rest.cooperativeId } : {}),
-    },
-    credentials: 'include',
-  }).catch(() => {
-    throw ApiError.network()
-  })
-
-  const payload: unknown = await response.json().catch(() => null)
-  if (!response.ok) throw toApiError(response.status, payload)
-  const typed = payload as { data: TItem[]; meta: unknown }
-  return { items: typed.data, meta: typed.meta }
+): Promise<{ items: TItem[]; meta: PageMeta | undefined }> {
+  const { data, meta } = await request<TItem[], PageMeta>(path, options)
+  return { items: data, meta }
 }

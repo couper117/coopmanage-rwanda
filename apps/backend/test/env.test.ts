@@ -12,6 +12,7 @@ describe('environment configuration', () => {
     expect(env.PORT).toBe(4000)
     expect(env.CORS_ORIGINS).toEqual(['http://localhost:5175'])
     expect(env.SEED_DEMO).toBe(false)
+    expect(env.ENABLE_API_DOCS).toBe(true)
   })
 
   it('refuses to start without a database URL', () => {
@@ -51,6 +52,42 @@ describe('environment configuration', () => {
       expect(() => parseEnv({ ...PROD, JWT_ACCESS_SECRET: 'too-short' })).toThrow(
         /JWT_ACCESS_SECRET/,
       )
+    })
+
+    it('refuses the placeholder secret shipped in .env.example', () => {
+      expect(() =>
+        parseEnv({
+          ...PROD,
+          JWT_ACCESS_SECRET: 'replace-me-with-a-long-random-value',
+        }),
+      ).toThrow(/JWT_ACCESS_SECRET/)
+    })
+
+    it('refuses any loopback CORS origin, not just the word localhost', () => {
+      for (const origin of ['http://127.0.0.1:5175', 'http://[::1]:5175', 'http://0.0.0.0:8080']) {
+        expect(() =>
+          parseEnv({
+            ...PROD,
+            JWT_ACCESS_SECRET: 'a'.repeat(48),
+            CORS_ORIGINS: `https://app.example,${origin}`,
+          }),
+        ).toThrow(/CORS_ORIGINS/)
+      }
+    })
+
+    it('keeps the API documentation closed in production unless it is switched on', () => {
+      const closed = parseEnv({
+        ...PROD,
+        JWT_ACCESS_SECRET: 'a'.repeat(48),
+      })
+      expect(closed.ENABLE_API_DOCS).toBe(false)
+
+      const opened = parseEnv({
+        ...PROD,
+        JWT_ACCESS_SECRET: 'a'.repeat(48),
+        ENABLE_API_DOCS: 'true',
+      })
+      expect(opened.ENABLE_API_DOCS).toBe(true)
     })
 
     it('refuses a localhost CORS origin', () => {

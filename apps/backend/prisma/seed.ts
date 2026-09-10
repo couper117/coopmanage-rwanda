@@ -141,11 +141,11 @@ async function main(): Promise<void> {
   console.log('Reference data seeded.')
 }
 
-main()
-  .catch((error: unknown) => {
-    console.error('Seed failed:', error)
-    process.exitCode = 1
-  })
-  .finally(() => {
-    void prisma.$disconnect()
-  })
+try {
+  await main()
+} catch (error) {
+  console.error('Seed failed:', error)
+  process.exitCode = 1
+} finally {
+  await prisma.$disconnect()
+}

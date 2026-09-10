@@ -34,7 +34,9 @@ export function LanguageSwitcher() {
             <DropdownMenu.Item
               key={language}
               onSelect={() => {
-                void changeLanguage(language)
+                changeLanguage(language).catch((error: unknown) => {
+                  console.error('Failed to change language', error)
+                })
               }}
               className={cn(
                 'flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-base',

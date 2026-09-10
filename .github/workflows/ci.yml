@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+
+    # The backend suite talks to a real PostgreSQL rather than a mock, because the things worth
+    # testing here are transactions, constraints and generated defaults.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: coopmanage
+          POSTGRES_PASSWORD: coopmanage
+          POSTGRES_DB: coopmanage
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U coopmanage -d coopmanage"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://coopmanage:coopmanage@localhost:5435/coopmanage?schema=public
+      DIRECT_URL: postgresql://coopmanage:coopmanage@localhost:5435/coopmanage?schema=public
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the shared package
+        run: npm run build -w @coopmanage/shared
+
+      - name: Apply migrations to an empty database
+        run: npm run db:deploy
+
+      - name: Seed reference data
+        run: npm run db:seed
+
+      - name: Seed again to prove it is idempotent
+        run: npm run db:seed
+
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # High and critical findings fail the build. The two accepted advisories in the Prisma CLI
+      # are documented in docs/architecture.md section 16 and docs/security.md section 11; when
+      # they are resolved upstream this threshold drops to moderate.
+      - run: npm audit --audit-level=high --omit=dev
+      - name: Report development-only advisories without failing
+        run: npm audit --audit-level=high || true
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

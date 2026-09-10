@@ -79,19 +79,27 @@ returns unfiltered data.
 
 ### Status codes
 
-`200` read or update, `201` create, `204` delete or archive with no body, `400` malformed request,
+`200` read or update, `201` create, `204` delete or archive with no body, `400` malformed request
+(code `MALFORMED_REQUEST`, distinct from the field-level `422 VALIDATION_FAILED`),
 `401` unauthenticated, `403` authenticated but not permitted, `404` not found **or wrong tenant**,
 `409` conflict (duplicate code, idempotency reuse, state transition not allowed),
 `422` validation failed, `429` rate limited, `500` internal.
 
 ### Error codes
 
-`VALIDATION_FAILED`, `UNAUTHENTICATED`, `TOKEN_EXPIRED`, `INVALID_CREDENTIALS`, `ACCOUNT_LOCKED`,
+`VALIDATION_FAILED`, `MALFORMED_REQUEST`, `UNAUTHENTICATED`, `TOKEN_EXPIRED`,
+`INVALID_CREDENTIALS`, `ACCOUNT_LOCKED`,
 `FORBIDDEN`, `NO_COOPERATIVE_ACCESS`, `NOT_FOUND`, `DUPLICATE_RESOURCE`, `CONFLICT`,
 `INSUFFICIENT_STOCK`, `INVALID_STATE_TRANSITION`, `IDEMPOTENCY_KEY_REUSED`, `FILE_TOO_LARGE`,
 `UNSUPPORTED_FILE_TYPE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`.
 
 ### Rate limits
+
+Limits apply to the whole API rather than being opted into per route, so an endpoint added later is
+covered without anyone remembering to enable it. The limit follows the request method; an endpoint
+needing something tighter adds its own on top. Liveness is exempt, because a hosting platform polls
+it continuously and it touches nothing. Readiness is **not** exempt, because it opens a database
+connection and an anonymous caller must not be able to drive unbounded queries against the pool.
 
 | Scope                        | Limit                                                |
 | ---------------------------- | ---------------------------------------------------- |

@@ -2,6 +2,7 @@
 
 export const ERROR_CODES = [
   'VALIDATION_FAILED',
+  'MALFORMED_REQUEST',
   'UNAUTHENTICATED',
   'TOKEN_EXPIRED',
   'INVALID_CREDENTIALS',
@@ -35,7 +36,11 @@ export interface ApiErrorBody {
   code: ErrorCode
   messageKey: string
   messageParams?: MessageParams
-  /** Fallback sentence in the request language, for clients that do not know the key. */
+  /**
+   * Last-resort English sentence for a client that does not know `messageKey`. Clients translate
+   * the key and use this only when the key is unknown to them, so it is deliberately not
+   * localised on the server: the API carries no translation bundles.
+   */
   message: string
   details?: ApiFieldError[]
   requestId: string

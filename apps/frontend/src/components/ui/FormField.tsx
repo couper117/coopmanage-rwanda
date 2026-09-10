@@ -59,7 +59,7 @@ export function FormField({
         </p>
       ) : null}
       {error ? (
-        <p id={errorId} className="flex items-start gap-1 text-xs text-danger-fg">
+        <p id={errorId} role="alert" className="flex items-start gap-1 text-xs text-danger-fg">
           <AlertCircle aria-hidden="true" className="mt-px size-3.5 shrink-0" />
           <span>{t(toI18nKey(error), { defaultValue: error })}</span>
         </p>

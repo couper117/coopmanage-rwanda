@@ -44,12 +44,11 @@ export class AppError extends Error {
     })
   }
 
-  static notFound(resourceKey = 'errors.resource'): AppError {
+  static notFound(): AppError {
     return new AppError({
       status: 404,
       code: 'NOT_FOUND',
       messageKey: 'errors.notFound',
-      messageParams: { resource: resourceKey },
       message: 'We could not find what you were looking for.',
     })
   }

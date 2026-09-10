@@ -1,15 +1,16 @@
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import rateLimit, { type RateLimitRequestHandler } from 'express-rate-limit'
 import { isTest } from '../config/env.js'
 import { AppError } from '../lib/errors.js'
 
 /**
- * Limits are documented in docs/api.md section 1. They are disabled under test so that a suite of
- * a few hundred requests does not trip them, and they are the real thing everywhere else.
+ * Limits are documented in docs/api.md section 1. They are disabled under test so a suite of a few
+ * hundred requests does not trip them, and they are the real thing everywhere else.
  */
 function build(options: { windowMs: number; limit: number }): RateLimitRequestHandler {
   return rateLimit({
     windowMs: options.windowMs,
-    limit: isTest ? 0 : options.limit,
+    limit: options.limit,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     skip: () => isTest,
@@ -21,11 +22,32 @@ function build(options: { windowMs: number; limit: number }): RateLimitRequestHa
 
 const MINUTE = 60_000
 
-/** Applied to every read endpoint: 300 per minute per client. */
+/** Read endpoints: 300 per minute per client. */
 export const readLimiter = build({ windowMs: MINUTE, limit: 300 })
 
-/** Applied to every mutating endpoint: 60 per minute per client. */
+/** Mutating endpoints: 60 per minute per client. */
 export const writeLimiter = build({ windowMs: MINUTE, limit: 60 })
 
 /** Login and password reset. Tightened further per account in Phase 2. */
 export const authLimiter = build({ windowMs: 15 * MINUTE, limit: 5 })
+
+/**
+ * Liveness is polled continuously by the hosting platform and touches nothing, so it is exempt.
+ * Readiness is not exempt: it opens a database connection, and an unauthenticated caller must not
+ * be able to drive unbounded queries against the pool.
+ */
+const EXEMPT_PATHS = new Set(['/health'])
+
+/**
+ * Applied once to the whole API so that a route added later is covered without anyone remembering
+ * to opt in. Endpoints needing a tighter limit than their method's default still add their own.
+ */
+export function methodRateLimiter(req: Request, res: Response, next: NextFunction): void {
+  if (EXEMPT_PATHS.has(req.path)) {
+    next()
+    return
+  }
+  const limiter: RequestHandler =
+    req.method === 'GET' || req.method === 'HEAD' ? readLimiter : writeLimiter
+  limiter(req, res, next)
+}

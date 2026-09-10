@@ -48,7 +48,7 @@ export const resources = {
 
 export const NAMESPACES = Object.keys(resources.en) as (keyof typeof resources.en)[]
 
-void i18n
+i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
@@ -67,6 +67,18 @@ void i18n
       escapeValue: false,
     },
     returnNull: false,
+  })
+  .then(() => {
+    // init resolves synchronously with bundled resources, so the languageChanged listener below
+    // never fires for the initial language. Setting it here is what makes a screen reader use the
+    // right voice on first load for a user whose stored preference is Kinyarwanda.
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = i18n.resolvedLanguage ?? 'en'
+    }
+  })
+  .catch((error: unknown) => {
+    // Without resources every label would render as its key, so this must not pass unnoticed.
+    console.error('Failed to initialise translations', error)
   })
 
 /** Keeps the document language attribute in step, which screen readers rely on. */

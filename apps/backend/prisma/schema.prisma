@@ -27,7 +27,7 @@ enum RoleScope {
 }
 
 model Permission {
-  id            String          @id @default(uuid()) @db.Uuid
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   key           String          @unique
   resource      String
   action        String
@@ -44,7 +44,7 @@ model Permission {
 }
 
 model Role {
-  id            String   @id @default(uuid()) @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   key           String   @unique
   nameEn        String   @map("name_en")
   nameRw        String   @map("name_rw")
@@ -74,7 +74,7 @@ model RolePermission {
 }
 
 model CooperativeType {
-  id                  String   @id @default(uuid()) @db.Uuid
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   key                 String   @unique
   nameEn              String   @map("name_en")
   nameRw              String   @map("name_rw")

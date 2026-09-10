@@ -38,7 +38,8 @@
   }
 
   ::placeholder {
-    color: var(--color-ink-disabled);
+    /* The muted token, not the disabled one: a placeholder is readable text, not a dimmed control. */
+    color: var(--color-ink-muted);
   }
 
   [hidden] {

@@ -7,6 +7,14 @@ loadDotenv()
  * Environment configuration. The process refuses to start on a missing or malformed value rather
  * than failing later at request time, when the cause is much harder to see.
  */
+/** Values shipped in .env.example. None may reach production. */
+const PLACEHOLDER_SECRETS = new Set(['replace-me-with-a-long-random-value'])
+
+/** localhost, 127.0.0.1, ::1 or 0.0.0.0, in any scheme and on any port. */
+function isLoopbackOrigin(origin: string): boolean {
+  return /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)(:\d+)?$/i.test(origin.trim())
+}
+
 const booleanFromString = z
   .union([z.boolean(), z.enum(['true', 'false', '1', '0'])])
   .transform((value) => value === true || value === 'true' || value === '1')
@@ -38,30 +46,40 @@ const envSchema = z
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(30),
 
     SEED_DEMO: booleanFromString.default(false),
-    ENABLE_API_DOCS: booleanFromString.default(true),
+    // Defaults to on outside production and off in production. Setting it explicitly wins,
+    // which is what docs/api.md section 4 promises.
+    ENABLE_API_DOCS: booleanFromString.optional(),
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== 'production') return
 
-    // Production must never fall back to a development default.
-    if (
+    // Production must never fall back to a development default or to a value copied out of
+    // .env.example, which is the mistake this guard exists to catch.
+    const placeholder =
+      PLACEHOLDER_SECRETS.has(value.JWT_ACCESS_SECRET) ||
       value.JWT_ACCESS_SECRET.includes('development-only') ||
-      value.JWT_ACCESS_SECRET.length < 32
-    ) {
+      /^(replace|change)[-_ ]?me/i.test(value.JWT_ACCESS_SECRET)
+
+    if (placeholder || value.JWT_ACCESS_SECRET.length < 32) {
       ctx.addIssue({
         code: 'custom',
         path: ['JWT_ACCESS_SECRET'],
-        message: 'must be set to a random value of at least 32 characters in production',
+        message:
+          'must be a real random value of at least 32 characters in production, not a placeholder',
       })
     }
-    if (value.CORS_ORIGINS.some((origin) => origin.includes('localhost'))) {
+    if (value.CORS_ORIGINS.some(isLoopbackOrigin)) {
       ctx.addIssue({
         code: 'custom',
         path: ['CORS_ORIGINS'],
-        message: 'must not allow a localhost origin in production',
+        message: 'must not allow a loopback origin in production',
       })
     }
   })
+  .transform((value) => ({
+    ...value,
+    ENABLE_API_DOCS: value.ENABLE_API_DOCS ?? value.NODE_ENV !== 'production',
+  }))
 
 export type Env = z.infer<typeof envSchema>
 

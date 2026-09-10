@@ -3,10 +3,12 @@ import cors from 'cors'
 import express, { type Express } from 'express'
 import helmet from 'helmet'
 import { pinoHttp } from 'pino-http'
-import { env, isTest } from './config/env.js'
+import { env, isProduction, isTest } from './config/env.js'
+import { AppError } from './lib/errors.js'
 import { logger, REDACTED_PATHS } from './lib/logger.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
+import { methodRateLimiter } from './middleware/rateLimit.js'
 import { requestContext } from './middleware/requestContext.js'
 import { apiRouter } from './routes.js'
 
@@ -15,10 +17,15 @@ export const API_PREFIX = '/api/v1'
 export function createApp(): Express {
   const app = express()
 
-  // Behind Railway/Vercel the client address arrives in X-Forwarded-For. Trust exactly one proxy
-  // rather than `true`, which would let a client spoof its own address and defeat rate limiting.
-  app.set('trust proxy', 1)
+  // Only trust a forwarded client address where a proxy actually terminates the connection.
+  // Trusting it everywhere would let any direct caller set X-Forwarded-For and choose the key
+  // that rate limiting counts against.
+  app.set('trust proxy', isProduction ? 1 : 'loopback')
   app.disable('x-powered-by')
+
+  // First, so that every failure below this line carries an id the user can quote, including one
+  // raised by CORS or by the body parser.
+  app.use(requestContext)
 
   app.use(
     helmet({
@@ -49,7 +56,18 @@ export function createApp(): Express {
           callback(null, true)
           return
         }
-        callback(new Error(`Origin not allowed: ${origin}`))
+        // A browser asking from an origin we do not serve is a routine refusal, not a server
+        // fault. The rejected origin is logged but never echoed back in the response, so the
+        // caller learns nothing and the 5xx rate stays meaningful.
+        logger.warn({ origin }, 'rejected cross-origin request')
+        callback(
+          new AppError({
+            status: 403,
+            code: 'FORBIDDEN',
+            messageKey: 'errors.originNotAllowed',
+            message: 'This origin is not allowed to call the API.',
+          }),
+        )
       },
       credentials: true,
       exposedHeaders: ['X-Request-Id'],
@@ -57,9 +75,6 @@ export function createApp(): Express {
   )
 
   app.use(compression())
-  // Before the body parsers: a malformed JSON body fails inside express.json(), and that error
-  // still has to carry a request id the user can quote.
-  app.use(requestContext)
   app.use(express.json({ limit: '1mb' }))
   app.use(express.urlencoded({ extended: false, limit: '1mb' }))
 
@@ -78,6 +93,11 @@ export function createApp(): Express {
       }),
     )
   }
+
+  // Rate limiting applies to the whole API rather than being opted into per route, so a new
+  // endpoint is covered the moment it is added. Limits are chosen by method and documented in
+  // docs/api.md section 1.
+  app.use(API_PREFIX, methodRateLimiter)
 
   app.use(API_PREFIX, apiRouter)
 

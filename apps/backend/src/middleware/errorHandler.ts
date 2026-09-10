@@ -68,7 +68,7 @@ function toAppError(error: unknown): AppError {
   ) {
     return new AppError({
       status: 400,
-      code: 'VALIDATION_FAILED',
+      code: 'MALFORMED_REQUEST',
       messageKey: 'errors.malformedJson',
       message: 'The request body is not valid JSON.',
     })

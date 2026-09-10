@@ -21,7 +21,7 @@ What exists today:
 - PostgreSQL with the first migration and an idempotent reference-data seed: 58 permissions,
   6 roles, 10 cooperative types
 - React application shell with the full design-token set, navigation, and both languages
-- 109 tests across the three packages
+- 132 tests across the three packages
 
 Navigation shows every planned module. Screens that are not built yet say so plainly and name the
 phase that delivers them, rather than showing a mock-up.

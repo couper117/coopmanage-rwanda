@@ -30,6 +30,10 @@ cookies scoped to the refresh path, rotated on every use, and revoked as a famil
 token is presented again. Password reset tokens are single use, expire in 60 minutes, and the
 request endpoint answers identically for known and unknown addresses.
 
+The environment schema refuses to start production on a placeholder secret, including the exact
+value shipped in `.env.example`, on any loopback CORS origin, or on a secret shorter than 32
+characters. API documentation defaults to closed in production and must be switched on deliberately.
+
 Password rules: minimum 10 characters, checked against a list of the most common passwords, no
 composition rules that push people towards `Password1!`. Invited staff must change the password on
 first login.
@@ -57,6 +61,14 @@ through the authorised streaming endpoint with `Content-Disposition: attachment`
 `X-Content-Type-Options: nosniff`. A SHA-256 checksum is recorded.
 
 ## 6. Transport and headers
+
+A forwarded client address is trusted only where a proxy actually terminates the connection:
+`trust proxy` is `1` in production and `loopback` elsewhere. Trusting it everywhere would let any
+direct caller set `X-Forwarded-For` and choose the key that rate limiting counts against.
+
+A browser origin that is not on the allow-list is refused with `403 FORBIDDEN`. The rejected origin
+is logged but never echoed back in the response, so the caller learns nothing and a routine refusal
+does not register as a server fault.
 
 HTTPS everywhere in production with HSTS. Helmet supplies `X-Content-Type-Options`,
 `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY` and a Content Security

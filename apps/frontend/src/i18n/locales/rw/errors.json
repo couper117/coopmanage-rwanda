@@ -9,6 +9,7 @@
   "unauthenticated": "Banza winjire kugira ngo ukomeze.",
   "forbidden": "Nta burenganzira ufite bwo gukora ibi.",
   "noCooperativeAccess": "Nta burenganzira ufite kuri iyi koperative.",
+  "originNotAllowed": "Uru rubuga ntarwemerewe gukoresha serivisi ya CoopManage.",
   "validationFailed": "Hari amakuru atari yo. Reba ahagaragajwe.",
   "malformedJson": "Ubutumwa ntibwashoboye gusomwa. Ongera ugerageze.",
   "conflict": "Iryo hinduka ripingana n'ibyari byabitswe.",

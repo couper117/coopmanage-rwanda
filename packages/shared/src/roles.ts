@@ -88,6 +88,7 @@ const INVENTORY_OFFICER: readonly CooperativePermission[] = [
   'inventory:adjust',
   'inventory:transfer',
   'buyers:view',
+  'buyers:manage',
   'sales:view',
   'reports:view',
   'reports:export',

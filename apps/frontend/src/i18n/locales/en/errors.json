@@ -9,6 +9,7 @@
   "unauthenticated": "Please sign in to continue.",
   "forbidden": "You do not have permission to do this.",
   "noCooperativeAccess": "You do not have access to this cooperative.",
+  "originNotAllowed": "This website is not allowed to use the CoopManage service.",
   "validationFailed": "Some of the information is not valid. Please check the highlighted fields.",
   "malformedJson": "The request could not be read. Please try again.",
   "conflict": "That change conflicts with something already saved.",

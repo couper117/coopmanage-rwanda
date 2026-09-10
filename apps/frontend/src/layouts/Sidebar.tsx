@@ -1,3 +1,4 @@
+import * as Dialog from '@radix-ui/react-dialog'
 import { PanelLeftClose, PanelLeftOpen, Sprout, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
@@ -42,14 +43,12 @@ export function Sidebar({ variant }: SidebarProps) {
               )}
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => setMobileNavOpen(false)}
+            <Dialog.Close
               className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
               aria-label={t('nav:closeMenu')}
             >
               <X aria-hidden="true" className="size-4" />
-            </button>
+            </Dialog.Close>
           )}
         </div>
       </div>
@@ -58,7 +57,7 @@ export function Sidebar({ variant }: SidebarProps) {
         {NAV_GROUPS.map((group) => (
           <div key={group.key} className="mb-4 last:mb-0">
             {!collapsed ? (
-              <p className="px-2 pb-1.5 text-2xs font-semibold tracking-wider text-white/45 uppercase">
+              <p className="px-2 pb-1.5 text-2xs font-semibold tracking-wider text-white/70 uppercase">
                 {t(`nav:groups.${group.key}`)}
               </p>
             ) : null}
@@ -70,6 +69,7 @@ export function Sidebar({ variant }: SidebarProps) {
                     end={item.to === '/'}
                     onClick={() => variant === 'mobile' && setMobileNavOpen(false)}
                     title={collapsed ? t(`nav:items.${item.key}`) : undefined}
+                    aria-label={collapsed ? t(`nav:items.${item.key}`) : undefined}
                     className={({ isActive }) =>
                       cn(
                         'flex items-center gap-2.5 rounded-md px-2 py-1.5 text-base transition-colors',

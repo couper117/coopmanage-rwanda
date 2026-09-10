@@ -14,15 +14,21 @@ describe('health', () => {
     const res = await request(app).get(`${API_PREFIX}/health`)
     expect(res.status).toBe(200)
     expect(res.body.data.status).toBe('ok')
-    expect(res.body.data.environment).toBe('test')
   })
 
-  it('reports readiness with database latency', async () => {
+  it('discloses nothing about the deployment to an anonymous caller', async () => {
+    const res = await request(app).get(`${API_PREFIX}/health`)
+    expect(res.body.data).not.toHaveProperty('environment')
+    expect(res.body.data).not.toHaveProperty('uptimeSeconds')
+  })
+
+  it('reports readiness when the database is reachable', async () => {
     const res = await request(app).get(`${API_PREFIX}/health/ready`)
     expect(res.status).toBe(200)
     expect(res.body.data.status).toBe('ready')
     expect(res.body.data.checks.database.reachable).toBe(true)
-    expect(typeof res.body.data.checks.database.latencyMs).toBe('number')
+    // Query latency is a deployment detail; it belongs in the log, not in a public response.
+    expect(res.body.data.checks.database).not.toHaveProperty('latencyMs')
   })
 })
 
@@ -68,7 +74,9 @@ describe('errors', () => {
       .set('Content-Type', 'application/json')
       .send('{"unclosed":')
     expect(res.status).toBe(400)
-    expect(res.body.error.code).toBe('VALIDATION_FAILED')
+    // Distinct from VALIDATION_FAILED, so a client can tell an unreadable body from a rejected
+    // field without parsing the message.
+    expect(res.body.error.code).toBe('MALFORMED_REQUEST')
     expect(res.body.error.messageKey).toBe('errors.malformedJson')
     expect(res.body.error.requestId).not.toBe('unknown')
   })
@@ -111,5 +119,33 @@ describe('security headers', () => {
   it('does not advertise the server framework', async () => {
     const res = await request(app).get(`${API_PREFIX}/health`)
     expect(res.headers['x-powered-by']).toBeUndefined()
+  })
+})
+
+describe('cross-origin requests', () => {
+  it('allows a configured origin', async () => {
+    const res = await request(app)
+      .get(`${API_PREFIX}/health`)
+      .set('Origin', 'http://localhost:5175')
+    expect(res.status).toBe(200)
+    expect(res.headers['access-control-allow-origin']).toBe('http://localhost:5175')
+  })
+
+  it('refuses an unknown origin with 403 rather than a server error', async () => {
+    const res = await request(app).get(`${API_PREFIX}/health`).set('Origin', 'https://evil.example')
+    expect(res.status).toBe(403)
+    expect(res.body.error.code).toBe('FORBIDDEN')
+  })
+
+  it('never echoes the rejected origin back to the caller', async () => {
+    const res = await request(app).get(`${API_PREFIX}/health`).set('Origin', 'https://evil.example')
+    expect(JSON.stringify(res.body)).not.toContain('evil.example')
+    expect(res.headers['access-control-allow-origin']).toBeUndefined()
+  })
+
+  it('gives the refusal a request id the user can quote', async () => {
+    const res = await request(app).get(`${API_PREFIX}/health`).set('Origin', 'https://evil.example')
+    expect(res.body.error.requestId).not.toBe('unknown')
+    expect(res.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/)
   })
 })

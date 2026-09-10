@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiRequest } from '../src/lib/apiClient'
+import { ApiError, apiRequest, apiRequestCollection } from '../src/lib/apiClient'
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -124,6 +124,30 @@ describe('apiRequest', () => {
     })
   })
 
+  it('reports a 200 that is not our envelope as an error, not a crash', async () => {
+    // A proxy or gateway page returned with a success status. Reading `.data` off it used to throw
+    // a TypeError, which no error handler in the application recognises.
+    // A fresh Response per call: a body can only be read once.
+    vi.mocked(fetch).mockImplementation(() =>
+      Promise.resolve(new Response('<html>oops</html>', { status: 200 })),
+    )
+    await expect(apiRequest('/members')).rejects.toBeInstanceOf(ApiError)
+    await expect(apiRequest('/members')).rejects.toMatchObject({
+      code: 'INTERNAL_ERROR',
+      messageKey: 'errors.internal',
+    })
+  })
+
+  it('reports an empty 200 body as an error rather than returning undefined', async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response('', { status: 200 }))
+    await expect(apiRequest('/members')).rejects.toBeInstanceOf(ApiError)
+  })
+
+  it('reports a JSON 200 with no data property as an error', async () => {
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(200, { rows: [] }))
+    await expect(apiRequest('/members')).rejects.toBeInstanceOf(ApiError)
+  })
+
   it('marks server and rate-limit failures retryable and client errors not', () => {
     const retryable = new ApiError({
       status: 503,
@@ -145,5 +169,47 @@ describe('apiRequest', () => {
   it('lets an abort propagate rather than reporting it as a network failure', async () => {
     vi.mocked(fetch).mockRejectedValue(new DOMException('aborted', 'AbortError'))
     await expect(apiRequest('/members')).rejects.toBeInstanceOf(DOMException)
+  })
+})
+
+describe('apiRequestCollection', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns the rows and the pagination metadata', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      jsonResponse(200, {
+        data: [{ id: '1' }, { id: '2' }],
+        meta: { page: 1, pageSize: 25, total: 2, totalPages: 1 },
+      }),
+    )
+    const result = await apiRequestCollection<{ id: string }>('/members')
+    expect(result.items).toHaveLength(2)
+    expect(result.meta?.total).toBe(2)
+  })
+
+  it('honours the abort signal it is given', async () => {
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(200, { data: [] }))
+    const controller = new AbortController()
+    await apiRequestCollection('/members', { signal: controller.signal })
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit]
+    expect(init.signal).toBe(controller.signal)
+  })
+
+  it('sends the cooperative header like every other request', async () => {
+    vi.mocked(fetch).mockResolvedValue(jsonResponse(200, { data: [] }))
+    await apiRequestCollection('/members', { cooperativeId: 'coop-9' })
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit]
+    expect((init.headers as Record<string, string>)['X-Cooperative-Id']).toBe('coop-9')
+  })
+
+  it('lets an abort propagate instead of reporting a connection failure', async () => {
+    vi.mocked(fetch).mockRejectedValue(new DOMException('aborted', 'AbortError'))
+    await expect(apiRequestCollection('/members')).rejects.toBeInstanceOf(DOMException)
   })
 })

@@ -1,3 +1,13 @@
+-- Extensions this schema depends on.
+--   pgcrypto : gen_random_uuid() for every primary key
+--   citext   : case-insensitive email addresses (from M2)
+--   pg_trgm  : trigram indexes for member, product and buyer search (from M4)
+-- Created here as well as in scripts/db-init so a managed PostgreSQL, which never runs the local
+-- container's init scripts, is set up by the migration alone.
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "citext";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
 -- CreateEnum
 CREATE TYPE "PermissionScope" AS ENUM ('COOPERATIVE', 'PLATFORM');
 
@@ -6,7 +16,7 @@ CREATE TYPE "RoleScope" AS ENUM ('COOPERATIVE', 'PLATFORM');
 
 -- CreateTable
 CREATE TABLE "permissions" (
-    "id" UUID NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "key" TEXT NOT NULL,
     "resource" TEXT NOT NULL,
     "action" TEXT NOT NULL,
@@ -21,7 +31,7 @@ CREATE TABLE "permissions" (
 
 -- CreateTable
 CREATE TABLE "roles" (
-    "id" UUID NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "key" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "name_rw" TEXT NOT NULL,
@@ -45,7 +55,7 @@ CREATE TABLE "role_permissions" (
 
 -- CreateTable
 CREATE TABLE "cooperative_types" (
-    "id" UUID NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "key" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "name_rw" TEXT NOT NULL,
