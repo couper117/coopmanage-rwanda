@@ -20,10 +20,10 @@ export function MobileNavDrawer() {
   return (
     <Dialog.Root open={open} onOpenChange={setMobileNavOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/40 lg:hidden" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/40 md:hidden" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 left-0 z-50 w-sidebar shadow-overlay outline-none lg:hidden"
+          className="fixed inset-y-0 left-0 z-50 w-sidebar shadow-overlay outline-none md:hidden"
         >
           <Dialog.Title className="sr-only">{t('mainNavigation')}</Dialog.Title>
           <Sidebar variant="mobile" />

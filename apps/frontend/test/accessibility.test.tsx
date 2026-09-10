@@ -5,6 +5,7 @@ import { Providers } from '../src/app/Providers'
 import { routes } from '../src/app/routes'
 import { EmptyState, FormField, Input } from '../src/components/ui'
 import { useUiStore } from '../src/stores/uiStore'
+import { setViewportWidth } from './setup'
 
 function renderApp(path = '/') {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
@@ -125,5 +126,53 @@ describe('collapsed sidebar', () => {
     )
     expect(dashboard).toBeDefined()
     expect(dashboard?.getAttribute('aria-label')).toBeNull()
+  })
+})
+
+describe('responsive layouts', () => {
+  /**
+   * The three layouts specified in docs/ui-system.md section 5. The tablet rail had gone missing
+   * entirely, so these assertions exist to keep each breakpoint honest.
+   */
+  function sidebarState() {
+    const aside = document.querySelector('aside')
+    const railWidth = aside?.className.includes('w-sidebar-rail') ?? false
+    const labelVisible = [...document.querySelectorAll('nav a')].some(
+      (link) => link.textContent === 'Dashboard',
+    )
+    return { hasAside: aside !== null, railWidth, labelVisible }
+  }
+
+  it('shows the full sidebar with labels at 1440px', () => {
+    setViewportWidth(1440)
+    renderApp()
+    const state = sidebarState()
+    expect(state.hasAside).toBe(true)
+    expect(state.railWidth).toBe(false)
+    expect(state.labelVisible).toBe(true)
+  })
+
+  it('collapses to an icon rail at 900px', () => {
+    setViewportWidth(900)
+    renderApp()
+    const state = sidebarState()
+    expect(state.hasAside).toBe(true)
+    expect(state.railWidth).toBe(true)
+    expect(state.labelVisible).toBe(false)
+  })
+
+  it('hides the collapse toggle where the rail is forced', () => {
+    setViewportWidth(900)
+    renderApp()
+    expect(screen.queryByLabelText('Close menu')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Open menu')).toBeInTheDocument() // the drawer trigger only
+  })
+
+  it('offers the drawer trigger at every width, and the rail keeps names', () => {
+    setViewportWidth(900)
+    renderApp()
+    for (const link of document.querySelectorAll('nav a')) {
+      expect(link.getAttribute('aria-label')).toBeTruthy()
+    }
   })
 })

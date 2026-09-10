@@ -9,11 +9,21 @@ import { useUiStore } from '@/stores/uiStore'
 interface SidebarProps {
   /** Rendered inside the mobile drawer, which is always expanded and has a close button. */
   variant: 'desktop' | 'mobile'
+  /**
+   * Whether to render as an icon rail. Decided by the shell, which is the only place that knows
+   * both the viewport width and the user's preference. Reading the store here instead would ignore
+   * the viewport and leave the tablet rail showing labels it has no room for.
+   */
+  collapsed?: boolean
+  /**
+   * Whether the viewport is wide enough for labels to fit. Below 1280px the rail is forced, so the
+   * toggle is hidden rather than offered as a control that cannot change anything.
+   */
+  canToggle?: boolean
 }
 
-export function Sidebar({ variant }: SidebarProps) {
+export function Sidebar({ variant, collapsed = false, canToggle = true }: SidebarProps) {
   const { t } = useTranslation(['nav', 'common'])
-  const collapsed = useUiStore((state) => state.sidebarCollapsed) && variant === 'desktop'
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen)
 
@@ -29,7 +39,20 @@ export function Sidebar({ variant }: SidebarProps) {
           <span className="truncate text-base font-semibold">{t('common:appName')}</span>
         ) : null}
         <div className="ml-auto">
-          {variant === 'desktop' ? (
+          {/*
+            The branch is on variant, never on canToggle: Dialog.Close throws outside a dialog,
+            so the drawer's close button must not be reachable from the desktop sidebar. Where the
+            rail is forced by viewport width the toggle is simply absent, rather than offered as a
+            control that cannot change anything.
+          */}
+          {variant === 'mobile' ? (
+            <Dialog.Close
+              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+              aria-label={t('nav:closeMenu')}
+            >
+              <X aria-hidden="true" className="size-4" />
+            </Dialog.Close>
+          ) : canToggle ? (
             <button
               type="button"
               onClick={toggleSidebar}
@@ -42,14 +65,7 @@ export function Sidebar({ variant }: SidebarProps) {
                 <PanelLeftClose aria-hidden="true" className="size-4" />
               )}
             </button>
-          ) : (
-            <Dialog.Close
-              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
-              aria-label={t('nav:closeMenu')}
-            >
-              <X aria-hidden="true" className="size-4" />
-            </Dialog.Close>
-          )}
+          ) : null}
         </div>
       </div>
 

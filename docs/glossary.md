@@ -113,41 +113,42 @@ this table, it is added here first and then used.
 
 ## 6. Interface and system
 
-| English           | Kinyarwanda            | Notes                                                    |
-| ----------------- | ---------------------- | -------------------------------------------------------- |
-| Dashboard         | Incamake               | "Overview". Clearer than any literal rendering           |
-| Overview          | Incamake rusange       |                                                          |
-| Settings          | Igenamiterere          |                                                          |
-| Search            | Gushakisha             |                                                          |
-| Filter            | Muyunguruzi            | Verb form _Kuyungurura_ on buttons                       |
-| Add               | Kongeramo              |                                                          |
-| New               | Gishya                 |                                                          |
-| Edit              | Guhindura              |                                                          |
-| Save              | Kubika                 |                                                          |
-| Cancel            | Kureka                 | Distinct from _Guhagarika_, used for cancelling a record |
-| Delete            | Gusiba                 |                                                          |
-| Deactivate        | Guhagarika             |                                                          |
-| Activate          | Gusubizaho             |                                                          |
-| Confirm           | Kwemeza                |                                                          |
-| Export            | Gukuramo               |                                                          |
-| Download          | Gufata kuri mudasobwa  |                                                          |
-| Upload            | Kohereza               |                                                          |
-| Print             | Gucapa                 |                                                          |
-| Login             | Kwinjira               |                                                          |
-| Logout            | Gusohoka               |                                                          |
-| Password          | Ijambobanga            |                                                          |
-| User              | Ukoresha               | **Never _umukoresha_, which means employer**             |
-| Notification      | Imenyesha              | Plural: _Amamenyesha_                                    |
-| Language          | Ururimi                |                                                          |
-| Date              | Itariki                |                                                          |
-| Name              | Izina                  |                                                          |
-| Phone number      | Nimero ya telefone     |                                                          |
-| Optional          | Bidasabwa              | Critical on the member phone field                       |
-| Required          | Birasabwa              |                                                          |
-| Status            | Imiterere              |                                                          |
-| Active / Inactive | Akora / Ntakora        | For members                                              |
-| Loading           | Biratunganywa          |                                                          |
-| No results        | Nta bisubizo bibonetse |                                                          |
+| English                     | Kinyarwanda            | Notes                                                                                             |
+| --------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| Dashboard                   | Incamake               | "Overview". Clearer than any literal rendering                                                    |
+| Overview (navigation group) | Ibanze                 | Deliberately not _Incamake_, which would repeat the Dashboard item sitting inside that same group |
+| Overview                    | Incamake rusange       |                                                                                                   |
+| Settings                    | Igenamiterere          |                                                                                                   |
+| Search                      | Gushakisha             |                                                                                                   |
+| Filter                      | Muyunguruzi            | Verb form _Kuyungurura_ on buttons                                                                |
+| Add                         | Kongeramo              |                                                                                                   |
+| New                         | Gishya                 |                                                                                                   |
+| Edit                        | Guhindura              |                                                                                                   |
+| Save                        | Kubika                 |                                                                                                   |
+| Cancel                      | Kureka                 | Distinct from _Guhagarika_, used for cancelling a record                                          |
+| Delete                      | Gusiba                 |                                                                                                   |
+| Deactivate                  | Guhagarika             |                                                                                                   |
+| Activate                    | Gusubizaho             |                                                                                                   |
+| Confirm                     | Kwemeza                |                                                                                                   |
+| Export                      | Gukuramo               |                                                                                                   |
+| Download                    | Gufata kuri mudasobwa  |                                                                                                   |
+| Upload                      | Kohereza               |                                                                                                   |
+| Print                       | Gucapa                 |                                                                                                   |
+| Login                       | Kwinjira               |                                                                                                   |
+| Logout                      | Gusohoka               |                                                                                                   |
+| Password                    | Ijambobanga            |                                                                                                   |
+| User                        | Ukoresha               | **Never _umukoresha_, which means employer**                                                      |
+| Notification                | Imenyesha              | Plural: _Amamenyesha_                                                                             |
+| Language                    | Ururimi                |                                                                                                   |
+| Date                        | Itariki                |                                                                                                   |
+| Name                        | Izina                  |                                                                                                   |
+| Phone number                | Nimero ya telefone     |                                                                                                   |
+| Optional                    | Bidasabwa              | Critical on the member phone field                                                                |
+| Required                    | Birasabwa              |                                                                                                   |
+| Status                      | Imiterere              |                                                                                                   |
+| Active / Inactive           | Akora / Ntakora        | For members                                                                                       |
+| Loading                     | Biratunganywa          |                                                                                                   |
+| No results                  | Nta bisubizo bibonetse |                                                                                                   |
 
 ## 7. Health indicators
 

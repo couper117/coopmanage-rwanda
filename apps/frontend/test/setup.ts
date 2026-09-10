@@ -17,6 +17,52 @@ if (!('ResizeObserver' in globalThis)) {
   }
 }
 
+/**
+ * jsdom implements no `matchMedia`, which every browser has and which the layout uses to decide
+ * whether the sidebar can show its labels. This evaluates min-width and max-width queries against
+ * `window.innerWidth`, so a test can set a viewport width and get the layout that width produces.
+ */
+export function setViewportWidth(width: number): void {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width })
+  window.dispatchEvent(new Event('resize'))
+}
+
+if (!window.matchMedia) {
+  window.matchMedia = (query: string): MediaQueryList => {
+    const listeners = new Set<(event: MediaQueryListEvent) => void>()
+    const evaluate = (): boolean => {
+      const min = /\(min-width:\s*(\d+)px\)/.exec(query)
+      const max = /\(max-width:\s*(\d+)px\)/.exec(query)
+      if (min) return window.innerWidth >= Number(min[1])
+      if (max) return window.innerWidth <= Number(max[1])
+      return false
+    }
+    const list = {
+      get matches() {
+        return evaluate()
+      },
+      media: query,
+      onchange: null,
+      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.add(listener)
+      },
+      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+        listeners.delete(listener)
+      },
+      addListener: (listener: (event: MediaQueryListEvent) => void) => listeners.add(listener),
+      removeListener: (listener: (event: MediaQueryListEvent) => void) =>
+        listeners.delete(listener),
+      dispatchEvent: () => true,
+    }
+    window.addEventListener('resize', () => {
+      for (const listener of listeners) {
+        listener({ matches: evaluate(), media: query } as MediaQueryListEvent)
+      }
+    })
+    return list as unknown as MediaQueryList
+  }
+}
+
 if (!('PointerEvent' in globalThis)) {
   // jsdom does not implement PointerEvent at all, and Radix triggers open on pointerdown. Without
   // this, menus, dialogs and selects silently never open and the test times out instead of failing.
@@ -65,6 +111,10 @@ if (!('DOMRect' in globalThis)) {
 }
 
 beforeEach(() => {
+  // Tests describe a desktop viewport unless they say otherwise, which is where the full sidebar
+  // with its labels applies.
+  setViewportWidth(1440)
+
   // Pointer capture and scrollIntoView are used by menus and selects for focus management.
   if (!Element.prototype.hasPointerCapture) {
     Element.prototype.hasPointerCapture = () => false

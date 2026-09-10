@@ -13,14 +13,16 @@ export function TopBar() {
       <button
         type="button"
         onClick={() => setMobileNavOpen(true)}
-        className="-ml-1 rounded-md p-1.5 text-ink-secondary hover:bg-surface-subtle hover:text-ink lg:hidden"
+        className="-ml-1 rounded-md p-1.5 text-ink-secondary hover:bg-surface-subtle hover:text-ink md:hidden"
         aria-label={t('nav:openMenu')}
       >
         <Menu aria-hidden="true" className="size-5" strokeWidth={1.75} />
       </button>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-ink-secondary">{t('common:appTagline')}</p>
+        <p className="hidden truncate text-sm font-medium text-ink-secondary sm:block">
+          {t('common:appTagline')}
+        </p>
       </div>
 
       <div className="flex items-center gap-2">
