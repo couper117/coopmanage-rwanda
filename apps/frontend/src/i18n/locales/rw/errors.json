@@ -22,10 +22,17 @@
   "page": {
     "notFoundTitle": "Paji ntiyabonetse",
     "notFoundBody": "Paji wasabye ntibaho, cyangwa yarimuwe.",
-    "backToDashboard": "Subira ku ncamake"
+    "backToDashboard": "Subira ku ncamake",
+    "forbiddenTitle": "Nta burenganzira ufite kuri uru rupapuro",
+    "forbiddenBody": "Uruhare rwawe ntirukubiyemo iki gice cya sisitemu. Baza umuyobozi w’ikoperative niba ukeneye.",
+    "forbiddenBodyWithPermission": "Uru rupapuro rusaba uburenganzira bwa \"{{permission}}\", butari mu ruhare rwawe. Umuyobozi w’ikoperative ashobora kubuguha."
   },
   "boundary": {
     "title": "Iyi paji ntiyashoboye kugaragara",
     "body": "Ibindi bice bya sisitemu biracyakora. Ushobora gusubira ku ncamake cyangwa kongera kugerageza."
-  }
+  },
+  "tokenExpired": "Umukoro wawe warangiye. Ongera winjire.",
+  "invalidCredentials": "Iyo aderesi ya imeyili n’iryo jambobanga ntibihuye na konti.",
+  "accountLocked": "Wagerageje kenshi. Ongera ugerageze mu minota {{minutes}}.",
+  "resetTokenInvalid": "Uyu murongo wo guhindura warangiye cyangwa wakoreshejwe. Saba undi."
 }

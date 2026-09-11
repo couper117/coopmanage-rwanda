@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 import { NAV_GROUPS } from '@/app/navigation'
 import { cn } from '@/lib/cn'
+import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
 
 interface SidebarProps {
@@ -26,6 +27,15 @@ export function Sidebar({ variant, collapsed = false, canToggle = true }: Sideba
   const { t } = useTranslation(['nav', 'common'])
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen)
+  const permissions = useAuthStore((state) => state.permissions)
+
+  // An item the user cannot reach is not rendered, and a group left with no items disappears
+  // rather than showing an empty heading. This is presentation only: docs/permissions.md section 6
+  // is explicit that hiding a control is never treated as security, and every route re-checks.
+  const groups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => permissions.has(item.permission)),
+  })).filter((group) => group.items.length > 0)
 
   return (
     <div className="flex h-full flex-col bg-primary-800 text-ink-inverse">
@@ -70,7 +80,7 @@ export function Sidebar({ variant, collapsed = false, canToggle = true }: Sideba
       </div>
 
       <nav aria-label={t('nav:mainNavigation')} className="flex-1 overflow-y-auto px-2 py-3">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.key} className="mb-4 last:mb-0">
             {!collapsed ? (
               <p className="px-2 pb-1.5 text-2xs font-semibold tracking-wider text-white/70 uppercase">

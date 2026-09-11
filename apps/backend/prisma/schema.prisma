@@ -37,7 +37,8 @@ model Permission {
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  roles RolePermission[]
+  roles     RolePermission[]
+  overrides StaffPermissionOverride[]
 
   @@index([scope])
   @@map("permissions")
@@ -56,6 +57,7 @@ model Role {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   permissions RolePermission[]
+  staff       CooperativeStaff[]
 
   @@map("roles")
 }
@@ -88,5 +90,257 @@ model CooperativeType {
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
+  cooperatives Cooperative[]
+
   @@map("cooperative_types")
+}
+
+// ---------------------------------------------------------------------------
+// M2 (Phase 2) — identity, tenancy and the audit trail.
+//
+// `Cooperative` lands here rather than with the cooperative module in Phase 3:
+// `CooperativeStaff` is the tenant gate and cannot exist without it, and Phase 2
+// needs the gate. `UnitOfMeasure` lands here too, because it carries a nullable
+// cooperative_id and so cannot precede the table it points at.
+// Ordering is fixed by docs/database.md section 15.
+// ---------------------------------------------------------------------------
+
+enum Locale {
+  EN
+  RW
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum CooperativeStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OverrideEffect {
+  GRANT
+  DENY
+}
+
+/// Platform-level identity. One person may serve more than one cooperative, so nothing here is
+/// tenant-scoped; membership lives in CooperativeStaff.
+model User {
+  id                 String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String     @unique @db.Citext
+  passwordHash       String     @map("password_hash")
+  fullName           String     @map("full_name")
+  phone              String?
+  locale             Locale     @default(EN)
+  isPlatformAdmin    Boolean    @default(false) @map("is_platform_admin")
+  status             UserStatus @default(ACTIVE)
+  mustChangePassword Boolean    @default(false) @map("must_change_password")
+  lastLoginAt        DateTime?  @map("last_login_at") @db.Timestamptz(3)
+  failedLoginCount   Int        @default(0) @map("failed_login_count")
+  lockedUntil        DateTime?  @map("locked_until") @db.Timestamptz(3)
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  refreshSessions     RefreshSession[]
+  passwordResetTokens PasswordResetToken[]
+  staff               CooperativeStaff[]        @relation("StaffUser")
+  invitedStaff        CooperativeStaff[]        @relation("StaffInviter")
+  grantedOverrides    StaffPermissionOverride[]
+  auditEntries        AuditLog[]
+
+  @@index([status])
+  @@map("users")
+}
+
+/// One row per signed-in device. Refresh tokens are opaque and stored only as a hash, so a
+/// database leak yields nothing that can be presented back to the API.
+model RefreshSession {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  tokenHash    String    @unique @map("token_hash")
+  /// Every token rotated from the same login shares this id. Presenting an already-rotated token
+  /// revokes the whole family, which is how a stolen token is detected.
+  familyId     String    @map("family_id") @db.Uuid
+  userAgent    String?   @map("user_agent")
+  ipAddress    String?   @map("ip_address")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  replacedById String?   @map("replaced_by_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([familyId])
+  @@map("refresh_sessions")
+}
+
+/// Single use, 60 minute lifetime. The request endpoint answers identically for a known and an
+/// unknown address, so this table cannot be used to enumerate users.
+model PasswordResetToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+/// The tenant. Every tenant-owned row in every later migration points back here.
+model Cooperative {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                 String            @unique
+  name                 String
+  typeId               String            @map("type_id") @db.Uuid
+  registrationNumber   String?           @unique @map("registration_number")
+  tinNumber            String?           @map("tin_number")
+  province             String
+  district             String
+  sector               String
+  cell                 String
+  village              String
+  addressLine          String?           @map("address_line")
+  phone                String?
+  email                String?
+  logoUrl              String?           @map("logo_url")
+  foundedOn            DateTime?         @map("founded_on") @db.Date
+  status               CooperativeStatus @default(ACTIVE)
+  /// Flagged once, on the cooperative. Everything else is reachable from here by foreign key, so a
+  /// per-row flag would be redundant and would eventually be forgotten on some table.
+  isDemo               Boolean           @default(false) @map("is_demo")
+  currency             String            @default("RWF")
+  timezone             String            @default("Africa/Kigali")
+  defaultLocale        Locale            @default(RW) @map("default_locale")
+  memberCodePrefix     String            @default("COOP") @map("member_code_prefix")
+  memberCodeSequence   Int               @default(0) @map("member_code_sequence")
+  fiscalYearStartMonth Int               @default(1) @map("fiscal_year_start_month")
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  type     CooperativeType    @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  staff    CooperativeStaff[]
+  units    UnitOfMeasure[]
+  auditLog AuditLog[]
+
+  @@index([status])
+  @@map("cooperatives")
+}
+
+/// The membership row that makes a user part of a cooperative. This table is the tenant gate:
+/// without an ACTIVE row here, no request may read or write anything belonging to the cooperative.
+model CooperativeStaff {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String      @map("cooperative_id") @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  roleId        String      @map("role_id") @db.Uuid
+  jobTitle      String?     @map("job_title")
+  status        StaffStatus @default(ACTIVE)
+  invitedById   String?     @map("invited_by_id") @db.Uuid
+  invitedAt     DateTime    @default(now()) @map("invited_at") @db.Timestamptz(3)
+  joinedAt      DateTime?   @map("joined_at") @db.Timestamptz(3)
+  deactivatedAt DateTime?   @map("deactivated_at") @db.Timestamptz(3)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative               @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  user        User                      @relation("StaffUser", fields: [userId], references: [id], onDelete: Restrict)
+  role        Role                      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  invitedBy   User?                     @relation("StaffInviter", fields: [invitedById], references: [id], onDelete: Restrict)
+  overrides   StaffPermissionOverride[]
+
+  @@unique([cooperativeId, userId])
+  @@index([userId, status])
+  @@index([cooperativeId, status])
+  @@index([roleId])
+  @@map("cooperative_staff")
+}
+
+/// A single grant or deny on top of the role, so a cooperative with unusual staffing does not force
+/// a new role into existence. Evaluated as: role permissions + GRANT − DENY.
+model StaffPermissionOverride {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  staffId      String         @map("staff_id") @db.Uuid
+  permissionId String         @map("permission_id") @db.Uuid
+  effect       OverrideEffect
+  grantedById  String?        @map("granted_by_id") @db.Uuid
+  reason       String?
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff      CooperativeStaff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  permission Permission       @relation(fields: [permissionId], references: [id], onDelete: Restrict)
+  grantedBy  User?            @relation(fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([staffId, permissionId])
+  @@index([permissionId])
+  @@map("staff_permission_overrides")
+}
+
+/// Append only. The application exposes no update or delete path, and the production database role
+/// is granted INSERT and SELECT on this table only. `before` and `after` pass through the same
+/// redaction list as the logger, so a password hash or a token can never land here.
+model AuditLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Null means a platform-level action that belongs to no cooperative.
+  cooperativeId String?  @map("cooperative_id") @db.Uuid
+  actorUserId   String?  @map("actor_user_id") @db.Uuid
+  /// Name and email captured at the time, so the log stays readable after a user is renamed.
+  actorLabel    String   @map("actor_label")
+  action        String
+  entityType    String   @map("entity_type")
+  entityId      String?  @map("entity_id")
+  messageKey    String   @map("message_key")
+  messageParams Json?    @map("message_params")
+  before        Json?
+  after         Json?
+  ipAddress     String?  @map("ip_address")
+  userAgent     String?  @map("user_agent")
+  requestId     String?  @map("request_id")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  cooperative Cooperative? @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  actor       User?        @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([cooperativeId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@map("audit_log")
+}
+
+/// A null cooperativeId is a system-wide seeded unit. Uniqueness needs two partial indexes, added
+/// by the migration: in PostgreSQL two NULLs do not compare equal, so a plain
+/// unique (cooperative_id, key) would allow duplicate system units.
+model UnitOfMeasure {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String?  @map("cooperative_id") @db.Uuid
+  key           String
+  nameEn        String   @map("name_en")
+  nameRw        String   @map("name_rw")
+  symbol        String
+  precision     Int      @default(2)
+  baseUnitId    String?  @map("base_unit_id") @db.Uuid
+  factorToBase  Decimal? @map("factor_to_base") @db.Decimal(18, 6)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative  Cooperative?    @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  baseUnit     UnitOfMeasure?  @relation("UnitBase", fields: [baseUnitId], references: [id], onDelete: Restrict)
+  derivedUnits UnitOfMeasure[] @relation("UnitBase")
+
+  @@index([cooperativeId, isActive])
+  @@index([baseUnitId])
+  @@map("units_of_measure")
 }

@@ -154,6 +154,21 @@ The frontend receives the same permission list and uses it to hide navigation an
 That is a usability affordance only. **Every protected endpoint re-checks server-side.** No frontend
 signal is ever trusted.
 
+**Rotation is claimed, not checked.** Reading the session row, testing `replaced_by_id` and then
+writing is a check followed by an act: two requests carrying the same token both pass the test and
+both mint a replacement, which leaves several live tokens in one family and the reuse undetected.
+The rotation therefore claims the presented token with
+`UPDATE ... WHERE replaced_by_id IS NULL AND revoked_at IS NULL`, which takes a row lock, so exactly
+one caller can win whatever else is in flight. The losers are treated as a replay.
+
+That strictness has a consequence worth stating. Two browser tabs waking at the same moment hold the
+same cookie; one rotation wins and the other is read as a replay, so the family is revoked and the
+user is signed out. The client refreshes single-flight within a tab, so reaching this needs two
+tabs. A short grace window, during which a just-rotated token returns its existing replacement
+rather than revoking, would remove the sharp edge without giving a real thief a useful window. It is
+a deliberate change to the rule in `database.md` section 3 rather than a defect, and belongs to the
+Phase 15 security review.
+
 A per-staff override table (`StaffPermissionOverride`) allows a single grant or deny on top of the
 role. It exists so that real cooperatives with unusual staffing do not force the creation of new
 roles, and it is evaluated as: `role permissions + GRANT overrides − DENY overrides`.

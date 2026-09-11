@@ -1,0 +1,43 @@
+{
+  "title": "Konti yanjye",
+  "description": "Amakuru yawe, ijambobanga ryawe n'ibikoresho winjiriyeho.",
+  "roles": {
+    "MANAGER": "Umuyobozi",
+    "ACCOUNTANT": "Umubaruramari",
+    "SECRETARY": "Umunyamabanga",
+    "INVENTORY_OFFICER": "Ushinzwe ububiko",
+    "VIEWER": "Ureba gusa",
+    "SYSTEM_ADMIN": "Umuyobozi wa sisitemu"
+  },
+  "fields": {
+    "fullName": "Amazina yombi",
+    "phone": "Nimero ya telefone",
+    "phoneHint": "Ikoreshwa na bagenzi bawe kugira ngo bakugereho. Ntiyigera yerekwa abanyamuryango.",
+    "language": "Ururimi",
+    "currentPassword": "Ijambobanga rikoreshwa",
+    "newPassword": "Ijambobanga rishya",
+    "confirmPassword": "Ongera wandike ijambobanga rishya"
+  },
+  "details": {
+    "title": "Amakuru yawe",
+    "description": "Amazina n'ururimi byawe bigukurikira kuri mudasobwa iyo ari yo yose winjiriyeho.",
+    "saved": "Amakuru yawe yabitswe."
+  },
+  "password": {
+    "title": "Ijambobanga",
+    "description": "Rihindure igihe cyose ukeka ko hari undi waribonye.",
+    "submit": "Hindura ijambobanga",
+    "changed": "Ijambobanga ryawe ryahinduwe.",
+    "signsOutOtherDevices": "Guhindura ijambobanga bigusohora ku bindi bikoresho byose. Iki gikomeza kwinjira."
+  },
+  "devices": {
+    "title": "Ibikoresho winjiriyeho",
+    "description": "Sohoka ku gikoresho utazi, cyangwa kuri mudasobwa isangiwe wasize wihuta.",
+    "signedInAt": "Winjiye {{when}}",
+    "thisDevice": "Iki gikoresho",
+    "signOut": "Sohoka",
+    "unknownDevice": "Igikoresho kitazwi",
+    "emptyTitle": "Nta bindi bikoresho",
+    "emptyBody": "Winjiye hano gusa, ahandi nta ho."
+  }
+}

@@ -22,10 +22,17 @@
   "page": {
     "notFoundTitle": "Page not found",
     "notFoundBody": "The page you asked for does not exist, or it has moved.",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "forbiddenTitle": "You do not have access to this page",
+    "forbiddenBody": "Your role does not cover this part of the system. Ask your cooperative manager if you need it.",
+    "forbiddenBodyWithPermission": "This page needs the \"{{permission}}\" permission, which your role does not include. Your cooperative manager can grant it."
   },
   "boundary": {
     "title": "This screen could not be displayed",
     "body": "The rest of the application is still working. You can go back to the dashboard or try loading this screen again."
-  }
+  },
+  "tokenExpired": "Your session has expired. Please sign in again.",
+  "invalidCredentials": "That email address and password do not match an account.",
+  "accountLocked": "Too many failed attempts. Try again in {{minutes}} minutes.",
+  "resetTokenInvalid": "This reset link has expired or has already been used. Please ask for a new one."
 }

@@ -1,5 +1,6 @@
 export * from './permissions.js'
 export * from './roles.js'
 export * from './api.js'
+export * from './auth.js'
 export * from './enums.js'
 export * from './format.js'

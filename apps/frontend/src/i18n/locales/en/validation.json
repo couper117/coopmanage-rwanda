@@ -12,5 +12,13 @@
   "phone": "Enter a valid phone number.",
   "decimalScale": "Use at most {{scale}} decimal places.",
   "positiveAmount": "Enter an amount greater than zero.",
-  "dateRange": "The end date must be on or after the start date."
+  "dateRange": "The end date must be on or after the start date.",
+  "password": {
+    "hint": "At least {{min}} characters. A short sentence you will remember works well.",
+    "tooShort": "Use at least {{min}} characters.",
+    "tooLong": "That password is too long.",
+    "tooCommon": "That password is too easy to guess. Choose something less common.",
+    "incorrect": "That is not your current password.",
+    "mismatch": "The two passwords do not match."
+  }
 }

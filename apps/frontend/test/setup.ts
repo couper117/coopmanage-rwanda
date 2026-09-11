@@ -2,6 +2,8 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach } from 'vitest'
 import '../src/i18n'
+import { queryClient } from '../src/app/queryClient'
+import { resetSession } from './session'
 
 /**
  * jsdom implements no layout engine, and the Radix primitives the design system is built on rely
@@ -133,4 +135,11 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   window.localStorage.clear()
+  // A session must not leak from one test into the next: a guarded screen rendering because an
+  // earlier test signed somebody in would hide exactly the bug these tests exist to catch.
+  resetSession()
+  // The query client is a module singleton, so a cached result from one test would be served to
+  // the next inside its stale time — which reads as "the screen showed nothing" rather than as
+  // the leak it is.
+  queryClient.clear()
 })

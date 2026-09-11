@@ -58,12 +58,24 @@ export interface PageMeta {
   sort?: string
 }
 
+/**
+ * Paging for feeds that only ever grow and are read newest-first — the audit log, and the activity
+ * feed that joins it in Phase 10. Offset paging over those is both slow and wrong: a row inserted
+ * between two requests shifts every later page by one and silently hides an entry.
+ */
+export interface CursorMeta {
+  limit: number
+  /** Pass back as `?cursor=` to read the next page. `null` means this was the last one. */
+  nextCursor: string | null
+}
+
 export interface ApiResponse<TData, TMeta = Record<string, unknown>> {
   data: TData
   meta?: TMeta
 }
 
 export type ApiCollectionResponse<TItem> = ApiResponse<TItem[], PageMeta>
+export type ApiCursorResponse<TItem> = ApiResponse<TItem[], CursorMeta>
 
 export const DEFAULT_PAGE_SIZE = 25
 export const MAX_PAGE_SIZE = 100

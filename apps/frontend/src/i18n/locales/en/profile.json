@@ -1,0 +1,43 @@
+{
+  "title": "My account",
+  "description": "Your details, your password and the devices you are signed in on.",
+  "roles": {
+    "MANAGER": "Manager",
+    "ACCOUNTANT": "Accountant",
+    "SECRETARY": "Secretary",
+    "INVENTORY_OFFICER": "Inventory officer",
+    "VIEWER": "Viewer",
+    "SYSTEM_ADMIN": "System administrator"
+  },
+  "fields": {
+    "fullName": "Full name",
+    "phone": "Phone number",
+    "phoneHint": "Used by colleagues to reach you. It is never shown to members.",
+    "language": "Language",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password"
+  },
+  "details": {
+    "title": "Your details",
+    "description": "Your name and language follow you to whichever computer you sign in on.",
+    "saved": "Your details have been saved."
+  },
+  "password": {
+    "title": "Password",
+    "description": "Change it whenever you think somebody else may have seen it.",
+    "submit": "Change password",
+    "changed": "Your password has been changed.",
+    "signsOutOtherDevices": "Changing your password signs you out on every other device. This one stays signed in."
+  },
+  "devices": {
+    "title": "Signed-in devices",
+    "description": "Sign out anything you do not recognise, or a shared computer you left in a hurry.",
+    "signedInAt": "Signed in {{when}}",
+    "thisDevice": "This device",
+    "signOut": "Sign out",
+    "unknownDevice": "Unrecognised device",
+    "emptyTitle": "No other devices",
+    "emptyBody": "You are signed in here and nowhere else."
+  }
+}

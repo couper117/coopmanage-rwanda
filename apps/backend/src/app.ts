@@ -1,4 +1,5 @@
 import compression from 'compression'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { type Express } from 'express'
 import helmet from 'helmet'
@@ -75,6 +76,9 @@ export function createApp(): Express {
   )
 
   app.use(compression())
+  // The refresh token is the only cookie the API reads, and it is HttpOnly. Nothing is signed
+  // here because the value is already an opaque random token verified against its stored hash.
+  app.use(cookieParser())
   app.use(express.json({ limit: '1mb' }))
   app.use(express.urlencoded({ extended: false, limit: '1mb' }))
 

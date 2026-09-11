@@ -48,6 +48,7 @@
     "@prisma/engines@7.10.0": true,
     "esbuild@0.28.2": true,
     "esbuild@0.25.12": true,
-    "fsevents@2.3.3": true
+    "fsevents@2.3.3": true,
+    "argon2@0.44.0": true
   }
 }

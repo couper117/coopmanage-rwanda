@@ -12,5 +12,13 @@
   "phone": "Andika nimero ya telefone nyayo.",
   "decimalScale": "Koresha ibice {{scale}} gusa nyuma y'akadomo.",
   "positiveAmount": "Andika umubare uri hejuru ya zeru.",
-  "dateRange": "Itariki yo kurangiriraho igomba kuba ari nyuma y'iyo watangiriyeho."
+  "dateRange": "Itariki yo kurangiriraho igomba kuba ari nyuma y'iyo watangiriyeho.",
+  "password": {
+    "hint": "Nibura inyuguti {{min}}. Interuro ngufi wibuka irakora neza.",
+    "tooShort": "Koresha nibura inyuguti {{min}}.",
+    "tooLong": "Iryo jambobanga ni rirerire cyane.",
+    "tooCommon": "Iryo jambobanga ryoroshye kumenyekana. Hitamo irindi ridasanzwe.",
+    "incorrect": "Iryo si ijambobanga ryawe rikoreshwa.",
+    "mismatch": "Amagambobanga yombi ntahuye."
+  }
 }

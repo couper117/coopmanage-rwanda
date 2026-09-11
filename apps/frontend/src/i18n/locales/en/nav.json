@@ -26,6 +26,7 @@
     "finance": "Finance",
     "staff": "Staff",
     "settings": "Settings",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "profile": "My account"
   }
 }

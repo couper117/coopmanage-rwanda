@@ -18,7 +18,8 @@
     "back": "Subira inyuma",
     "next": "Ibikurikira",
     "previous": "Ibibanza",
-    "viewAll": "Reba byose"
+    "viewAll": "Reba byose",
+    "signOut": "Sohoka"
   },
   "state": {
     "loading": "Biratunganywa",
@@ -41,5 +42,8 @@
     "rw": "Ikinyarwanda",
     "switchTo": "Hindura ujye mu {{language}}"
   },
-  "currency": { "code": "RWF" }
+  "currency": {
+    "code": "RWF"
+  },
+  "demoData": "Amakuru y'urugero"
 }

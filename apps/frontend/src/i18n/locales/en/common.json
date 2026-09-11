@@ -18,7 +18,8 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "signOut": "Sign out"
   },
   "state": {
     "loading": "Loading",
@@ -41,5 +42,8 @@
     "rw": "Kinyarwanda",
     "switchTo": "Switch to {{language}}"
   },
-  "currency": { "code": "RWF" }
+  "currency": {
+    "code": "RWF"
+  },
+  "demoData": "Demonstration data"
 }

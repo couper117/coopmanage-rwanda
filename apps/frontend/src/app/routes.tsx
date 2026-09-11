@@ -1,31 +1,56 @@
 import type { RouteObject } from 'react-router-dom'
+import { RequireAuth, RequirePermission } from '@/features/auth/RequireAuth'
 import { AppShell } from '@/layouts/AppShell'
+import { AuditLogPage } from '@/pages/AuditLogPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { ProfilePage } from '@/pages/ProfilePage'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
+import { LoginPage } from '@/pages/auth/LoginPage'
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { ALL_NAV_ITEMS } from './navigation'
 
 /**
- * Routes for modules that exist, plus an honest status route for every navigation destination
- * whose module is still to come. Each pending route is replaced by the phase named against it in
+ * Three kinds of route.
+ *
+ * The authentication screens are public, because they are how a session begins. Everything else
+ * sits behind `RequireAuth`, inside the application shell. A screen whose module has not been
+ * built yet keeps an honest status route, replaced by the phase named against it in
  * `navigation.ts`, so none can be quietly forgotten.
  *
  * Exported as data rather than as a built router so tests can mount the same tree in a memory
  * router and assert what a user actually sees.
  */
 const pendingRoutes: RouteObject[] = ALL_NAV_ITEMS.filter(
-  (item) => item.availableFromPhase > 1,
+  (item) => item.availableFromPhase > 2,
 ).map((item) => ({
   path: item.to,
   element: <ModulePendingPage moduleKey={item.key} phase={item.availableFromPhase} />,
 }))
 
 export const routes: RouteObject[] = [
+  { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/reset-password/:token', element: <ResetPasswordPage /> },
   {
     path: '/',
-    element: <AppShell />,
+    element: (
+      <RequireAuth>
+        <AppShell />
+      </RequireAuth>
+    ),
     children: [
       { index: true, element: <DashboardPage /> },
+      { path: 'profile', element: <ProfilePage /> },
+      {
+        path: 'settings/audit',
+        element: (
+          <RequirePermission permission="audit:view">
+            <AuditLogPage />
+          </RequirePermission>
+        ),
+      },
       ...pendingRoutes,
       { path: '*', element: <NotFoundPage /> },
     ],

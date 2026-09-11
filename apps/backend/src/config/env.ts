@@ -42,8 +42,15 @@ const envSchema = z
       .string()
       .min(1)
       .default('development-only-secret-do-not-use-in-production'),
-    JWT_ACCESS_TTL: z.string().default('15m'),
+    JWT_ACCESS_TTL: z
+      .string()
+      .regex(/^\d+[smhd]$/, 'must be a duration such as 15m or 1h')
+      .default('15m'),
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+    PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(5).max(1440).default(60),
+
+    /** Where the browser application is served. Password reset links are built against it. */
+    APP_BASE_URL: z.string().url().default('http://localhost:5175'),
 
     SEED_DEMO: booleanFromString.default(false),
     // Defaults to on outside production and off in production. Setting it explicitly wins,

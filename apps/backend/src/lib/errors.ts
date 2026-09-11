@@ -62,6 +62,56 @@ export class AppError extends Error {
     })
   }
 
+  /**
+   * Distinct from `unauthenticated` on purpose: the client refreshes silently on this and sends
+   * the user to the login screen on that. Confusing the two either interrupts someone mid-form or
+   * puts the client into a refresh loop against a token that will never be accepted.
+   */
+  static tokenExpired(): AppError {
+    return new AppError({
+      status: 401,
+      code: 'TOKEN_EXPIRED',
+      messageKey: 'errors.tokenExpired',
+      message: 'Your session has expired. Please sign in again.',
+    })
+  }
+
+  static invalidCredentials(): AppError {
+    return new AppError({
+      status: 401,
+      code: 'INVALID_CREDENTIALS',
+      messageKey: 'errors.invalidCredentials',
+      message: 'That email address and password do not match an account.',
+    })
+  }
+
+  static accountLocked(minutes: number): AppError {
+    return new AppError({
+      status: 401,
+      code: 'ACCOUNT_LOCKED',
+      messageKey: 'errors.accountLocked',
+      messageParams: { minutes },
+      message: `Too many failed attempts. Try again in ${minutes} minutes.`,
+    })
+  }
+
+  /**
+   * The caller has a session but no ACTIVE membership of the cooperative they named. A platform
+   * identifier they may not see returns 404 instead, so ids cannot be probed.
+   */
+  static noCooperativeAccess(): AppError {
+    return new AppError({
+      status: 403,
+      code: 'NO_COOPERATIVE_ACCESS',
+      messageKey: 'errors.noCooperativeAccess',
+      message: 'You do not have access to this cooperative.',
+    })
+  }
+
+  static conflict(messageKey: string, message: string): AppError {
+    return new AppError({ status: 409, code: 'CONFLICT', messageKey, message })
+  }
+
   static forbidden(permission?: string): AppError {
     return new AppError({
       status: 403,

@@ -1,0 +1,35 @@
+{
+  "title": "Audit log",
+  "description": "Who did what, and when. Entries are kept permanently and cannot be edited or removed.",
+  "tableCaption": "Actions taken in this cooperative, most recent first",
+  "columns": {
+    "when": "When",
+    "who": "Who",
+    "what": "What happened",
+    "record": "Record"
+  },
+  "loadMore": "Show older entries",
+  "empty": {
+    "title": "Nothing recorded yet",
+    "body": "Actions taken in this cooperative will be listed here as staff begin using the system."
+  },
+  "auth": {
+    "loginSucceeded": "{{email}} signed in",
+    "loginFailed": "A sign-in attempt for {{email}} was refused",
+    "logout": "Signed out",
+    "refreshReused": "A session token was presented twice; all sessions were ended",
+    "passwordResetRequested": "A password reset was requested",
+    "passwordResetCompleted": "A password was reset",
+    "sessionRevoked": "A device was signed out"
+  },
+  "user": {
+    "profileUpdated": "Account details were changed",
+    "passwordChanged": "A password was changed"
+  },
+  "platform": {
+    "tenantAccess": "Platform administrator opened {{cooperative}} ({{path}})"
+  },
+  "member": {
+    "created": "A member was registered"
+  }
+}

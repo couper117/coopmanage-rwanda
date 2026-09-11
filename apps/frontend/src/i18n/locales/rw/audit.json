@@ -1,0 +1,35 @@
+{
+  "title": "Igitabo cy'ibyakozwe",
+  "description": "Uwakoze iki, ryari. Ibyanditswe bibikwa burundu, ntibishobora guhindurwa cyangwa gusibwa.",
+  "tableCaption": "Ibyakorewe muri iyi koperative, ibya vuba mbere",
+  "columns": {
+    "when": "Igihe",
+    "who": "Uwabikoze",
+    "what": "Icyabaye",
+    "record": "Inyandiko"
+  },
+  "loadMore": "Erekana ibya kera",
+  "empty": {
+    "title": "Nta kintu kiranditswe",
+    "body": "Ibikorwa byo muri iyi koperative bizagaragara hano abakozi batangiye gukoresha sisitemu."
+  },
+  "auth": {
+    "loginSucceeded": "{{email}} yinjiye",
+    "loginFailed": "Kwinjira kwa {{email}} kwanzwe",
+    "logout": "Yasohotse",
+    "refreshReused": "Ikimenyetso cy'umukoro cyakoreshejwe kabiri; imikoro yose yarangiye",
+    "passwordResetRequested": "Hasabwe guhindura ijambobanga",
+    "passwordResetCompleted": "Ijambobanga ryahinduwe",
+    "sessionRevoked": "Igikoresho cyasohowe"
+  },
+  "user": {
+    "profileUpdated": "Amakuru ya konti yahinduwe",
+    "passwordChanged": "Ijambobanga ryahinduwe"
+  },
+  "platform": {
+    "tenantAccess": "Umuyobozi wa sisitemu yafunguye {{cooperative}} ({{path}})"
+  },
+  "member": {
+    "created": "Umunyamuryango yanditswe"
+  }
+}

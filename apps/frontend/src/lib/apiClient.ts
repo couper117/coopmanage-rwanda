@@ -1,12 +1,14 @@
 import type {
   ApiErrorBody,
   ApiResponse,
+  CursorMeta,
   ErrorCode,
   MessageParams,
   PageMeta,
 } from '@coopmanage/shared'
 import { HEADERS } from '@coopmanage/shared'
 import { currentLanguage } from '@/i18n'
+import { authState } from '@/stores/authStore'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
@@ -73,8 +75,13 @@ export class ApiError extends Error {
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   body?: unknown
-  /** Sent as X-Cooperative-Id. Every tenant-scoped request needs it from Phase 3. */
+  /**
+   * Overrides the cooperative the session is currently working in. Almost nothing needs this:
+   * the active cooperative is attached automatically.
+   */
   cooperativeId?: string
+  /** Skips the bearer token and the silent refresh. Only the authentication endpoints use it. */
+  anonymous?: boolean
   /** Sent as Idempotency-Key on money and stock mutations, so a retry cannot duplicate a record. */
   idempotencyKey?: string
   signal?: AbortSignal
@@ -126,23 +133,49 @@ function toApiError(status: number, payload: unknown): ApiError {
  * here, so headers, error shape, language handling and abort behaviour cannot drift between
  * features.
  */
-async function request<TData, TMeta = unknown>(
+/**
+ * A refresh in flight, shared by every request that discovers an expired token at the same moment.
+ * Without this, a screen firing four queries would send four refreshes; the server rotates on each
+ * one and treats the second as a replayed token, revoking the family and signing the user out —
+ * the exact failure the rotation scheme exists to detect.
+ */
+let refreshInFlight: Promise<boolean> | null = null
+
+async function refreshAccessToken(): Promise<boolean> {
+  refreshInFlight ??= (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
+      })
+      if (!response.ok) return false
+      const payload = (await response.json()) as { data?: { accessToken?: string } }
+      const token = payload.data?.accessToken
+      if (typeof token !== 'string') return false
+      authState.setAccessToken(token)
+      return true
+    } catch {
+      return false
+    } finally {
+      // Cleared on the microtask after the awaiting callers have read the result, so a later
+      // request starts a fresh attempt rather than reusing a settled one.
+      queueMicrotask(() => {
+        refreshInFlight = null
+      })
+    }
+  })()
+  return refreshInFlight
+}
+
+async function send(
   path: string,
   options: RequestOptions,
-): Promise<{ data: TData; meta: TMeta | undefined }> {
-  const { method = 'GET', body, cooperativeId, idempotencyKey, signal, query } = options
-
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Accept-Language': currentLanguage(),
-  }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
-  if (cooperativeId) headers[HEADERS.cooperativeId] = cooperativeId
-  if (idempotencyKey) headers[HEADERS.idempotencyKey] = idempotencyKey
-
-  let response: Response
+  headers: Record<string, string>,
+): Promise<Response> {
+  const { method = 'GET', body, signal, query } = options
   try {
-    response = await fetch(buildUrl(path, query), {
+    return await fetch(buildUrl(path, query), {
       method,
       headers,
       credentials: 'include',
@@ -153,6 +186,53 @@ async function request<TData, TMeta = unknown>(
     // An abort is the caller's own decision, not a failure to report to the user.
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw ApiError.network()
+  }
+}
+
+async function request<TData, TMeta = unknown>(
+  path: string,
+  options: RequestOptions,
+): Promise<{ data: TData; meta: TMeta | undefined }> {
+  const { body, cooperativeId, idempotencyKey, anonymous = false } = options
+
+  function buildHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      'Accept-Language': currentLanguage(),
+    }
+    if (body !== undefined) headers['Content-Type'] = 'application/json'
+    if (idempotencyKey) headers[HEADERS.idempotencyKey] = idempotencyKey
+    if (anonymous) return headers
+
+    const token = authState.accessToken()
+    if (token) headers.Authorization = `Bearer ${token}`
+    const tenant = cooperativeId ?? authState.cooperativeId()
+    if (tenant) headers[HEADERS.cooperativeId] = tenant
+    return headers
+  }
+
+  let response = await send(path, options, buildHeaders())
+
+  // An access token lasts fifteen minutes and the user does not need to know that. On the one
+  // status that means "expired, but the session is still good", refresh once and replay.
+  if (response.status === 401 && !anonymous) {
+    const payload = (await response
+      .clone()
+      .json()
+      .catch(() => null)) as {
+      error?: { code?: string }
+    } | null
+    if (payload?.error?.code === 'TOKEN_EXPIRED') {
+      if (await refreshAccessToken()) {
+        response = await send(path, options, buildHeaders())
+      } else {
+        authState.signedOut()
+      }
+    } else {
+      // Any other 401 on an authenticated request means the session is genuinely over — signed
+      // out elsewhere, account suspended, token tampered with. Retrying would achieve nothing.
+      authState.signedOut()
+    }
   }
 
   if (response.status === 204) {
@@ -198,5 +278,14 @@ export async function apiRequestCollection<TItem>(
   options: RequestOptions = {},
 ): Promise<{ items: TItem[]; meta: PageMeta | undefined }> {
   const { data, meta } = await request<TItem[], PageMeta>(path, options)
+  return { items: data, meta }
+}
+
+/** Reads a cursor-paged feed, such as the audit log, keeping the cursor alongside the rows. */
+export async function apiRequestCursor<TItem>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<{ items: TItem[]; meta: CursorMeta | undefined }> {
+  const { data, meta } = await request<TItem[], CursorMeta>(path, options)
   return { items: data, meta }
 }

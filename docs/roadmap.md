@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 1 complete.** Phase 2 is next.
+Status: **Phase 2 complete.** Phase 3 is next.
 
 ---
 
@@ -141,7 +141,7 @@ in `architecture.md` section 16.
 
 ---
 
-### Phase 2 — Authentication, users, authorization
+### Phase 2 — Authentication, users, authorization ✅
 
 - Argon2id hashing, login, refresh rotation with family revocation, logout, session list
 - Forgot and reset password, single-use tokens, uniform responses, rate limits, progressive lockout
@@ -151,8 +151,45 @@ in `architecture.md` section 16.
 - Login screen, protected routes, `PermissionGate`, `usePermission`, profile screen, session expiry
   handling with silent refresh
 
-**Exit:** the five permission test suites in `permissions.md` §7 pass; a viewer token is rejected by
-every mutating endpoint; nothing user-facing is untranslated.
+Migration **M2** creates `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`,
+`CooperativeStaff`, `StaffPermissionOverride`, `AuditLog` and `UnitOfMeasure`, and the seed gains
+the twelve system units, a platform administrator and the demonstration cooperative — _Umurenge
+Farmers Cooperative_ in Musanze, with a member of staff in each of the five cooperative roles.
+
+**Exit:** met. The five permission suites in `permissions.md` §7 pass, along with 253 tests in
+total; a viewer is refused every endpoint their role does not cover; lint, typecheck and the
+production build are green; the migrations apply to an empty database and the seed is idempotent
+across two consecutive runs; and the login, profile and audit screens were reviewed in both
+languages at 1440px and 390px, driven by keyboard alone, with no horizontal overflow and a visible
+focus ring on every control.
+
+Four things are worth recording, because each changed a decision.
+
+**The audit trail is append-only in the database, not only in the application.** A trigger refuses
+`UPDATE` and `DELETE` on `audit_log`, so there is no code path — and no mistake — that can rewrite
+history. It raises on the default `P0001`: the first version used `restrict_violation`, which
+Prisma maps to "foreign key constraint violated" and which therefore said nothing about what had
+been refused.
+
+**Refresh rotation claims the presented token with a conditional update.** Reading the row, checking
+`replaced_by_id` and then acting on it is a check followed by an act: two requests carrying the same
+token both passed the check and both minted a replacement, leaving several live tokens in one
+family with the reuse undetected. This was found by looking at the running application, not by a
+test. The claim is now `UPDATE ... WHERE replaced_by_id IS NULL AND revoked_at IS NULL`, which takes
+a row lock, and a concurrency test asserts that exactly one of five simultaneous refreshes wins.
+
+**Strict rotation has a consequence worth naming before Phase 15.** Two browser tabs waking at the
+same moment both hold the same cookie; one rotation wins and the other is treated as a replay, which
+by design revokes the family and signs the user out. The client is single-flight per tab, so this
+needs two tabs to reach. Adding a short grace window during which a just-rotated token returns its
+replacement would remove the sharp edge, and is a deliberate deviation from `database.md` §3 rather
+than a bug fix, so it belongs to the security review rather than here.
+
+**Password reset has no delivery channel yet.** The token lifecycle is complete — single use, sixty
+minutes, uniform responses — and delivery goes through one named port in `auth.delivery.ts`. Outside
+production the link is written to the server log, which is how a developer completes the flow. In
+production, with no channel configured, the attempt is recorded as a warning and the link is never
+logged. Phase 12 brings SMS and with it the first real channel.
 
 ---
 

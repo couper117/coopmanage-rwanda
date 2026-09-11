@@ -26,6 +26,9 @@ describe('route inventory', () => {
     expect(paths).toContain('GET /health')
     expect(paths).toContain('GET /health/ready')
     expect(paths).toContain('GET /cooperative-types')
+    expect(paths).toContain('POST /auth/login')
+    expect(paths).toContain('GET /auth/me')
+    expect(paths).toContain('GET /audit')
   })
 
   it('declares an access requirement for every route', () => {
@@ -40,7 +43,19 @@ describe('route inventory', () => {
       .map((route) => `${route.method} ${route.path}`)
       .sort()
     // Growing this list is a deliberate security decision, so the test names it explicitly.
-    expect(publicPaths).toEqual(['GET /cooperative-types', 'GET /health', 'GET /health/ready'])
+    // Every authentication route on this list is how a session begins or is recovered, and each is
+    // rate limited by IP and by account. `/auth/refresh` and `/auth/logout` authenticate with the
+    // refresh cookie rather than a bearer token, and check the request origin.
+    expect(publicPaths).toEqual([
+      'GET /cooperative-types',
+      'GET /health',
+      'GET /health/ready',
+      'POST /auth/forgot-password',
+      'POST /auth/login',
+      'POST /auth/logout',
+      'POST /auth/refresh',
+      'POST /auth/reset-password',
+    ])
   })
 
   it('registers no duplicate route', () => {
@@ -49,9 +64,11 @@ describe('route inventory', () => {
   })
 
   it('records paths that the running application actually serves', async () => {
-    // Guards against a router being mounted at a different path from the one it recorded.
+    // Guards against a router being mounted at a different path from the one it recorded. A
+    // protected route answers 401 here rather than 200, which is still proof that it is mounted.
     for (const route of routes.filter((candidate) => candidate.method === 'GET')) {
-      const res = await request(app).get(`${API_PREFIX}${route.path}`)
+      const path = route.path.replace(/:\w+/g, '00000000-0000-4000-8000-000000000000')
+      const res = await request(app).get(`${API_PREFIX}${path}`)
       expect(res.status, `${route.method} ${route.path} is recorded but not reachable`).not.toBe(
         404,
       )

@@ -4,9 +4,12 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, describe, expect, it } from 'vitest'
 import { Providers } from '../src/app/Providers'
 import { routes } from '../src/app/routes'
+import { signInAs } from './session'
 import { changeLanguage } from '../src/i18n'
 
 function renderApp(path = '/') {
+  // These screens live behind the session guard, so a test that wants to see one signs in first.
+  signInAs('MANAGER')
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   return render(
     <Providers>
