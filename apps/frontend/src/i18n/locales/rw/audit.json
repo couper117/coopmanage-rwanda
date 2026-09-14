@@ -68,5 +68,15 @@
     "unitUpdated": "Igipimo {{unit}} cyahinduwe",
     "warehouseCreated": "Ububiko {{warehouse}} bwongeweho nka {{code}}",
     "warehouseUpdated": "Ububiko {{warehouse}} bwahinduwe"
+  },
+  "sales": {
+    "buyerCreated": "Umuguzi {{buyer}} yongeweho",
+    "buyerUpdated": "Umuguzi {{buyer}} yahinduwe",
+    "drafted": "Igurisha {{reference}} ryanditswe ku {{total}} RWF",
+    "updated": "Igurisha {{reference}} ryahinduwe rikiri umushinga",
+    "confirmed": "Igurisha {{reference}} ryemejwe ku {{total}} RWF",
+    "cancelled": "Igurisha {{reference}} rya {{total}} RWF ryahagaritswe",
+    "paymentRecorded": "{{amount}} RWF yakiriwe ku igurisha {{reference}}, icyanditswe {{entry}}",
+    "receiptIssued": "Inyemezabwishyu y'igurisha {{reference}} yakozwe"
   }
 }

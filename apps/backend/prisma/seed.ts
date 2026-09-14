@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 import {
   ALL_PERMISSIONS,
+  COOPERATIVE_PERMISSIONS,
   permissionScope,
   ROLE_KEYS,
   ROLE_PERMISSIONS,
@@ -13,6 +14,7 @@ import argon2 from 'argon2'
 import { randomBytes } from 'node:crypto'
 import { COOPERATIVE_TYPES } from './seed-data/cooperative-types.js'
 import { buildDemoFinance, DEMO_MEMBER_PAYMENTS } from './seed-data/demo-finance.js'
+import { DEMO_BUYERS, DEMO_SALES } from './seed-data/demo-sales.js'
 import {
   DEMO_MOVEMENTS,
   DEMO_PRODUCT_CATEGORIES,
@@ -32,6 +34,12 @@ import {
 import { defaultCategoriesFor } from '../src/modules/finance/finance.categories.js'
 import { scanLowStock } from '../src/modules/inventory/lowStock.js'
 import { decreaseStock, increaseStock } from '../src/modules/inventory/stock.js'
+import {
+  cancelSale,
+  confirmSale,
+  createBuyer,
+  createSale,
+} from '../src/modules/sales/sales.service.js'
 import { Decimal } from '../src/lib/money.js'
 import { voidTransaction } from '../src/modules/finance/finance.service.js'
 import type { RequestContext } from '../src/lib/context.js'
@@ -372,6 +380,7 @@ async function seedDemoCooperative(): Promise<void> {
   await seedDemoMembers(cooperative.id)
   await seedDemoFinance(cooperative.id)
   await seedDemoInventory(cooperative.id)
+  await seedDemoSales(cooperative.id)
 }
 
 /**
@@ -399,6 +408,134 @@ async function seedFinanceCategories(cooperativeId: string, typeKey: string): Pr
       })
     }
   }
+}
+
+/**
+ * Demonstration buyers and sales.
+ *
+ * Written through the application's own service functions rather than by inserting rows, so a
+ * confirmed sale really does take the stock and post the income, a cancelled one really does write
+ * its compensating movements, and the demonstration data is built by the same code a storekeeper's
+ * sale goes through. Anything less would leave the seeded books and the seeded store able to
+ * disagree, which is the failure the whole module is designed to prevent.
+ *
+ * Idempotent on the buyers already present.
+ */
+async function seedDemoSales(cooperativeId: string): Promise<void> {
+  const existing = await prisma.buyer.count({ where: { cooperativeId } })
+  if (existing > 0) {
+    console.log(`  demonstration sales: ${existing} buyers already present, left alone`)
+    return
+  }
+
+  const managerEmail = DEMO_STAFF[0]?.email
+  const manager = managerEmail
+    ? await prisma.user.findUnique({
+        where: { email: managerEmail },
+        select: { id: true, email: true, fullName: true, isPlatformAdmin: true, locale: true },
+      })
+    : null
+  if (!manager) return
+
+  const cooperative = await prisma.cooperative.findUniqueOrThrow({
+    where: { id: cooperativeId },
+    select: { id: true, name: true, code: true, isDemo: true },
+  })
+
+  // A context the services can act under. Every cooperative permission, because the seed is
+  // standing in for a manager who holds them all.
+  const ctx: RequestContext = {
+    requestId: 'seed',
+    sessionFamilyId: 'seed',
+    user: manager,
+    cooperative,
+    permissions: new Set(COOPERATIVE_PERMISSIONS),
+  }
+
+  const buyerByName = new Map<string, string>()
+  for (const buyer of DEMO_BUYERS) {
+    const row = await createBuyer(ctx, buyer)
+    buyerByName.set(buyer.name, row.id)
+  }
+
+  const warehouse = await prisma.warehouse.findFirstOrThrow({
+    where: { cooperativeId, isDefault: true },
+    select: { id: true },
+  })
+  const products = await prisma.product.findMany({
+    where: { cooperativeId },
+    select: { id: true, name: true },
+  })
+  const productByName = new Map(products.map((row) => [row.name, row.id]))
+  const incomeCategory = await prisma.financeCategory.findFirstOrThrow({
+    where: { cooperativeId, kind: 'INCOME', name: 'Sale of produce' },
+    select: { id: true },
+  })
+
+  const year = new Date().getUTCFullYear()
+  let confirmed = 0
+  let drafts = 0
+  let cancelled = 0
+
+  for (const sale of DEMO_SALES) {
+    const buyerId = buyerByName.get(sale.buyer)
+    if (!buyerId) continue
+
+    const saleDate = new Date(Date.UTC(year, sale.month - 1, sale.day))
+    if (saleDate > new Date()) continue
+
+    const lines = sale.lines
+      .map((line) => ({
+        productId: productByName.get(line.product),
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+      }))
+      .filter((line): line is { productId: string; quantity: string; unitPrice: string } =>
+        Boolean(line.productId),
+      )
+    if (lines.length === 0) continue
+
+    const draft = await createSale(ctx, {
+      buyerId,
+      warehouseId: warehouse.id,
+      saleDate: saleDate.toISOString().slice(0, 10),
+      lines: lines.map((line) => ({ ...line, note: null })),
+      ...(sale.discount ? { discount: sale.discount } : {}),
+      note: sale.note,
+    })
+
+    if (sale.state === 'DRAFT') {
+      drafts += 1
+      continue
+    }
+
+    // The store has to be able to fill it. A demonstration sale that failed here would leave the
+    // seed half done, so a refusal is reported and the sale is left as a draft rather than
+    // stopping the whole seed.
+    try {
+      await confirmSale(ctx, draft.id, {
+        ...(sale.paid
+          ? { amountPaid: sale.paid, method: 'MOBILE_MONEY', incomeCategoryId: incomeCategory.id }
+          : {}),
+      })
+    } catch {
+      console.log(`  demonstration sales: ${draft.reference} left as a draft, the store is short`)
+      drafts += 1
+      continue
+    }
+
+    if (sale.state === 'CANCELLED' && sale.cancelReason) {
+      await cancelSale(ctx, draft.id, sale.cancelReason)
+      cancelled += 1
+      continue
+    }
+    confirmed += 1
+  }
+
+  console.log(
+    `  demonstration sales: ${DEMO_BUYERS.length} buyers, ${confirmed} confirmed, ` +
+      `${drafts} draft, ${cancelled} cancelled`,
+  )
 }
 
 /**

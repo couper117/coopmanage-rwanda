@@ -9,7 +9,7 @@ import { financePrefixFor, nextFinanceReference, type Db } from '../../lib/refer
 import {
   add,
   compare,
-  Decimal,
+  fromDatabase,
   MONEY_SCALE,
   multiply,
   parseMoney,
@@ -326,22 +326,6 @@ export async function financeTotals(
 // Phase 5: the finance module proper — the ledger, the summaries and the
 // categories, all on the tables M4 had to create.
 // ---------------------------------------------------------------------------
-
-/**
- * A numeric column read back through raw SQL.
- *
- * The PostgreSQL driver hands `numeric` back as a string and Prisma's own reads hand it back as a
- * `Decimal`, so anything that goes through `$queryRaw` has to accept both. Passing either through
- * `Number` first would be the one mistake this whole module exists to prevent.
- */
-function moneyFrom(value: unknown): Money {
-  if (value === null || value === undefined) return ZERO
-  if (typeof value === 'string' || typeof value === 'number') return toMoney(value)
-  // A Decimal, which prints itself exactly. Anything else is a shape this query cannot produce,
-  // and turning it into "[object Object]" would be worse than refusing it.
-  if (value instanceof Decimal) return value
-  throw new Error(`a numeric column came back as ${typeof value}, which money cannot read`)
-}
 
 export interface TransactionRow {
   id: string
@@ -673,13 +657,19 @@ export async function voidTransactionById(
   })
   if (!exists) throw AppError.notFound()
 
-  if (exists.sourceType === 'CONTRIBUTION' || exists.sourceType === 'SHARE_PURCHASE') {
-    // The ledger row and the member record are two views of the same money. Voiding only the
-    // ledger side would leave the member's history claiming money the books no longer hold, so
-    // the correction has to be made from the member's own record.
+  if (
+    exists.sourceType === 'CONTRIBUTION' ||
+    exists.sourceType === 'SHARE_PURCHASE' ||
+    exists.sourceType === 'SALE' ||
+    exists.sourceType === 'STOCK_PURCHASE'
+  ) {
+    // The ledger row and the record it came from are two views of the same money. Voiding only
+    // the ledger side would leave a member's history claiming money the books no longer hold, or
+    // a sale showing a payment that has been reversed, so the correction has to be made where the
+    // money was recorded: cancel the contribution, the sale, or the stock receipt.
     throw AppError.conflict(
       'errors.finance.voidFromSource',
-      'This entry came from a member record. Cancel it there, so both views stay in step.',
+      'This entry came from a member record, a sale or a stock receipt. Cancel it there, so both views stay in step.',
     )
   }
 
@@ -797,8 +787,8 @@ export async function financeSummary(
   for (const row of rows) {
     const key = row.bucket.toISOString().slice(0, 10)
     const entry = byBucket.get(key) ?? { income: ZERO, expenses: ZERO }
-    if (row.kind === 'INCOME') entry.income = moneyFrom(row.total)
-    else entry.expenses = moneyFrom(row.total)
+    if (row.kind === 'INCOME') entry.income = fromDatabase(row.total)
+    else entry.expenses = fromDatabase(row.total)
     byBucket.set(key, entry)
   }
 

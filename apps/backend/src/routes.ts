@@ -9,6 +9,7 @@ import { healthRouter } from './modules/health/health.routes.js'
 import { inventoryRouter } from './modules/inventory/inventory.routes.js'
 import { membersRouter } from './modules/members/members.routes.js'
 import { referenceRouter } from './modules/reference/reference.routes.js'
+import { salesRouter } from './modules/sales/sales.routes.js'
 import { staffRouter } from './modules/staff/staff.routes.js'
 
 /**
@@ -29,6 +30,7 @@ apiRouter.use('/', membersRouter)
 apiRouter.use('/', financeRouter)
 apiRouter.use('/', catalogueRouter)
 apiRouter.use('/', inventoryRouter)
+apiRouter.use('/', salesRouter)
 apiRouter.use('/', cooperativesRouter)
 apiRouter.use('/', staffRouter)
 apiRouter.use('/', referenceRouter)

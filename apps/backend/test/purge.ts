@@ -71,7 +71,20 @@ export async function purgeTestData(): Promise<PurgeReport> {
   const cooperativeIds = strays.map((row) => row.id)
 
   if (cooperativeIds.length > 0) {
-    // The store first, because a movement points at a product, a store, a unit, a member and
+    // Sales before the store, because a sale line points at a product and a unit, and a sale at a
+    // buyer and a store. Deleting the sale cascades its lines.
+    await prisma.financeTransaction.updateMany({
+      where: { cooperativeId: { in: cooperativeIds } },
+      data: { saleId: null, buyerId: null },
+    })
+    await prisma.inventoryTransaction.updateMany({
+      where: { cooperativeId: { in: cooperativeIds } },
+      data: { saleId: null, buyerId: null },
+    })
+    await prisma.sale.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    await prisma.buyer.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
+    // The store next, because a movement points at a product, a store, a unit, a member and
     // sometimes a finance entry, and every one of those references is RESTRICT. The self
     // references — a reversal and the two halves of a transfer — are cleared before the rows go,
     // since RESTRICT is checked immediately and does not care that the referencing row is being
@@ -128,6 +141,8 @@ export async function purgeTestData(): Promise<PurgeReport> {
       await prisma.financeTransaction.deleteMany({ where: { memberId: { in: memberIds } } })
       await prisma.member.deleteMany({ where: { id: { in: memberIds } } })
     }
+    await prisma.sale.deleteMany({ where: { createdById: { in: userIds } } })
+    await prisma.buyer.deleteMany({ where: { createdById: { in: userIds } } })
     await prisma.inventoryTransaction.updateMany({
       where: { createdById: { in: userIds } },
       data: { reversalOfId: null, counterpartyTransactionId: null },

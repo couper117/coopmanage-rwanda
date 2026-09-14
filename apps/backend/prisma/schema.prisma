@@ -167,6 +167,8 @@ model User {
   financeVoided        FinanceTransaction[]      @relation("FinanceVoidedBy")
   idempotencyKeys      IdempotencyKey[]
   productsCreated      Product[]                 @relation("ProductCreatedBy")
+  buyersCreated        Buyer[]                   @relation("BuyerCreatedBy")
+  salesCreated         Sale[]                    @relation("SaleCreatedBy")
   inventoryCreated     InventoryTransaction[]    @relation("InventoryCreatedBy")
   notifications        Notification[]
 
@@ -261,6 +263,8 @@ model Cooperative {
   stockLevels         StockLevel[]
   inventory           InventoryTransaction[]
   notifications       Notification[]
+  buyers              Buyer[]
+  sales               Sale[]
 
   @@index([status])
   @@map("cooperatives")
@@ -368,6 +372,7 @@ model UnitOfMeasure {
   derivedUnits UnitOfMeasure[]        @relation("UnitBase")
   products     Product[]
   movements    InventoryTransaction[]
+  saleItems    SaleItem[]
 
   @@index([cooperativeId, isActive])
   @@index([baseUnitId])
@@ -646,6 +651,9 @@ model FinanceTransaction {
   description   String
   sourceType    FinanceSourceType @default(MANUAL) @map("source_type")
   memberId      String?           @map("member_id") @db.Uuid
+  /// Added in M7: the counterparty and the sale an income entry came from.
+  buyerId       String?           @map("buyer_id") @db.Uuid
+  saleId        String?           @map("sale_id") @db.Uuid
   status        PostingStatus     @default(POSTED)
   /// A correcting entry points at the row it reverses. Both stay visible in the history.
   reversalOfId  String?           @unique @map("reversal_of_id") @db.Uuid
@@ -659,6 +667,8 @@ model FinanceTransaction {
   cooperative  Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
   category     FinanceCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   member       Member?             @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  buyer        Buyer?              @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  sale         Sale?               @relation(fields: [saleId], references: [id], onDelete: Restrict)
   reversalOf   FinanceTransaction? @relation("Reversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
   reversedBy   FinanceTransaction? @relation("Reversal")
   createdBy    User?               @relation("FinanceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
@@ -673,6 +683,7 @@ model FinanceTransaction {
   @@index([cooperativeId, categoryId, occurredAt])
   @@index([cooperativeId, status, occurredAt])
   @@index([cooperativeId, memberId])
+  @@index([cooperativeId, saleId])
   @@map("finance_transactions")
 }
 
@@ -807,6 +818,7 @@ model Product {
   createdBy    User?                  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   stockLevels  StockLevel[]
   movements    InventoryTransaction[]
+  saleItems    SaleItem[]
 
   @@unique([cooperativeId, sku])
   @@index([cooperativeId, isActive])
@@ -832,6 +844,7 @@ model Warehouse {
   cooperative Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
   stockLevels StockLevel[]
   movements   InventoryTransaction[]
+  sales       Sale[]
 
   @@unique([cooperativeId, code])
   @@index([cooperativeId, isActive])
@@ -881,6 +894,9 @@ model InventoryTransaction {
   /// Set when a member delivered the produce, which is what "products supplied" on a member
   /// profile sums over. No separate deliveries table, so stock and member history cannot disagree.
   sourceMemberId            String?                  @map("source_member_id") @db.Uuid
+  /// Added in M7: who the stock went to, and under which sale.
+  buyerId                   String?                  @map("buyer_id") @db.Uuid
+  saleId                    String?                  @map("sale_id") @db.Uuid
   /// Pairs the two halves of a transfer, so each names the other.
   counterpartyTransactionId String?                  @unique @map("counterparty_transaction_id") @db.Uuid
   reversalOfId              String?                  @unique @map("reversal_of_id") @db.Uuid
@@ -898,6 +914,8 @@ model InventoryTransaction {
   warehouse          Warehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
   unit               UnitOfMeasure         @relation(fields: [unitId], references: [id], onDelete: Restrict)
   sourceMember       Member?               @relation(fields: [sourceMemberId], references: [id], onDelete: Restrict)
+  buyer              Buyer?                @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  sale               Sale?                 @relation(fields: [saleId], references: [id], onDelete: Restrict)
   counterparty       InventoryTransaction? @relation("TransferPair", fields: [counterpartyTransactionId], references: [id], onDelete: Restrict)
   pairedWith         InventoryTransaction? @relation("TransferPair")
   reversalOf         InventoryTransaction? @relation("InventoryReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
@@ -911,6 +929,7 @@ model InventoryTransaction {
   @@index([cooperativeId, sourceMemberId])
   @@index([cooperativeId, warehouseId, occurredAt])
   @@index([cooperativeId, type, occurredAt])
+  @@index([saleId])
   @@map("inventory_transactions")
 }
 
@@ -945,4 +964,131 @@ model Notification {
   @@index([cooperativeId, userId, readAt])
   @@index([cooperativeId, createdAt(sort: Desc)])
   @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// M7 — buyers and sales
+// ---------------------------------------------------------------------------
+
+enum SaleStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+
+  @@map("sale_status")
+}
+
+/// Derived from the income entries linked to the sale, never set by hand.
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+
+  @@map("payment_status")
+}
+
+/// Who the cooperative sells to: a trader, a school, a processor, a district office.
+model Buyer {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  name          String
+  organization  String?
+  contactPerson String?  @map("contact_person")
+  phone         String?
+  email         String?
+  /// Taxpayer identification number, which a buyer needs on an invoice.
+  tin           String?
+  province      String?
+  district      String?
+  sector        String?
+  address       String?
+  notes         String?
+  isActive      Boolean  @default(true) @map("is_active")
+  createdById   String?  @map("created_by_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  createdBy   User?                  @relation("BuyerCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  sales       Sale[]
+  movements   InventoryTransaction[]
+  finance     FinanceTransaction[]
+
+  @@unique([cooperativeId, name])
+  @@index([cooperativeId, isActive])
+  @@map("buyers")
+}
+
+/// A sale, which is a draft until somebody confirms it.
+///
+/// Nothing leaves the store and no money is recorded while it is a draft: that is the whole point
+/// of the state. Confirming is one transaction that takes the stock, writes a movement for every
+/// line, records any payment taken and marks the sale — all of it or none of it. A confirmed sale
+/// can never return to draft; it is cancelled, which writes compensating movements.
+model Sale {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String        @map("cooperative_id") @db.Uuid
+  /// `SL-2026-000045`, unique per cooperative.
+  reference     String
+  buyerId       String        @map("buyer_id") @db.Uuid
+  /// Where the stock is taken from when the sale is confirmed.
+  warehouseId   String        @map("warehouse_id") @db.Uuid
+  saleDate      DateTime      @map("sale_date") @db.Date
+  status        SaleStatus    @default(DRAFT)
+  /// Derived from the linked income entries, never set directly.
+  paymentStatus PaymentStatus @default(UNPAID) @map("payment_status")
+  subtotal      Decimal       @default(0) @db.Decimal(14, 2)
+  discount      Decimal       @default(0) @db.Decimal(14, 2)
+  taxAmount     Decimal       @default(0) @map("tax_amount") @db.Decimal(14, 2)
+  total         Decimal       @default(0) @db.Decimal(14, 2)
+  amountPaid    Decimal       @default(0) @map("amount_paid") @db.Decimal(14, 2)
+  currency      String        @default("RWF")
+  note          String?
+  confirmedAt   DateTime?     @map("confirmed_at") @db.Timestamptz(3)
+  cancelledAt   DateTime?     @map("cancelled_at") @db.Timestamptz(3)
+  cancelReason  String?       @map("cancel_reason")
+  createdById   String?       @map("created_by_id") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  buyer       Buyer                  @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  warehouse   Warehouse              @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  createdBy   User?                  @relation("SaleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  items       SaleItem[]
+  movements   InventoryTransaction[]
+  finance     FinanceTransaction[]
+
+  @@unique([cooperativeId, reference])
+  @@index([cooperativeId, saleDate])
+  @@index([cooperativeId, buyerId])
+  @@index([cooperativeId, paymentStatus])
+  @@index([cooperativeId, status, saleDate])
+  @@map("sales")
+}
+
+/// One line of a sale. Cascades with the sale, because a line has no meaning without it and a
+/// draft's lines are edited freely until the sale is confirmed.
+model SaleItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleId    String   @map("sale_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Decimal  @db.Decimal(14, 3)
+  /// The unit at the time of the sale, so a later change to the product does not rewrite it.
+  unitId    String   @map("unit_id") @db.Uuid
+  unitPrice Decimal  @map("unit_price") @db.Decimal(14, 2)
+  lineTotal Decimal  @map("line_total") @db.Decimal(14, 2)
+  note      String?
+  /// Keeps the order the lines were entered in, which is the order they are read back.
+  position  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  sale    Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unit    UnitOfMeasure @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@unique([saleId, position])
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
 }

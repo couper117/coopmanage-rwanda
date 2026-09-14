@@ -99,3 +99,23 @@ export async function nextInventoryReference(
   const used = Number(rows[0]?.used ?? 0)
   return `STK-${year}-${String(used + 1).padStart(6, '0')}`
 }
+
+/** Allocates the next sale reference, for example `SL-2026-000045`. */
+export async function nextSaleReference(
+  db: Db,
+  cooperativeId: string,
+  saleDate: Date,
+): Promise<string> {
+  const year = saleDate.getUTCFullYear()
+
+  await db.$executeRaw`SELECT id FROM cooperatives WHERE id = ${cooperativeId}::uuid FOR UPDATE`
+
+  const rows = await db.$queryRaw<{ used: bigint }[]>`
+    SELECT count(*) AS used
+      FROM sales
+     WHERE cooperative_id = ${cooperativeId}::uuid
+       AND reference LIKE ${`SL-${year}-%`}
+  `
+  const used = Number(rows[0]?.used ?? 0)
+  return `SL-${year}-${String(used + 1).padStart(6, '0')}`
+}

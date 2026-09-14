@@ -122,6 +122,21 @@ export function toMoney(value: Money | string | number): Money {
   return value instanceof Decimal ? value : new Decimal(String(value))
 }
 
+/**
+ * A numeric column read back through raw SQL.
+ *
+ * The PostgreSQL driver hands `numeric` back as a string and Prisma's own reads hand it back as a
+ * `Decimal`, so anything that goes through `$queryRaw` has to accept both. Anything else is a
+ * shape the query cannot produce, and turning it into `[object Object]` would be worse than
+ * refusing it: a report would show a figure that came from nowhere.
+ */
+export function fromDatabase(value: unknown): Money {
+  if (value === null || value === undefined) return ZERO
+  if (typeof value === 'string' || typeof value === 'number') return toMoney(value)
+  if (value instanceof Decimal) return value
+  throw new Error(`a numeric column came back as ${typeof value}, which money cannot read`)
+}
+
 export function add(...values: (Money | string)[]): Money {
   return values.reduce<Money>((total, value) => total.plus(toMoney(value)), ZERO)
 }

@@ -46,6 +46,8 @@ interface Tenant {
   productId: string
   warehouseId: string
   movementId: string
+  buyerId: string
+  saleId: string
 }
 
 let a: Tenant
@@ -139,6 +141,19 @@ async function buildTenant(name: string): Promise<Tenant> {
     })
     .expect(201)
 
+  // A buyer and a draft sale, so the sweep has genuine sales records of this cooperative.
+  const buyer = await call('post', '/buyers')
+    .send({ name: `District buyer for ${name}` })
+    .expect(201)
+
+  const sale = await call('post', '/sales')
+    .send({
+      buyerId: buyer.body.data.id,
+      warehouseId: warehouse.body.data.id,
+      lines: [{ productId: product.body.data.id, quantity: '10', unitPrice: '500' }],
+    })
+    .expect(201)
+
   return {
     cooperative,
     manager,
@@ -153,6 +168,8 @@ async function buildTenant(name: string): Promise<Tenant> {
     productId: product.body.data.id as string,
     warehouseId: warehouse.body.data.id as string,
     movementId: movement.body.data.id as string,
+    buyerId: buyer.body.data.id as string,
+    saleId: sale.body.data.id as string,
   }
 }
 
@@ -221,6 +238,20 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
       id: b.movementId,
       body: { reason: 'reversed from the wrong cooperative' },
     },
+    '/buyers/:id': { id: b.buyerId, body: { name: 'Renamed from away' } },
+    '/buyers/:id/summary': { id: b.buyerId },
+    '/sales/:id': { id: b.saleId, body: { note: 'edited from the wrong cooperative' } },
+    '/sales/:id/confirm': { id: b.saleId, body: {} },
+    '/sales/:id/cancel': { id: b.saleId, body: { reason: 'cancelled from away' } },
+    '/sales/:id/payments': {
+      id: b.saleId,
+      body: {
+        amount: '100',
+        method: 'CASH',
+        incomeCategoryId: '00000000-0000-4000-8000-000000000000',
+      },
+    },
+    '/sales/:id/receipt': { id: b.saleId },
   }
 }
 

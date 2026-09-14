@@ -570,7 +570,7 @@ implies a different phase is wrong.
 | M3        | 3     | `CooperativeSetting`, `SystemSetting`                                                                                                     |
 | M4 ✅     | 4     | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey`                                        |
 | M6 ✅     | 6     | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification`                                           |
-| M7        | 7     | `Buyer`, `Sale`, `SaleItem`                                                                                                               |
+| M7 ✅     | 7     | `Buyer`, `Sale`, `SaleItem`                                                                                                               |
 | M8        | 8     | `ReportRun`                                                                                                                               |
 | M9        | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
 | M10       | 12    | `Announcement`, `AnnouncementRecipient`, `SmsMessage`                                                                                     |
@@ -604,6 +604,20 @@ shape when a phase builds a module on tables an earlier phase had to create. It 
 either: the four indexes M4 created on `finance_transactions` — by date, by kind and date, by
 category and date, and by status and date — turned out to be exactly what the ledger, the summary
 and the category breakdown ask for, and adding one nothing queries would only slow every write.
+
+**M7 as applied** (`20260914213128_m7_buyers_and_sales`). It also adds the columns M4 and M6 left
+for it, per the additive rule above: `buyer_id` and `sale_id` on both `finance_transactions` and
+`inventory_transactions`, so a payment and a stock movement each name the sale they came from.
+
+Two of its hand-written constraints are worth naming, because they are what make a stored derived
+figure safe. `sales_total_is_derived` refuses any row where the total is not the subtotal less the
+discount plus the tax, and `sale_items_line_total_is_derived` refuses a line whose total is not the
+quantity times the price. The totals are stored so a report need not recompute them, and storing a
+derived figure is only defensible if the database refuses a row where it disagrees with what it was
+derived from. `sales_discount_within_subtotal` stops a mistyped discount turning a sale negative,
+`sales_cancelled_has_reason` means no cancelled sale can be unexplained, and
+`sales_draft_is_unpaid` makes it structural that money is only ever recorded against a confirmed
+sale.
 
 **M6 as applied** (`20260914201958_m6_catalogue_warehouses_inventory`). Beyond what Prisma
 generates, the migration hand-appends the constraints that keep a store record honest: a positive

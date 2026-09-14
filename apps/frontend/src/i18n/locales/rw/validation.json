@@ -20,5 +20,8 @@
     "tooCommon": "Iryo jambobanga ryoroshye kumenyekana. Hitamo irindi ridasanzwe.",
     "incorrect": "Iryo si ijambobanga ryawe rikoreshwa.",
     "mismatch": "Amagambobanga yombi ntahuye."
-  }
+  },
+  "discountTooLarge": "Igabanuka ntirishobora kuruta agaciro k'igurisha.",
+  "paymentExceedsTotal": "Ibyo biruta agaciro k'igurisha.",
+  "paymentExceedsOutstanding": "Ibyo biruta ibisigaye kwishyurwa kuri iri gurisha."
 }

@@ -92,5 +92,17 @@
     "warehouseCodeTaken": "Another store already has that code.",
     "warehouseHoldsStock": "That store still holds stock. Move it to another store before closing this one.",
     "warehouseIsDefault": "A cooperative always has one main store. Make another store the main one instead."
+  },
+  "sales": {
+    "buyerNameTaken": "Another buyer already has that name.",
+    "buyerInactive": "That buyer is no longer in use. Choose another, or bring them back into use first.",
+    "warehouseClosed": "That store is closed. Choose the store the stock is actually in.",
+    "productRetired": "One of the products on this sale has been retired. Remove the line, or bring the product back into use.",
+    "notADraft": "This sale has already been confirmed, so it cannot be changed. Cancel it and record a new one.",
+    "alreadyConfirmed": "That sale has already been confirmed.",
+    "alreadyCancelled": "That sale is already cancelled.",
+    "cancelled": "That sale was cancelled. Record a new one rather than confirming this.",
+    "noLines": "This sale has no lines, so there is nothing to confirm.",
+    "paymentNeedsConfirmed": "Payment is recorded against a confirmed sale. Confirm it first."
   }
 }

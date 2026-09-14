@@ -190,7 +190,22 @@ export async function cleanupFixtures(): Promise<void> {
   await prisma.refreshSession.deleteMany({ where: { userId: { in: userIds } } })
   await prisma.passwordResetToken.deleteMany({ where: { userId: { in: userIds } } })
 
-  // The store first. A movement points at a product, a store and sometimes a member, and every
+  // Sales first, because a sale line points at a product and a unit, and a sale at a buyer and a
+  // store. The sale itself cascades its lines, so the lines go with it.
+  // A finance entry and a stock movement each point at the sale and the buyer they came from,
+  // with RESTRICT, so those references are cleared before the sale and the buyer can go.
+  await prisma.financeTransaction.updateMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+    data: { saleId: null, buyerId: null },
+  })
+  await prisma.inventoryTransaction.updateMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+    data: { saleId: null, buyerId: null },
+  })
+  await prisma.sale.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.buyer.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
+  // The store next. A movement points at a product, a store and sometimes a member, and every
   // one of those references is RESTRICT, so nothing below can go while a movement names it.
   await prisma.inventoryTransaction.updateMany({
     where: { cooperativeId: { in: cooperativeIds } },

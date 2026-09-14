@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 6 complete.** Phase 7 is next.
+Status: **Phase 7 in progress.** The sales backend is complete; the screens are in review.
 
 ---
 
@@ -431,17 +431,44 @@ means the demonstration store is built by exactly the code a storekeeper's recei
 
 ---
 
-### Phase 7 — Buyers and sales
+### Phase 7 — Buyers and sales ✅ (backend; screens in review)
 
 - Buyers with history and totals
 - Sale draft, confirm, cancel; line items; discount and tax; payment recording
 - Confirmation transaction: stock out, finance in, audit, all or nothing
 - Printable receipt
 - Sales list, sale form with product picker and live line totals, buyer profile
+- Sales summary with the top buyers and the top products over a period
 
-**Exit:** a forced failure injected at the last step of confirmation leaves the sale still in
-draft, with no stock movement and no finance row; cancelling a confirmed sale restores stock through compensating
-movements rather than deletions.
+**Exit:** both met, and both with real failures rather than injected ones. A payment against a
+category that does not exist fails at the last step of confirmation, after the stock has come out
+and the movements have been written: the sale is still a draft, the level is untouched, no movement
+and no finance row exists, and the rebuild command confirms the history still adds up to the
+levels. A two-line sale whose second line is short leaves the first line's stock where it was, which
+is the same property seen from inside the transaction rather than at the end of it. Cancelling a
+confirmed sale writes a `SALE_RETURN` per line and reverses the income, and the demonstration data
+carries one cancelled sale whose four movements — two out and two back — are all visible in the
+history.
+
+Three things are worth recording.
+
+**A cancelled sale was reporting money still owed.** `outstanding` was the total less what was
+paid, and cancelling resets the paid figure to nil, so a sale that had been undone showed its whole
+value as outstanding. A treasurer scanning that column would have chased a buyer for business that
+never happened. It reports nil now, while keeping the total, because what the sale was worth is
+still a fact a period report needs.
+
+**A sale payment could be voided from the finance ledger.** The refusal that already covered a
+contribution and a share purchase did not cover a sale or a stock receipt, so the ledger side could
+be reversed on its own and leave the sale claiming a payment the books no longer held. All four
+sources now send the correction back to the record it came from.
+
+**The demonstration data was taking the same stock twice.** The store seed recorded an issue "sold
+to the district buyer" and the sales seed then recorded the sale, so the maize left twice. The sales
+seed now runs through the application's own service functions — a confirmed sale really does take
+the stock and post the income — and the issues that were really sales are gone from the store data.
+Every sale state is represented on purpose: paid, part paid, cancelled and still a draft, because a
+list where everything is confirmed hides three badges and the cancel reason entirely.
 
 ---
 

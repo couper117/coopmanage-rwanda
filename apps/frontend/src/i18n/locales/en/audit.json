@@ -68,5 +68,15 @@
     "unitUpdated": "The unit {{unit}} was changed",
     "warehouseCreated": "The store {{warehouse}} was added as {{code}}",
     "warehouseUpdated": "The store {{warehouse}} was changed"
+  },
+  "sales": {
+    "buyerCreated": "The buyer {{buyer}} was added",
+    "buyerUpdated": "The buyer {{buyer}} was changed",
+    "drafted": "Sale {{reference}} was written up for {{total}} RWF",
+    "updated": "Sale {{reference}} was changed while still a draft",
+    "confirmed": "Sale {{reference}} was confirmed for {{total}} RWF",
+    "cancelled": "Sale {{reference}} for {{total}} RWF was cancelled",
+    "paymentRecorded": "{{amount}} RWF was received for sale {{reference}}, entry {{entry}}",
+    "receiptIssued": "A receipt for sale {{reference}} was produced"
   }
 }

@@ -20,5 +20,8 @@
     "tooCommon": "That password is too easy to guess. Choose something less common.",
     "incorrect": "That is not your current password.",
     "mismatch": "The two passwords do not match."
-  }
+  },
+  "discountTooLarge": "The discount cannot be more than the sale is worth.",
+  "paymentExceedsTotal": "That is more than the sale is worth.",
+  "paymentExceedsOutstanding": "That is more than is still owed on this sale."
 }

@@ -92,5 +92,17 @@
     "warehouseCodeTaken": "Ubundi bubiko busanzwe bufite iyo nomero.",
     "warehouseHoldsStock": "Ubwo bubiko buracyafite ibintu. Byimure ujye mu bundi mbere yo kubufunga.",
     "warehouseIsDefault": "Koperative iba ifite ububiko bukuru bumwe. Hitamo ubundi bubiko nk'ubukuru."
+  },
+  "sales": {
+    "buyerNameTaken": "Undi muguzi asanzwe afite iryo zina.",
+    "buyerInactive": "Uwo muguzi ntakoreshwa ukundi. Hitamo undi, cyangwa umugarure mbere.",
+    "warehouseClosed": "Ubwo bubiko bwafunzwe. Hitamo ububiko ibintu birimo koko.",
+    "productRetired": "Kimwe mu bicuruzwa biri kuri iri gurisha cyavanywe mu mikoreshwa. Kura uwo murongo, cyangwa ugarure igicuruzwa.",
+    "notADraft": "Iri gurisha ryamaze kwemezwa, ntirishobora guhinduka. Rihagarike hanyuma wandike irindi.",
+    "alreadyConfirmed": "Iryo gurisha ryamaze kwemezwa.",
+    "alreadyCancelled": "Iryo gurisha risanzwe ryahagaritswe.",
+    "cancelled": "Iryo gurisha ryahagaritswe. Andika irindi aho kwemeza iri.",
+    "noLines": "Iri gurisha nta murongo rifite, nta cyo kwemeza.",
+    "paymentNeedsConfirmed": "Ubwishyu bwandikwa ku igurisha ryemejwe. Ryemeze mbere."
   }
 }

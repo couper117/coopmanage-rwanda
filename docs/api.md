@@ -380,7 +380,41 @@ with no movement to explain where the stock went.
 | GET    | `/sales/:id/receipt`  | `sales:view`                 |
 | GET    | `/sales/summary`      | `sales:view`                 |
 
-`confirm` and `payments` honour `Idempotency-Key`. A confirmed sale can never return to draft.
+`confirm`, `cancel` and `payments` honour `Idempotency-Key`. A confirmed sale can never return to
+draft.
+
+**A sale is a draft until somebody confirms it.** While it is a draft nothing has left the store and
+no money has been recorded, so the lines can be corrected freely and a half-finished sale costs
+nothing. A draft is deliberately accepted for more than the store holds: a sale is often written up
+before the stock is counted, and refusing it would stop somebody recording an order they are about
+to go and fill. The stock is checked at confirmation, which is the moment it actually leaves.
+
+**Confirming is one transaction, and the order matters.** The stock comes out first, every line
+before anything else is written, so a sale the store cannot fill is refused before a movement or a
+payment exists — and because it is one transaction, the first line's decrement does not survive the
+second line being short. Then the movements, then the payment, then the sale, then the trail. If any
+step raises, the sale is still a draft with the stock untouched and no money recorded.
+
+**Cancelling writes compensating movements, never deletions.** A `SALE_RETURN` puts each line's
+stock back and the income is reversed the way the finance module reverses anything, so the sale and
+its undoing both stay in the history. A cancelled sale keeps its total, because that is what it was
+worth and a report covering the period has to say so, but its `outstanding` is nil: a treasurer
+scanning that column must not be sent to chase a buyer for business that was undone. `meta.totals`
+on the list, and every buyer total, count **confirmed sales only**.
+
+`amountPaid` and `paymentStatus` on a sale are maintained from the linked income entries rather
+than set by hand, and recomputed from what is actually posted every time a payment is recorded, so
+the two can never disagree. A payment larger than the sale, or than what is still owed, is refused:
+that is a data-entry slip rather than a payment.
+
+A sale payment cannot be voided from the finance ledger — it answers
+`409 errors.finance.voidFromSource`, the same as a contribution or a stock receipt. The ledger row
+and the sale are two views of the same money, so the correction is made by cancelling the sale.
+
+`GET /sales/:id/receipt` returns what a receipt needs and does not render one. A printable page
+belongs in the interface, where the cooperative's own language and paper size apply; what the server
+owes is the figures, already rounded and already strings, so that nothing in the printing path can
+arrive at a different total from the one in the books.
 
 ### Reports — Phase 8
 
