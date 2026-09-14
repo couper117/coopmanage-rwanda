@@ -41,6 +41,11 @@ interface Tenant {
   shareId: string
   categoryId: string
   financeTransactionId: string
+  unitId: string
+  productCategoryId: string
+  productId: string
+  warehouseId: string
+  movementId: string
 }
 
 let a: Tenant
@@ -91,6 +96,49 @@ async function buildTenant(name: string): Promise<Tenant> {
     })
     .expect(201)
 
+  // A store, a product and one movement, so the sweep has genuine stock records of this
+  // cooperative to try against the other one.
+  const call = (method: 'get' | 'post', path: string) =>
+    request(app)
+      [method](`${API_PREFIX}${path}`)
+      .set('Authorization', `Bearer ${manager.accessToken}`)
+      .set(HEADERS.cooperativeId, cooperative.id)
+
+  const unit = await call('post', '/units')
+    .send({
+      key: 'SACK50',
+      nameEn: 'Fifty-kilogram sack',
+      nameRw: 'Umufuka w’ibiro mirongo itanu',
+      symbol: 'sack',
+      precision: 0,
+    })
+    .expect(201)
+
+  const productCategory = await call('post', '/product-categories')
+    .send({ name: `Grain for ${name}` })
+    .expect(201)
+
+  const warehouse = await call('post', '/warehouses')
+    .send({ name: `Main store for ${name}` })
+    .expect(201)
+
+  const product = await call('post', '/products')
+    .send({
+      name: `Maize for ${name}`,
+      unitId: unit.body.data.id,
+      categoryId: productCategory.body.data.id,
+      minStockLevel: '10',
+    })
+    .expect(201)
+
+  const movement = await call('post', '/inventory/receive')
+    .send({
+      productId: product.body.data.id,
+      warehouseId: warehouse.body.data.id,
+      quantity: '40',
+    })
+    .expect(201)
+
   return {
     cooperative,
     manager,
@@ -100,6 +148,11 @@ async function buildTenant(name: string): Promise<Tenant> {
     shareId: share.body.data.id as string,
     categoryId: category,
     financeTransactionId: entry.body.data.id as string,
+    unitId: unit.body.data.id as string,
+    productCategoryId: productCategory.body.data.id as string,
+    productId: product.body.data.id as string,
+    warehouseId: warehouse.body.data.id as string,
+    movementId: movement.body.data.id as string,
   }
 }
 
@@ -160,6 +213,14 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
       body: { description: 'edited from the wrong cooperative' },
     },
     '/finance/transactions/:id/void': { id: b.financeTransactionId, body: {} },
+    '/units/:id': { id: b.unitId, body: { nameEn: 'Renamed from the wrong place' } },
+    '/product-categories/:id': { id: b.productCategoryId, body: { name: 'Renamed from away' } },
+    '/products/:id': { id: b.productId, body: { name: 'Renamed from the wrong cooperative' } },
+    '/warehouses/:id': { id: b.warehouseId, body: { name: 'Renamed from away' } },
+    '/inventory/transactions/:id/reverse': {
+      id: b.movementId,
+      body: { reason: 'reversed from the wrong cooperative' },
+    },
   }
 }
 

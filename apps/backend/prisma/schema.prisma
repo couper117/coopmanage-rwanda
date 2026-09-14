@@ -166,6 +166,9 @@ model User {
   financeCreated       FinanceTransaction[]      @relation("FinanceCreatedBy")
   financeVoided        FinanceTransaction[]      @relation("FinanceVoidedBy")
   idempotencyKeys      IdempotencyKey[]
+  productsCreated      Product[]                 @relation("ProductCreatedBy")
+  inventoryCreated     InventoryTransaction[]    @relation("InventoryCreatedBy")
+  notifications        Notification[]
 
   @@index([status])
   @@map("users")
@@ -252,6 +255,12 @@ model Cooperative {
   financeCategories   FinanceCategory[]
   financeTransactions FinanceTransaction[]
   idempotencyKeys     IdempotencyKey[]
+  productCategories   ProductCategory[]
+  products            Product[]
+  warehouses          Warehouse[]
+  stockLevels         StockLevel[]
+  inventory           InventoryTransaction[]
+  notifications       Notification[]
 
   @@index([status])
   @@map("cooperatives")
@@ -354,9 +363,11 @@ model UnitOfMeasure {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  cooperative  Cooperative?    @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
-  baseUnit     UnitOfMeasure?  @relation("UnitBase", fields: [baseUnitId], references: [id], onDelete: Restrict)
-  derivedUnits UnitOfMeasure[] @relation("UnitBase")
+  cooperative  Cooperative?           @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  baseUnit     UnitOfMeasure?         @relation("UnitBase", fields: [baseUnitId], references: [id], onDelete: Restrict)
+  derivedUnits UnitOfMeasure[]        @relation("UnitBase")
+  products     Product[]
+  movements    InventoryTransaction[]
 
   @@index([cooperativeId, isActive])
   @@index([baseUnitId])
@@ -512,8 +523,9 @@ model Member {
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  cooperative         Cooperative          @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
-  createdBy           User?                @relation("MemberCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  cooperative         Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  deliveries          InventoryTransaction[]
+  createdBy           User?                  @relation("MemberCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   updatedBy           User?                @relation("MemberUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
   shares              MemberShare[]        @relation("ShareHolder")
   shareCounterparties MemberShare[]        @relation("ShareCounterparty")
@@ -653,6 +665,7 @@ model FinanceTransaction {
   voidedBy     User?               @relation("FinanceVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
   contribution Contribution?
   memberShare  MemberShare?
+  movement     InventoryTransaction?
 
   @@unique([cooperativeId, reference])
   @@index([cooperativeId, occurredAt])
@@ -686,4 +699,250 @@ model IdempotencyKey {
   @@unique([cooperativeId, key])
   @@index([expiresAt])
   @@map("idempotency_keys")
+}
+
+// ---------------------------------------------------------------------------
+// M6 — catalogue, warehouses, inventory and notifications
+// ---------------------------------------------------------------------------
+
+enum ProductType {
+  GOODS
+  SERVICE
+
+  @@map("product_type")
+}
+
+enum InventoryTransactionType {
+  /// Stock arriving, including produce delivered by a member.
+  RECEIPT
+  /// Stock leaving for any reason other than a sale.
+  ISSUE
+  /// A count that disagreed with the record. Always carries a reason.
+  ADJUSTMENT
+  TRANSFER_OUT
+  TRANSFER_IN
+  SALE_OUT
+  SALE_RETURN
+  /// What was already in the store when the cooperative started keeping records here.
+  OPENING
+
+  @@map("inventory_transaction_type")
+}
+
+/// Derived from the type and stored, so a sum over a period does not have to know the rules.
+enum InventoryDirection {
+  IN
+  OUT
+
+  @@map("inventory_direction")
+}
+
+enum NotificationType {
+  LOW_STOCK
+  MEETING_REMINDER
+  REPORT_READY
+  MEMBER_INCOMPLETE
+  DOCUMENT
+  TASK
+  SYSTEM
+
+  @@map("notification_type")
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+
+  @@map("notification_severity")
+}
+
+/// A grouping for the catalogue, one level deep in practice but able to nest.
+model ProductCategory {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  name          String
+  nameRw        String?  @map("name_rw")
+  parentId      String?  @map("parent_id") @db.Uuid
+  description   String?
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative       @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  parent      ProductCategory?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: Restrict)
+  children    ProductCategory[] @relation("CategoryParent")
+  products    Product[]
+
+  @@unique([cooperativeId, name, parentId])
+  @@index([cooperativeId, isActive])
+  @@map("product_categories")
+}
+
+/// Something the cooperative buys, stores, sells or supplies. A service is a product that is not
+/// counted: `trackInventory` is what separates a bag of maize from a day of tractor hire.
+model Product {
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId        String      @map("cooperative_id") @db.Uuid
+  sku                  String
+  name                 String
+  nameRw               String?     @map("name_rw")
+  categoryId           String?     @map("category_id") @db.Uuid
+  unitId               String      @map("unit_id") @db.Uuid
+  type                 ProductType @default(GOODS)
+  trackInventory       Boolean     @default(true) @map("track_inventory")
+  /// Below this the low-stock scan raises a notification. Null means nobody wants warning.
+  minStockLevel        Decimal?    @map("min_stock_level") @db.Decimal(14, 3)
+  defaultPurchasePrice Decimal?    @map("default_purchase_price") @db.Decimal(14, 2)
+  defaultSalePrice     Decimal?    @map("default_sale_price") @db.Decimal(14, 2)
+  description          String?
+  isActive             Boolean     @default(true) @map("is_active")
+  createdById          String?     @map("created_by_id") @db.Uuid
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative  Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  category     ProductCategory?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  unit         UnitOfMeasure          @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  createdBy    User?                  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  stockLevels  StockLevel[]
+  movements    InventoryTransaction[]
+
+  @@unique([cooperativeId, sku])
+  @@index([cooperativeId, isActive])
+  @@index([cooperativeId, categoryId])
+  @@map("products")
+}
+
+/// Where stock is kept. A cooperative with one store still has one of these, because a movement
+/// has to say where it happened and a second store must not need a migration.
+model Warehouse {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  name          String
+  code          String
+  district      String?
+  sector        String?
+  /// Exactly one per cooperative, enforced by a partial unique index in the migration.
+  isDefault     Boolean  @default(false) @map("is_default")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  stockLevels StockLevel[]
+  movements   InventoryTransaction[]
+
+  @@unique([cooperativeId, code])
+  @@index([cooperativeId, isActive])
+  @@map("warehouses")
+}
+
+/// The running balance, and a cache of `InventoryTransaction` rather than a source of truth: it
+/// can be rebuilt from the movement history at any time and a test proves it reproduces exactly.
+///
+/// Every decrement is a conditional `UPDATE ... WHERE quantity >= :qty`. An affected-row count of
+/// zero is an insufficient-stock refusal rather than a negative balance, which is what stops two
+/// people selling the same sack.
+model StockLevel {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  productId     String   @map("product_id") @db.Uuid
+  warehouseId   String   @map("warehouse_id") @db.Uuid
+  quantity      Decimal  @default(0) @db.Decimal(14, 3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+  @@index([cooperativeId, quantity])
+  @@map("stock_levels")
+}
+
+/// The immutable movement history. Nothing here is ever updated or deleted; a movement recorded in
+/// error is reversed by an opposite movement that points at it, exactly as a finance entry is.
+model InventoryTransaction {
+  id                        String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId             String                   @map("cooperative_id") @db.Uuid
+  /// `STK-2026-000318`, unique per cooperative.
+  reference                 String
+  type                      InventoryTransactionType
+  direction                 InventoryDirection
+  productId                 String                   @map("product_id") @db.Uuid
+  warehouseId               String                   @map("warehouse_id") @db.Uuid
+  /// Always positive. Direction lives in `direction`, never in the sign.
+  quantity                  Decimal                  @db.Decimal(14, 3)
+  /// The unit at the time of the movement, so a later change to the product does not rewrite it.
+  unitId                    String                   @map("unit_id") @db.Uuid
+  unitCost                  Decimal?                 @map("unit_cost") @db.Decimal(14, 2)
+  totalCost                 Decimal?                 @map("total_cost") @db.Decimal(14, 2)
+  /// Set when a member delivered the produce, which is what "products supplied" on a member
+  /// profile sums over. No separate deliveries table, so stock and member history cannot disagree.
+  sourceMemberId            String?                  @map("source_member_id") @db.Uuid
+  /// Pairs the two halves of a transfer, so each names the other.
+  counterpartyTransactionId String?                  @unique @map("counterparty_transaction_id") @db.Uuid
+  reversalOfId              String?                  @unique @map("reversal_of_id") @db.Uuid
+  /// Required for an adjustment: a count that disagreed with the record needs an explanation.
+  reason                    String?
+  note                      String?
+  /// The finance entry this movement created, where the cooperative paid on receipt.
+  financeTransactionId      String?                  @unique @map("finance_transaction_id") @db.Uuid
+  occurredAt                DateTime                 @map("occurred_at") @db.Timestamptz(3)
+  createdById               String?                  @map("created_by_id") @db.Uuid
+  createdAt                 DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  cooperative        Cooperative           @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  product            Product               @relation(fields: [productId], references: [id], onDelete: Restrict)
+  warehouse          Warehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  unit               UnitOfMeasure         @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  sourceMember       Member?               @relation(fields: [sourceMemberId], references: [id], onDelete: Restrict)
+  counterparty       InventoryTransaction? @relation("TransferPair", fields: [counterpartyTransactionId], references: [id], onDelete: Restrict)
+  pairedWith         InventoryTransaction? @relation("TransferPair")
+  reversalOf         InventoryTransaction? @relation("InventoryReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversedBy         InventoryTransaction? @relation("InventoryReversal")
+  financeTransaction FinanceTransaction?   @relation(fields: [financeTransactionId], references: [id], onDelete: Restrict)
+  createdBy          User?                 @relation("InventoryCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([cooperativeId, reference])
+  @@index([cooperativeId, occurredAt])
+  @@index([productId, occurredAt])
+  @@index([cooperativeId, sourceMemberId])
+  @@index([cooperativeId, warehouseId, occurredAt])
+  @@index([cooperativeId, type, occurredAt])
+  @@map("inventory_transactions")
+}
+
+/// Something the cooperative should know about, stored as a translation key and its parameters
+/// rather than a rendered sentence: a notification raised while the interface was in English still
+/// reads correctly in Kinyarwanda.
+///
+/// Created in M6 because the Phase 6 low-stock scan is the first thing that writes one. The
+/// notification centre itself is Phase 12.
+model Notification {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String               @map("cooperative_id") @db.Uuid
+  /// Null means every member of staff at the cooperative, which is what a low-stock alert is.
+  userId        String?              @map("user_id") @db.Uuid
+  type          NotificationType
+  severity      NotificationSeverity @default(INFO)
+  messageKey    String               @map("message_key")
+  messageParams Json?                @map("message_params")
+  entityType    String?              @map("entity_type")
+  entityId      String?              @map("entity_id")
+  actionUrl     String?              @map("action_url")
+  /// What stops the same alert being raised every time the scanner runs.
+  dedupeKey     String               @map("dedupe_key")
+  readAt        DateTime?            @map("read_at") @db.Timestamptz(3)
+  dismissedAt   DateTime?            @map("dismissed_at") @db.Timestamptz(3)
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cooperativeId, dedupeKey])
+  @@index([cooperativeId, userId, readAt])
+  @@index([cooperativeId, createdAt(sort: Desc)])
+  @@map("notifications")
 }

@@ -71,6 +71,24 @@ export async function purgeTestData(): Promise<PurgeReport> {
   const cooperativeIds = strays.map((row) => row.id)
 
   if (cooperativeIds.length > 0) {
+    // The store first, because a movement points at a product, a store, a unit, a member and
+    // sometimes a finance entry, and every one of those references is RESTRICT. The self
+    // references — a reversal and the two halves of a transfer — are cleared before the rows go,
+    // since RESTRICT is checked immediately and does not care that the referencing row is being
+    // deleted in the same statement.
+    await prisma.inventoryTransaction.updateMany({
+      where: { cooperativeId: { in: cooperativeIds } },
+      data: { reversalOfId: null, counterpartyTransactionId: null },
+    })
+    await prisma.inventoryTransaction.deleteMany({
+      where: { cooperativeId: { in: cooperativeIds } },
+    })
+    await prisma.stockLevel.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    await prisma.product.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    await prisma.productCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    await prisma.warehouse.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
     // Members and money, child before parent. Every reference in these tables is RESTRICT,
     // because in production none of these rows is ever deleted: a member who leaves is marked as
     // having left, and a wrong figure is reversed rather than edited.
@@ -97,6 +115,10 @@ export async function purgeTestData(): Promise<PurgeReport> {
     })
     const memberIds = orphans.map((row) => row.id)
     if (memberIds.length > 0) {
+      await prisma.inventoryTransaction.updateMany({
+        where: { sourceMemberId: { in: memberIds } },
+        data: { sourceMemberId: null },
+      })
       await prisma.financeTransaction.updateMany({
         where: { memberId: { in: memberIds } },
         data: { reversalOfId: null },
@@ -106,6 +128,13 @@ export async function purgeTestData(): Promise<PurgeReport> {
       await prisma.financeTransaction.deleteMany({ where: { memberId: { in: memberIds } } })
       await prisma.member.deleteMany({ where: { id: { in: memberIds } } })
     }
+    await prisma.inventoryTransaction.updateMany({
+      where: { createdById: { in: userIds } },
+      data: { reversalOfId: null, counterpartyTransactionId: null },
+    })
+    await prisma.inventoryTransaction.deleteMany({ where: { createdById: { in: userIds } } })
+    await prisma.product.deleteMany({ where: { createdById: { in: userIds } } })
+
     await prisma.financeTransaction.updateMany({
       where: { createdById: { in: userIds } },
       data: { reversalOfId: null },

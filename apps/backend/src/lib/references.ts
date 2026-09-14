@@ -71,3 +71,31 @@ export async function nextFinanceReference(
 export function financePrefixFor(kind: 'INCOME' | 'EXPENSE'): FinancePrefix {
   return kind === 'INCOME' ? 'IN' : 'EX'
 }
+
+/**
+ * Allocates the next stock movement reference, for example `STK-2026-000318`.
+ *
+ * Same shape and same guarantee as a finance reference: the year is part of it because that is how
+ * a cooperative files paper, and the counter is scoped to the cooperative and the year so it
+ * restarts each January. The lock on the cooperative row serialises allocation for that
+ * cooperative and nobody else, which is also what makes twenty simultaneous issues against ten
+ * sacks resolve to ten and ten rather than to a race.
+ */
+export async function nextInventoryReference(
+  db: Db,
+  cooperativeId: string,
+  occurredAt: Date,
+): Promise<string> {
+  const year = occurredAt.getUTCFullYear()
+
+  await db.$executeRaw`SELECT id FROM cooperatives WHERE id = ${cooperativeId}::uuid FOR UPDATE`
+
+  const rows = await db.$queryRaw<{ used: bigint }[]>`
+    SELECT count(*) AS used
+      FROM inventory_transactions
+     WHERE cooperative_id = ${cooperativeId}::uuid
+       AND reference LIKE ${`STK-${year}-%`}
+  `
+  const used = Number(rows[0]?.used ?? 0)
+  return `STK-${year}-${String(used + 1).padStart(6, '0')}`
+}

@@ -317,7 +317,49 @@ with a Kinyarwanda name.
 | GET    | `/inventory/valuation`                | `inventory:view` + `finance:view` |
 
 `POST /inventory/receive` accepts `sourceMemberId`, which is how member deliveries are captured, and
-optionally creates the matching expense when the cooperative pays on receipt.
+optionally creates the matching expense when the cooperative pays on receipt. Giving
+`expenseCategoryId` requires `unitCost`, because an expense with no amount is not an expense.
+
+**The one statement this module turns on.** Every outward movement decrements through a single
+conditional `UPDATE ... WHERE quantity >= :qty`, and an affected-row count of zero is
+`409 INSUFFICIENT_STOCK`. There is no moment between checking that there are ten sacks and taking
+ten sacks in which somebody else can take them, which is why twenty simultaneous issues against a
+stock of ten produce ten movements and ten refusals rather than a negative balance. The refusal
+deliberately does not say how much there is: the figure the caller read a moment ago may already be
+stale, and quoting a number back would invite a retry with exactly that number.
+
+**`POST /inventory/adjust` takes what was counted, not the difference.** A storekeeper counts eight
+sacks and types eight; working out that the record said ten and the correction is therefore two out
+is the software's job, and asking a person to decide the sign is how the wrong one gets recorded. A
+count matching the record is `409 errors.inventory.countAgrees` rather than a movement of nothing.
+`reason` is required, and a database check constraint enforces that too, because an unexplained
+correction is what makes a shortfall unauditable.
+
+**A transfer is two rows in one transaction**, each naming the other through
+`counterparty_transaction_id`. Reversing either half reverses both: undoing one would leave stock in
+a store it never reached. A reversal takes a type that reads correctly on its own — a receipt
+reverses to an issue — rather than the original type with the direction flipped, and
+`reversal_of_id` is what records that the two are a pair. Where the movement posted an expense, that
+entry is voided by the same reversal the finance module uses.
+
+**Whether a product is low is a question about the cooperative, not about one store.** The minimum
+means "we want at least this much of it", so `isLow` and `meta.lowCount` compare the total across
+every store, and each stock row carries both its own `quantity` and `quantityInAllStores`. That is
+the same definition the low-stock watch uses, so the figure on the overview and the number of
+warnings raised can never disagree.
+
+`GET /inventory/valuation` needs `inventory:view` **and** `finance:view`: a storekeeper entitled to
+count sacks is not thereby entitled to know what the cooperative paid for them. The unit cost is
+the weighted average of every costed receipt, excluding any that were reversed. Where nothing costed
+has ever been received the product's default purchase price is used and the row says
+`costIsEstimated`, because a cooperative taking this figure to a lender needs to know which part of
+it is an estimate.
+
+There is no `DELETE` anywhere in this module. A movement recorded in error is reversed, a product is
+retired, a store is closed, a unit is deactivated. A product's unit and whether it is counted are
+frozen once movements exist against it: changing the unit would silently rewrite every quantity
+already recorded, and switching a counted product to an uncounted one would abandon its stock level
+with no movement to explain where the stock went.
 
 ### Buyers and sales — Phase 7
 
@@ -421,36 +463,36 @@ This is the same reasoning that makes a wrong-tenant record report "not found" r
 
 ## 3. Frontend route map
 
-| Route                                                                                | Screen                                               | Guard                                                     |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------- | --------------------------------------------------------- |
-| `/login`, `/forgot-password`, `/reset-password/:token`                               | Authentication                                       | public                                                    |
-| `/`                                                                                  | Dashboard                                            | `dashboard:view`                                          |
-| `/members`, `/members/:id`                                                           | Members (adding and editing are dialogs, see below)  | `members:view`                                            |
-| `/finance`                                                                           | Money in, money out, balance                         | `finance:view`                                            |
-| `/finance/transactions`                                                              | Ledger; recording is a dialog, as for members        | `finance:view` / `finance:create`                         |
-| `/finance/categories`                                                                | Categories                                           | `finance:view`, editing needs `finance:categories:manage` |
-| `/contributions`                                                                     | Member contributions                                 | `contributions:view`                                      |
-| `/inventory`                                                                         | Stock overview                                       | `inventory:view`                                          |
-| `/inventory/products`, `/inventory/products/:id`                                     | Catalogue                                            | `products:view`                                           |
-| `/inventory/movements`                                                               | Movement history                                     | `inventory:view`                                          |
-| `/inventory/receive`, `/inventory/issue`, `/inventory/adjust`, `/inventory/transfer` | Stock actions                                        | matching permission                                       |
-| `/inventory/warehouses`                                                              | Locations                                            | `inventory:view`, editing needs `warehouses:manage`       |
-| `/inventory/units`                                                                   | Units of measure                                     | `products:view`, editing needs `units:manage`             |
-| `/sales`, `/sales/new`, `/sales/:id`                                                 | Sales                                                | `sales:view` / `sales:create`                             |
-| `/buyers`, `/buyers/:id`                                                             | Buyers                                               | `buyers:view`                                             |
-| `/reports`, `/reports/:type`                                                         | Reports                                              | `reports:view`                                            |
-| `/documents`                                                                         | Document centre                                      | `documents:view`                                          |
-| `/meetings`, `/meetings/new`, `/meetings/:id`                                        | Meetings                                             | `meetings:view`                                           |
-| `/announcements`                                                                     | Announcements                                        | `announcements:view`                                      |
-| `/notifications`                                                                     | Notification centre                                  | `notifications:view`                                      |
-| `/assistant`                                                                         | Ask CoopManage                                       | `assistant:use`                                           |
-| `/search`                                                                            | Global search results                                | `search:use`                                              |
-| `/settings/cooperative`                                                              | Cooperative profile                                  | `cooperative:view`                                        |
-| `/settings/staff`                                                                    | Staff and roles                                      | `staff:view`                                              |
-| `/settings/preferences`                                                              | Which modules the cooperative uses                   | `cooperative:view`, editing needs `settings:manage`       |
-| `/settings/audit`                                                                    | Audit log                                            | `audit:view`                                              |
-| `/profile`                                                                           | Own account and language                             | authenticated                                             |
-| `/admin/*`                                                                           | Platform administration, including platform settings | `platform:*`                                              |
+| Route                                                  | Screen                                               | Guard                                                     |
+| ------------------------------------------------------ | ---------------------------------------------------- | --------------------------------------------------------- |
+| `/login`, `/forgot-password`, `/reset-password/:token` | Authentication                                       | public                                                    |
+| `/`                                                    | Dashboard                                            | `dashboard:view`                                          |
+| `/members`, `/members/:id`                             | Members (adding and editing are dialogs, see below)  | `members:view`                                            |
+| `/finance`                                             | Money in, money out, balance                         | `finance:view`                                            |
+| `/finance/transactions`                                | Ledger; recording is a dialog, as for members        | `finance:view` / `finance:create`                         |
+| `/finance/categories`                                  | Categories                                           | `finance:view`, editing needs `finance:categories:manage` |
+| `/contributions`                                       | Member contributions                                 | `contributions:view`                                      |
+| `/inventory`                                           | Stock overview                                       | `inventory:view`                                          |
+| `/inventory/products`, `/inventory/products/:id`       | Catalogue                                            | `products:view`                                           |
+| `/inventory/movements`                                 | Movement history                                     | `inventory:view`                                          |
+| (the four stock actions)                               | Dialogs over the overview, not routes                | matching permission                                       |
+| `/inventory/warehouses`                                | Locations                                            | `inventory:view`, editing needs `warehouses:manage`       |
+| `/inventory/units`                                     | Units of measure                                     | `products:view`, editing needs `units:manage`             |
+| `/sales`, `/sales/new`, `/sales/:id`                   | Sales                                                | `sales:view` / `sales:create`                             |
+| `/buyers`, `/buyers/:id`                               | Buyers                                               | `buyers:view`                                             |
+| `/reports`, `/reports/:type`                           | Reports                                              | `reports:view`                                            |
+| `/documents`                                           | Document centre                                      | `documents:view`                                          |
+| `/meetings`, `/meetings/new`, `/meetings/:id`          | Meetings                                             | `meetings:view`                                           |
+| `/announcements`                                       | Announcements                                        | `announcements:view`                                      |
+| `/notifications`                                       | Notification centre                                  | `notifications:view`                                      |
+| `/assistant`                                           | Ask CoopManage                                       | `assistant:use`                                           |
+| `/search`                                              | Global search results                                | `search:use`                                              |
+| `/settings/cooperative`                                | Cooperative profile                                  | `cooperative:view`                                        |
+| `/settings/staff`                                      | Staff and roles                                      | `staff:view`                                              |
+| `/settings/preferences`                                | Which modules the cooperative uses                   | `cooperative:view`, editing needs `settings:manage`       |
+| `/settings/audit`                                      | Audit log                                            | `audit:view`                                              |
+| `/profile`                                             | Own account and language                             | authenticated                                             |
+| `/admin/*`                                             | Platform administration, including platform settings | `platform:*`                                              |
 
 Adding and editing a member are dialogs over the register rather than the `/members/new` and
 `/members/:id/edit` routes planned here. A secretary registering people at a meeting adds several

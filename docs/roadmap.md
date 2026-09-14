@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 5 complete.** Phase 6 is next.
+Status: **Phase 6 in progress.** The stock backend is complete; the screens are in review.
 
 ---
 
@@ -379,7 +379,7 @@ figure was carrying the same defect.
 
 ---
 
-### Phase 6 — Products and inventory
+### Phase 6 — Products and inventory ✅ (backend; screens in review)
 
 - Products, categories, units, warehouses
 - Receive, issue, adjust, transfer; reversal; movement history
@@ -387,10 +387,41 @@ figure was carrying the same defect.
 - `Notification` table (M6) and the low-stock scan job writing de-duplicated notifications. The
   notification centre itself is Phase 12; this phase only writes the rows
 - Stock overview, movement table, and the receive and issue quick actions
+- Stock valuation at weighted average cost, behind both the stock and the money permission
+- A demonstration catalogue and store: ten products across two stores, a season of member
+  deliveries, sales, a count that disagreed and two transfers
 
-**Exit:** a concurrency test firing twenty simultaneous issues against a stock of ten leaves the
-level at zero with ten successes and ten `INSUFFICIENT_STOCK` errors; rebuilding levels from the
-movement history reproduces the stored levels exactly.
+**Exit:** both met. Twenty simultaneous issues against a stock of ten produce exactly ten movements
+and ten `INSUFFICIENT_STOCK` refusals, and leave the level at zero — never negative, never a sack
+issued twice. Rebuilding the levels from the movement history reproduces every stored level
+exactly, proved both on a test database full of movements and against the seeded demonstration
+store, where `npm run inventory:rebuild` reports ten levels all agreeing with their history. A
+level tampered with directly in the table is found and, with `--apply`, put back.
+
+Four things are worth recording.
+
+**The overview and the warnings gave two different answers to the same question.** The stock screen
+marked a row low by comparing one store's quantity against the product's minimum, while the
+low-stock watch summed across stores — so the overview said three products were short and only two
+warnings existed. The minimum means "we want at least this much of it", so both now compare the
+total across every store, and a row carries its own quantity and the cooperative-wide figure side
+by side. Holding eight tonnes of potatoes at the collection point is not being short of potatoes.
+
+**A low-stock alert never escalated.** A product that fell below its minimum raised a warning, and
+when the shelf later went empty the unique dedupe key meant nothing happened: the alert stayed at
+"low" while the cooperative could no longer sell at all. The watch now escalates the severity and
+resurfaces the alert as unread, but only when it has genuinely got worse — never on every movement.
+
+**The adjustment takes what was counted, not the difference.** A storekeeper counts eight sacks and
+types eight. Asking them to work out that the record said ten and the correction is two out is how
+the wrong sign gets recorded, and a database check constraint enforces the reason as well, because
+an unexplained correction is what makes a shortfall unauditable.
+
+**A check constraint caught the seed within a minute of being written.** The demonstration store
+built its levels with one upsert for both directions, inserting a negative candidate row for an
+outward movement. PostgreSQL evaluates a check constraint on the candidate row before the conflict
+resolves, so it was refused. The seed now uses the application's own two stock operations, which
+means the demonstration store is built by exactly the code a storekeeper's receipt goes through.
 
 ---
 

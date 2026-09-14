@@ -92,9 +92,23 @@ export function parseMoney(input: unknown, options: ParseOptions): Money {
   return value
 }
 
-/** Parses a quantity. Same rules, three decimal places, and zero is meaningless for a movement. */
-export function parseQuantity(input: unknown, field: string): Money {
-  return parseMoney(input, { field, scale: QUANTITY_SCALE })
+/**
+ * Parses a quantity. Same rules, three decimal places.
+ *
+ * Zero is refused by default, because a movement of nothing is not a movement. It is allowed only
+ * where the input is a measurement rather than a movement: a storekeeper who counts an empty shelf
+ * has counted zero, and that is a real answer the system has to accept.
+ */
+export function parseQuantity(
+  input: unknown,
+  field: string,
+  options: { allowZero?: boolean } = {},
+): Money {
+  return parseMoney(input, {
+    field,
+    scale: QUANTITY_SCALE,
+    ...(options.allowZero === undefined ? {} : { allowZero: options.allowZero }),
+  })
 }
 
 function reject(field: string, messageKey: string, messageParams?: Record<string, number>) {

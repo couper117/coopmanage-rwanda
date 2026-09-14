@@ -23,6 +23,30 @@ export function requirePermission(key: PermissionKey): RequestHandler {
   }
 }
 
+/**
+ * For a route that genuinely needs two permissions rather than one.
+ *
+ * The stock valuation is the case this exists for: it is a money question as much as a stock one,
+ * and a storekeeper entitled to count sacks is not thereby entitled to know what the cooperative
+ * paid for them. The route registry records the first of the two, which is what the inventory
+ * screens gate on; this refuses the request whichever one is missing.
+ */
+export function requireAllPermissions(...keys: PermissionKey[]): RequestHandler {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const ctx = req.ctx
+    if (!ctx) {
+      next(AppError.unauthenticated())
+      return
+    }
+    const missing = keys.find((key) => !ctx.permissions.has(key))
+    if (missing) {
+      next(AppError.forbidden(missing))
+      return
+    }
+    next()
+  }
+}
+
 /** Reads the context a handler can rely on, so no controller repeats the null check. */
 export function requireContext(req: Request) {
   const ctx = req.ctx

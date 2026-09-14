@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "prisma:generate": "prisma generate",
-    "purge-test-data": "tsx test/purge-cli.ts"
+    "purge-test-data": "tsx test/purge-cli.ts",
+    "inventory:rebuild": "tsx src/scripts/rebuild-stock.ts"
   },
   "dependencies": {
     "@coopmanage/shared": "*",

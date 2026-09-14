@@ -190,6 +190,22 @@ export async function cleanupFixtures(): Promise<void> {
   await prisma.refreshSession.deleteMany({ where: { userId: { in: userIds } } })
   await prisma.passwordResetToken.deleteMany({ where: { userId: { in: userIds } } })
 
+  // The store first. A movement points at a product, a store and sometimes a member, and every
+  // one of those references is RESTRICT, so nothing below can go while a movement names it.
+  await prisma.inventoryTransaction.updateMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+    data: { reversalOfId: null, counterpartyTransactionId: null },
+  })
+  await prisma.inventoryTransaction.deleteMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+  })
+  await prisma.stockLevel.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.product.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.productCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.warehouse.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.unitOfMeasure.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
   // Members and money, in dependency order. Every reference in the M4 tables is RESTRICT, because
   // in production none of these rows is ever deleted: a member who leaves is marked as having
   // left, and a wrong figure is reversed. A test database still has to be emptiable, so the

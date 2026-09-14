@@ -13,12 +13,26 @@ import argon2 from 'argon2'
 import { randomBytes } from 'node:crypto'
 import { COOPERATIVE_TYPES } from './seed-data/cooperative-types.js'
 import { buildDemoFinance, DEMO_MEMBER_PAYMENTS } from './seed-data/demo-finance.js'
+import {
+  DEMO_MOVEMENTS,
+  DEMO_PRODUCT_CATEGORIES,
+  DEMO_PRODUCTS,
+  DEMO_TRANSFERS,
+  DEMO_WAREHOUSES,
+} from './seed-data/demo-inventory.js'
 import { buildDemoMembers } from './seed-data/demo-members.js'
 import { DEMO_COOPERATIVE, DEMO_STAFF } from './seed-data/demo-cooperative.js'
 import { assertDescriptionsComplete, PERMISSION_DESCRIPTIONS } from './seed-data/permissions.js'
 import { ROLE_DESCRIPTIONS } from './seed-data/roles.js'
-import { nextFinanceReference, nextMemberCode } from '../src/lib/references.js'
+import {
+  nextFinanceReference,
+  nextInventoryReference,
+  nextMemberCode,
+} from '../src/lib/references.js'
 import { defaultCategoriesFor } from '../src/modules/finance/finance.categories.js'
+import { scanLowStock } from '../src/modules/inventory/lowStock.js'
+import { decreaseStock, increaseStock } from '../src/modules/inventory/stock.js'
+import { Decimal } from '../src/lib/money.js'
 import { voidTransaction } from '../src/modules/finance/finance.service.js'
 import type { RequestContext } from '../src/lib/context.js'
 import { SYSTEM_UNITS } from './seed-data/units.js'
@@ -357,6 +371,7 @@ async function seedDemoCooperative(): Promise<void> {
   await seedFinanceCategories(cooperative.id, DEMO_COOPERATIVE.typeKey)
   await seedDemoMembers(cooperative.id)
   await seedDemoFinance(cooperative.id)
+  await seedDemoInventory(cooperative.id)
 }
 
 /**
@@ -384,6 +399,290 @@ async function seedFinanceCategories(cooperativeId: string, typeKey: string): Pr
       })
     }
   }
+}
+
+/**
+ * The catalogue and the store.
+ *
+ * Written through the same `nextInventoryReference` allocator and the same movement shape the
+ * application uses, so the demonstration store is indistinguishable from a store a storekeeper
+ * kept. Idempotent on the products already present, so running the seed twice does not double
+ * the catalogue.
+ *
+ * Opening balances are `OPENING` movements rather than stock levels written directly. That is the
+ * point of the type: a level with no movement behind it would be the one row the rebuild command
+ * could never explain, and a cooperative starting to keep records here genuinely does have stock
+ * already in the store.
+ */
+async function seedDemoInventory(cooperativeId: string): Promise<void> {
+  const existing = await prisma.product.count({ where: { cooperativeId } })
+  if (existing > 0) {
+    console.log(`  demonstration store: ${existing} products already present, left alone`)
+    return
+  }
+
+  const managerEmail = DEMO_STAFF[0]?.email
+  const manager = managerEmail
+    ? await prisma.user.findUnique({ where: { email: managerEmail }, select: { id: true } })
+    : null
+  const createdById = manager?.id ?? null
+
+  const units = await prisma.unitOfMeasure.findMany({
+    where: { cooperativeId: null },
+    select: { id: true, key: true },
+  })
+  const unitByKey = new Map(units.map((row) => [row.key, row.id]))
+
+  const warehouseByCode = new Map<string, string>()
+  for (const warehouse of DEMO_WAREHOUSES) {
+    const row = await prisma.warehouse.upsert({
+      where: { cooperativeId_code: { cooperativeId, code: warehouse.code } },
+      create: { cooperativeId, ...warehouse },
+      update: {},
+      select: { id: true },
+    })
+    warehouseByCode.set(warehouse.code, row.id)
+  }
+
+  const categoryByName = new Map<string, string>()
+  for (const category of DEMO_PRODUCT_CATEGORIES) {
+    // Read then create, rather than an upsert. The unique is on
+    // `(cooperative_id, name, parent_id)` and `parent_id` is nullable, which Prisma will not
+    // accept as null in a compound unique `where`.
+    const found = await prisma.productCategory.findFirst({
+      where: { cooperativeId, name: category.name, parentId: null },
+      select: { id: true },
+    })
+    const row =
+      found ??
+      (await prisma.productCategory.create({
+        data: { cooperativeId, name: category.name, nameRw: category.nameRw },
+        select: { id: true },
+      }))
+    categoryByName.set(category.name, row.id)
+  }
+
+  const productByName = new Map<string, { id: string; unitId: string }>()
+  for (const product of DEMO_PRODUCTS) {
+    const unitId = unitByKey.get(product.unitKey)
+    if (!unitId) continue
+    const sku = product.name
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 24)
+
+    const row = await prisma.product.create({
+      data: {
+        cooperativeId,
+        sku,
+        name: product.name,
+        nameRw: product.nameRw,
+        categoryId: categoryByName.get(product.category) ?? null,
+        unitId,
+        type: product.type,
+        trackInventory: product.trackInventory,
+        minStockLevel: product.minStockLevel,
+        defaultPurchasePrice: product.purchasePrice,
+        defaultSalePrice: product.salePrice,
+        createdById,
+      },
+      select: { id: true, unitId: true },
+    })
+    productByName.set(product.name, row)
+  }
+
+  /** One movement and its level, exactly as the application writes them. */
+  async function move(input: {
+    product: { id: string; unitId: string }
+    warehouseId: string
+    type: 'OPENING' | 'RECEIPT' | 'ISSUE' | 'ADJUSTMENT' | 'TRANSFER_OUT' | 'TRANSFER_IN'
+    direction: 'IN' | 'OUT'
+    quantity: string
+    occurredAt: Date
+    unitCost?: string | null
+    sourceMemberId?: string | null
+    reason?: string | null
+    note?: string | null
+  }): Promise<string> {
+    return prisma.$transaction(async (tx) => {
+      const reference = await nextInventoryReference(tx, cooperativeId, input.occurredAt)
+      const total =
+        input.unitCost == null
+          ? null
+          : new Decimal(input.unitCost).times(new Decimal(input.quantity)).toFixed(2)
+
+      const row = await tx.inventoryTransaction.create({
+        data: {
+          cooperativeId,
+          reference,
+          type: input.type,
+          direction: input.direction,
+          productId: input.product.id,
+          warehouseId: input.warehouseId,
+          quantity: input.quantity,
+          unitId: input.product.unitId,
+          unitCost: input.unitCost ?? null,
+          totalCost: total,
+          sourceMemberId: input.sourceMemberId ?? null,
+          reason: input.reason ?? null,
+          note: input.note ?? null,
+          occurredAt: input.occurredAt,
+          createdById,
+        },
+        select: { id: true },
+      })
+
+      // The application's own two operations, rather than a single upsert doing both directions.
+      // A first attempt here inserted a negative candidate row for an outward movement and let
+      // `ON CONFLICT` turn it into a subtraction — and PostgreSQL evaluates a check constraint on
+      // the candidate row before the conflict resolves, so `stock_levels_quantity_not_negative`
+      // refused it. Reusing `increaseStock` and `decreaseStock` means the demonstration store is
+      // built by exactly the code a storekeeper's receipt goes through, which is the point.
+      const key = {
+        cooperativeId,
+        productId: input.product.id,
+        warehouseId: input.warehouseId,
+      }
+      const quantity = new Decimal(input.quantity)
+      if (input.direction === 'IN') await increaseStock(tx, key, quantity)
+      else await decreaseStock(tx, key, quantity)
+
+      return row.id
+    })
+  }
+
+  const year = new Date().getUTCFullYear()
+  const openingDate = new Date(Date.UTC(year, 0, 2))
+
+  for (const product of DEMO_PRODUCTS) {
+    const row = productByName.get(product.name)
+    if (!row) continue
+    for (const opening of product.opening) {
+      const warehouseId = warehouseByCode.get(opening.warehouse)
+      if (!warehouseId) continue
+      await move({
+        product: row,
+        warehouseId,
+        type: 'OPENING',
+        direction: 'IN',
+        quantity: opening.quantity,
+        unitCost: opening.unitCost,
+        occurredAt: openingDate,
+        note: 'What was already in the store when record-keeping began here',
+      })
+    }
+  }
+
+  // Members who delivered produce, taken in order so the same members are credited each run.
+  const suppliers = await prisma.member.findMany({
+    where: { cooperativeId, status: 'ACTIVE' },
+    select: { id: true },
+    orderBy: { memberCode: 'asc' },
+    take: 20,
+  })
+
+  let supplierIndex = 0
+  let movements = 0
+
+  for (const movement of DEMO_MOVEMENTS) {
+    const product = productByName.get(movement.product)
+    const warehouseId = warehouseByCode.get(movement.warehouse)
+    if (!product || !warehouseId) continue
+
+    const occurredAt = new Date(Date.UTC(year, movement.month - 1, movement.day))
+    if (occurredAt > new Date()) continue
+
+    if (movement.type === 'ADJUSTMENT') {
+      // The seed states what was counted, as the interface does, and works out the correction.
+      const level = await prisma.stockLevel.findUnique({
+        where: { productId_warehouseId: { productId: product.id, warehouseId } },
+        select: { quantity: true },
+      })
+      const onRecord = level?.quantity ?? new Decimal(0)
+      const difference = new Decimal(movement.quantity).minus(onRecord)
+      if (difference.isZero()) continue
+
+      await move({
+        product,
+        warehouseId,
+        type: 'ADJUSTMENT',
+        direction: difference.isPositive() ? 'IN' : 'OUT',
+        quantity: difference.abs().toFixed(3),
+        occurredAt,
+        reason: movement.reason,
+        note: movement.note,
+      })
+      movements += 1
+      continue
+    }
+
+    const supplier = movement.fromMember ? suppliers[supplierIndex % suppliers.length] : undefined
+    if (movement.fromMember) supplierIndex += 1
+
+    await move({
+      product,
+      warehouseId,
+      type: movement.type,
+      direction: movement.type === 'RECEIPT' ? 'IN' : 'OUT',
+      quantity: movement.quantity,
+      occurredAt,
+      ...(movement.type === 'RECEIPT'
+        ? {
+            unitCost:
+              DEMO_PRODUCTS.find((row) => row.name === movement.product)?.purchasePrice ?? null,
+          }
+        : {}),
+      sourceMemberId: supplier?.id ?? null,
+      reason: movement.reason,
+      note: movement.note,
+    })
+    movements += 1
+  }
+
+  for (const transfer of DEMO_TRANSFERS) {
+    const product = productByName.get(transfer.product)
+    const from = warehouseByCode.get(transfer.from)
+    const to = warehouseByCode.get(transfer.to)
+    if (!product || !from || !to) continue
+
+    const occurredAt = new Date(Date.UTC(year, transfer.month - 1, transfer.day))
+    if (occurredAt > new Date()) continue
+
+    const outward = await move({
+      product,
+      warehouseId: from,
+      type: 'TRANSFER_OUT',
+      direction: 'OUT',
+      quantity: transfer.quantity,
+      occurredAt,
+    })
+    const inward = await move({
+      product,
+      warehouseId: to,
+      type: 'TRANSFER_IN',
+      direction: 'IN',
+      quantity: transfer.quantity,
+      occurredAt,
+    })
+    // Each half names the other, so the stock can be followed from either end.
+    await prisma.inventoryTransaction.update({
+      where: { id: outward },
+      data: { counterpartyTransactionId: inward },
+    })
+    await prisma.inventoryTransaction.update({
+      where: { id: inward },
+      data: { counterpartyTransactionId: outward },
+    })
+    movements += 2
+  }
+
+  const low = await scanLowStock(cooperativeId)
+
+  console.log(
+    `  demonstration store: ${productByName.size} products, ${DEMO_WAREHOUSES.length} stores, ` +
+      `${movements} movements, ${low.raised} low-stock warnings`,
+  )
 }
 
 /**

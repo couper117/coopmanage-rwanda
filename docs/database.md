@@ -569,7 +569,7 @@ implies a different phase is wrong.
 | M2        | 2     | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog`, `UnitOfMeasure` |
 | M3        | 3     | `CooperativeSetting`, `SystemSetting`                                                                                                     |
 | M4 ✅     | 4     | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey`                                        |
-| M6        | 6     | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification`                                           |
+| M6 ✅     | 6     | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification`                                           |
 | M7        | 7     | `Buyer`, `Sale`, `SaleItem`                                                                                                               |
 | M8        | 8     | `ReportRun`                                                                                                                               |
 | M9        | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
@@ -604,6 +604,23 @@ shape when a phase builds a module on tables an earlier phase had to create. It 
 either: the four indexes M4 created on `finance_transactions` — by date, by kind and date, by
 category and date, and by status and date — turned out to be exactly what the ledger, the summary
 and the category breakdown ask for, and adding one nothing queries would only slow every write.
+
+**M6 as applied** (`20260914201958_m6_catalogue_warehouses_inventory`). Beyond what Prisma
+generates, the migration hand-appends the constraints that keep a store record honest: a positive
+quantity, a non-negative cost, a stock level that can never fall below nothing, an adjustment that
+must carry a reason, and nothing that reverses or pairs with itself. It adds the partial unique
+index that allows exactly one default warehouse per cooperative — a plain unique on
+`(cooperative_id, is_default)` would allow only one non-default store as well, which is the
+opposite of what is wanted. Two trigram indexes let a storekeeper search on part of a product name
+or code, and two more partial indexes keep the low-stock scan and the unread-notification query off
+the rest of the table.
+
+One constraint earned its place immediately. The demonstration seed built its stock levels with a
+single `INSERT ... ON CONFLICT DO UPDATE` for both directions, inserting a negative candidate row
+for an outward movement and letting the conflict turn it into a subtraction. PostgreSQL evaluates a
+check constraint on the candidate row **before** the conflict resolves, so
+`stock_levels_quantity_not_negative` refused it. The seed now calls the application's own
+`increaseStock` and `decreaseStock`, which is what it should have done in the first place.
 
 **M4 as applied** (`20260914145445_m4_members_and_money`). Beyond what Prisma generates, the
 migration hand-appends the check constraints that keep a monetary row honest — a positive amount, a
