@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Request } from 'express'
 import {
+  PLATFORM_PERMISSIONS,
   isRoleKey,
   type AuthUser,
   type LoginResult,
@@ -399,6 +400,22 @@ export async function sessionSummary(ctx: RequestContext): Promise<SessionSummar
   const user = await prisma.user.findUnique({ where: { id: ctx.user.id }, select: USER_FIELDS })
   if (!user) throw AppError.unauthenticated()
 
+  /**
+   * A platform administrator holds the `platform:*` keys wherever they are, independent of any
+   * cooperative, so the session has to say so.
+   *
+   * `req.ctx.permissions` is filled per request by whichever resolver ran: the cooperative one
+   * from a staff role, the platform one from this flag. `GET /auth/me` is neither, so without this
+   * union it reported no platform permissions at all and the administration screens refused their
+   * own administrator — either showing "no access" or waiting forever for a role that never
+   * arrives. What is reported here is what is held; enforcement is still `resolvePlatform`
+   * checking the flag again on every request.
+   */
+  const permissions = new Set(ctx.permissions)
+  if (user.isPlatformAdmin) {
+    for (const key of PLATFORM_PERMISSIONS) permissions.add(key)
+  }
+
   return {
     user: toAuthUser(user),
     memberships: await membershipsFor(user.id),
@@ -411,7 +428,7 @@ export async function sessionSummary(ctx: RequestContext): Promise<SessionSummar
         }
       : null,
     roleKey: ctx.staff?.roleKey ?? null,
-    permissions: [...ctx.permissions].sort(),
+    permissions: [...permissions].sort(),
   }
 }
 

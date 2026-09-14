@@ -143,13 +143,25 @@ Every row lists the permission the backend enforces. `—` means public or self-
 | GET    | `/cooperative-types`         | —                             |
 | GET    | `/settings`                  | `cooperative:view`            |
 | PUT    | `/settings/:key`             | `settings:manage`             |
-| GET    | `/staff`                     | `staff:view`                  |
-| POST   | `/staff/invite`              | `staff:invite`                |
-| PATCH  | `/staff/:id`                 | `staff:manage`                |
-| POST   | `/staff/:id/deactivate`      | `staff:manage`                |
-| GET    | `/roles`                     | `staff:view`                  |
-| GET    | `/permissions`               | `staff:view`                  |
-| PUT    | `/staff/:id/overrides`       | `staff:manage`                |
+
+`:key` is not free text. Both settings endpoints validate against the catalogue in
+`packages/shared/src/settings.ts`, which declares every key a cooperative may set, the shape of its
+value and its default. An unknown key is a `422`, and `GET /settings` always returns the complete
+object with defaults filled in, so a screen reading a setting never has to know whether anyone has
+saved it. The same holds for `/admin/settings/:key`.
+
+Cooperative keys today: `enabledModules`, the optional modules this cooperative uses. Platform keys
+today: `defaultCooperativeLocale`. The catalogue grows when a phase needs a key; a setting is added
+only once something reads it.
+
+| GET | `/staff` | `staff:view` |
+| POST | `/staff/invite` | `staff:invite` |
+| PATCH | `/staff/:id` | `staff:manage` |
+| POST | `/staff/:id/deactivate` | `staff:manage` |
+| GET | `/roles` | `staff:view` |
+| GET | `/permissions` | `staff:view` |
+| GET | `/staff/:id/overrides` | `staff:view` |
+| PUT | `/staff/:id/overrides` | `staff:manage` |
 
 ### Members — Phase 4
 
@@ -329,6 +341,11 @@ Formats: `pdf`, `csv`, `xlsx`.
 | GET    | `/health`                  | —                              |
 | GET    | `/health/ready`            | —                              |
 
+The whole `/admin` namespace answers **404, not 403**, to a caller who is not a platform
+administrator, so an ordinary user cannot discover that it exists or which parts of it are there.
+This is the same reasoning that makes a wrong-tenant record report "not found" rather than
+"forbidden".
+
 ---
 
 ## 3. Frontend route map
@@ -359,7 +376,7 @@ Formats: `pdf`, `csv`, `xlsx`.
 | `/search`                                                                            | Global search results                                | `search:use`                                              |
 | `/settings/cooperative`                                                              | Cooperative profile                                  | `cooperative:view`                                        |
 | `/settings/staff`                                                                    | Staff and roles                                      | `staff:view`                                              |
-| `/settings/preferences`                                                              | Cooperative-wide settings and thresholds             | `cooperative:view`, editing needs `settings:manage`       |
+| `/settings/preferences`                                                              | Which modules the cooperative uses                   | `cooperative:view`, editing needs `settings:manage`       |
 | `/settings/audit`                                                                    | Audit log                                            | `audit:view`                                              |
 | `/profile`                                                                           | Own account and language                             | authenticated                                             |
 | `/admin/*`                                                                           | Platform administration, including platform settings | `platform:*`                                              |

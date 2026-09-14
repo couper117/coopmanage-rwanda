@@ -11,12 +11,13 @@ import {
   Package,
   ScrollText,
   Settings,
+  SlidersHorizontal,
   ShoppingCart,
   Users,
   UsersRound,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { PermissionKey } from '@coopmanage/shared'
+import type { ModuleKey, PermissionKey } from '@coopmanage/shared'
 
 export interface NavItem {
   /** Key into the `nav` translation namespace. */
@@ -25,6 +26,15 @@ export interface NavItem {
   icon: LucideIcon
   /** Permission required to see the item. Enforced again by the backend on every request. */
   permission: PermissionKey
+  /**
+   * The module this item belongs to, when the cooperative can switch it off. An item with no
+   * module is always shown to anyone holding its permission.
+   *
+   * Module availability and permission are separate questions: a module can be on for the whole
+   * cooperative and still be invisible to a member of staff whose role does not cover it, and
+   * switching one off never weakens a permission check on the server.
+   */
+  module?: ModuleKey
   /** The phase that delivers the screen. Until then the route shows an honest status page. */
   availableFromPhase: number
 }
@@ -51,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'assistant',
+        module: 'assistant',
         to: '/assistant',
         icon: MessageCircleQuestion,
         permission: 'assistant:use',
@@ -58,6 +69,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'reports',
+        module: 'reports',
         to: '/reports',
         icon: Gauge,
         permission: 'reports:view',
@@ -70,6 +82,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         key: 'members',
+        module: 'members',
         to: '/members',
         icon: Users,
         permission: 'members:view',
@@ -77,6 +90,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'contributions',
+        module: 'contributions',
         to: '/contributions',
         icon: Coins,
         permission: 'contributions:view',
@@ -84,6 +98,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'meetings',
+        module: 'meetings',
         to: '/meetings',
         icon: ClipboardList,
         permission: 'meetings:view',
@@ -91,6 +106,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'documents',
+        module: 'documents',
         to: '/documents',
         icon: FileText,
         permission: 'documents:view',
@@ -98,6 +114,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'announcements',
+        module: 'announcements',
         to: '/announcements',
         icon: Megaphone,
         permission: 'announcements:view',
@@ -110,6 +127,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         key: 'inventory',
+        module: 'inventory',
         to: '/inventory',
         icon: Boxes,
         permission: 'inventory:view',
@@ -117,6 +135,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'products',
+        module: 'products',
         to: '/inventory/products',
         icon: Package,
         permission: 'products:view',
@@ -124,6 +143,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'sales',
+        module: 'sales',
         to: '/sales',
         icon: ShoppingCart,
         permission: 'sales:view',
@@ -131,6 +151,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         key: 'buyers',
+        module: 'buyers',
         to: '/buyers',
         icon: Handshake,
         permission: 'buyers:view',
@@ -143,6 +164,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         key: 'finance',
+        module: 'finance',
         to: '/finance',
         icon: Coins,
         permission: 'finance:view',
@@ -164,6 +186,13 @@ export const NAV_GROUPS: NavGroup[] = [
         key: 'settings',
         to: '/settings/cooperative',
         icon: Settings,
+        permission: 'cooperative:view',
+        availableFromPhase: 3,
+      },
+      {
+        key: 'preferences',
+        to: '/settings/preferences',
+        icon: SlidersHorizontal,
         permission: 'cooperative:view',
         availableFromPhase: 3,
       },

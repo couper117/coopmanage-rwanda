@@ -21,47 +21,62 @@ if (!('ResizeObserver' in globalThis)) {
 
 /**
  * jsdom implements no `matchMedia`, which every browser has and which the layout uses to decide
- * whether the sidebar can show its labels. This evaluates min-width and max-width queries against
- * `window.innerWidth`, so a test can set a viewport width and get the layout that width produces.
+ * whether the sidebar shows its labels and whether a list renders as a table or as cards. This
+ * evaluates min-width and max-width queries against `window.innerWidth`, so a test can set a
+ * viewport width and get the layout that width produces.
+ *
+ * One global resize listener notifies every live query. An earlier version added a listener inside
+ * `matchMedia` itself and never removed it, so every component that used a media query leaked one
+ * per mount; by the end of a file a single `setViewportWidth` was waking hundreds of dead
+ * listeners and a test that should take 40ms took eleven seconds.
  */
+type QueryListener = (event: MediaQueryListEvent) => void
+
+const mediaListeners = new Map<string, Set<QueryListener>>()
+
+function matches(query: string): boolean {
+  const min = /\(min-width:\s*(\d+)px\)/.exec(query)
+  const max = /\(max-width:\s*(\d+)px\)/.exec(query)
+  if (min) return window.innerWidth >= Number(min[1])
+  if (max) return window.innerWidth <= Number(max[1])
+  return false
+}
+
 export function setViewportWidth(width: number): void {
   Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width })
+  for (const [query, listeners] of mediaListeners) {
+    const event = { matches: matches(query), media: query } as MediaQueryListEvent
+    for (const listener of listeners) listener(event)
+  }
   window.dispatchEvent(new Event('resize'))
 }
 
 if (!window.matchMedia) {
   window.matchMedia = (query: string): MediaQueryList => {
-    const listeners = new Set<(event: MediaQueryListEvent) => void>()
-    const evaluate = (): boolean => {
-      const min = /\(min-width:\s*(\d+)px\)/.exec(query)
-      const max = /\(max-width:\s*(\d+)px\)/.exec(query)
-      if (min) return window.innerWidth >= Number(min[1])
-      if (max) return window.innerWidth <= Number(max[1])
-      return false
+    const add = (listener: QueryListener): void => {
+      const set = mediaListeners.get(query) ?? new Set<QueryListener>()
+      set.add(listener)
+      mediaListeners.set(query, set)
     }
-    const list = {
+    const remove = (listener: QueryListener): void => {
+      const set = mediaListeners.get(query)
+      if (!set) return
+      set.delete(listener)
+      if (set.size === 0) mediaListeners.delete(query)
+    }
+
+    return {
       get matches() {
-        return evaluate()
+        return matches(query)
       },
       media: query,
       onchange: null,
-      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        listeners.add(listener)
-      },
-      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        listeners.delete(listener)
-      },
-      addListener: (listener: (event: MediaQueryListEvent) => void) => listeners.add(listener),
-      removeListener: (listener: (event: MediaQueryListEvent) => void) =>
-        listeners.delete(listener),
+      addEventListener: (_type: string, listener: QueryListener) => add(listener),
+      removeEventListener: (_type: string, listener: QueryListener) => remove(listener),
+      addListener: add,
+      removeListener: remove,
       dispatchEvent: () => true,
-    }
-    window.addEventListener('resize', () => {
-      for (const listener of listeners) {
-        listener({ matches: evaluate(), media: query } as MediaQueryListEvent)
-      }
-    })
-    return list as unknown as MediaQueryList
+    } as unknown as MediaQueryList
   }
 }
 
@@ -134,6 +149,15 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+
+  // Radix's dismissable layers set body styles and aria-hidden on siblings while an overlay is
+  // open, and restore them on unmount. A test that ends with one open leaves that state behind,
+  // where it slows or confuses whatever renders next. Clearing it is cheap insurance.
+  document.body.style.pointerEvents = ''
+  document.body.removeAttribute('data-scroll-locked')
+  for (const node of document.body.querySelectorAll('[aria-hidden="true"]')) {
+    node.removeAttribute('aria-hidden')
+  }
   window.localStorage.clear()
   // A session must not leak from one test into the next: a guarded screen rendering because an
   // earlier test signed somebody in would hide exactly the bug these tests exist to catch.

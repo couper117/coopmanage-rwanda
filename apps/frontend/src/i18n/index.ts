@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next'
 import type { Locale } from '@coopmanage/shared'
 import { LANGUAGE_TO_LOCALE, LOCALE_TO_LANGUAGE } from '@coopmanage/shared'
 
+import enAdmin from './locales/en/admin.json'
 import enAudit from './locales/en/audit.json'
 import enAuth from './locales/en/auth.json'
 import enCommon from './locales/en/common.json'
@@ -12,7 +13,10 @@ import enErrors from './locales/en/errors.json'
 import enModules from './locales/en/modules.json'
 import enNav from './locales/en/nav.json'
 import enProfile from './locales/en/profile.json'
+import enSettings from './locales/en/settings.json'
+import enStaff from './locales/en/staff.json'
 import enValidation from './locales/en/validation.json'
+import rwAdmin from './locales/rw/admin.json'
 import rwAudit from './locales/rw/audit.json'
 import rwAuth from './locales/rw/auth.json'
 import rwCommon from './locales/rw/common.json'
@@ -21,6 +25,8 @@ import rwErrors from './locales/rw/errors.json'
 import rwModules from './locales/rw/modules.json'
 import rwNav from './locales/rw/nav.json'
 import rwProfile from './locales/rw/profile.json'
+import rwSettings from './locales/rw/settings.json'
+import rwStaff from './locales/rw/staff.json'
 import rwValidation from './locales/rw/validation.json'
 
 export const SUPPORTED_LANGUAGES = ['en', 'rw'] as const
@@ -39,6 +45,9 @@ export const resources = {
     nav: enNav,
     auth: enAuth,
     profile: enProfile,
+    settings: enSettings,
+    staff: enStaff,
+    admin: enAdmin,
     audit: enAudit,
     dashboard: enDashboard,
     errors: enErrors,
@@ -50,6 +59,9 @@ export const resources = {
     nav: rwNav,
     auth: rwAuth,
     profile: rwProfile,
+    settings: rwSettings,
+    staff: rwStaff,
+    admin: rwAdmin,
     audit: rwAudit,
     dashboard: rwDashboard,
     errors: rwErrors,

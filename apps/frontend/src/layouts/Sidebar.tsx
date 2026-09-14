@@ -2,7 +2,9 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { PanelLeftClose, PanelLeftOpen, Sprout, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
+import { isModuleEnabled } from '@coopmanage/shared'
 import { NAV_GROUPS } from '@/app/navigation'
+import { useCooperativeSettings } from '@/features/cooperative/cooperative.hooks'
 import { cn } from '@/lib/cn'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -28,13 +30,26 @@ export function Sidebar({ variant, collapsed = false, canToggle = true }: Sideba
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen)
   const permissions = useAuthStore((state) => state.permissions)
+  const { data: settings } = useCooperativeSettings()
 
-  // An item the user cannot reach is not rendered, and a group left with no items disappears
-  // rather than showing an empty heading. This is presentation only: docs/permissions.md section 6
-  // is explicit that hiding a control is never treated as security, and every route re-checks.
+  /**
+   * An item is shown when the caller holds its permission *and* the cooperative has its module
+   * switched on. Both are presentation only: docs/permissions.md section 6 is explicit that the
+   * backend re-checks every request, and a module being off never relaxes a permission.
+   *
+   * While the settings are still loading, or for a platform administrator who has no cooperative,
+   * every module is treated as available. Hiding navigation on a pending query would make the
+   * sidebar flicker on every page load.
+   */
+  const moduleAvailable = (item: (typeof NAV_GROUPS)[number]['items'][number]): boolean => {
+    if (!item.module) return true
+    if (!settings) return true
+    return isModuleEnabled(item.module, settings)
+  }
+
   const groups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => permissions.has(item.permission)),
+    key: group.key,
+    items: group.items.filter((item) => permissions.has(item.permission) && moduleAvailable(item)),
   })).filter((group) => group.items.length > 0)
 
   return (

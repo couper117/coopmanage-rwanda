@@ -112,6 +112,20 @@ export class AppError extends Error {
     return new AppError({ status: 409, code: 'CONFLICT', messageKey, message })
   }
 
+  /**
+   * A unique constraint refused the write. The message names what clashed but never whose record
+   * it is: registration numbers are unique across the platform, so the other holder is usually a
+   * different cooperative the caller has no business learning about.
+   */
+  static duplicate(messageKey: string): AppError {
+    return new AppError({
+      status: 409,
+      code: 'DUPLICATE_RESOURCE',
+      messageKey,
+      message: 'That value is already in use.',
+    })
+  }
+
   static forbidden(permission?: string): AppError {
     return new AppError({
       status: 403,

@@ -1,0 +1,67 @@
+{
+  "title": "Abakozi",
+  "description": "Abakorera iyi koperative n'ibyo umwe umwe yemerewe gukora",
+  "tableCaption": "Abakozi b'iyi koperative, hamwe n'imirimo n'imiterere yabo",
+  "you": "(wowe)",
+  "loadFailed": "Ntitwashoboye kuzana urutonde rw'abakozi.",
+  "changeRoleFor": "Hindura umurimo wa {{name}}",
+  "fields": {
+    "fullName": "Izina",
+    "email": "Imeyili",
+    "role": "Umurimo",
+    "jobTitle": "Izina ry'akazi",
+    "status": "Imiterere",
+    "exceptions": "Ibidasanzwe"
+  },
+  "status": {
+    "active": "Arakora",
+    "inactive": "Ntakora"
+  },
+  "filters": {
+    "allStatuses": "Imiterere iyo ari yo",
+    "allRoles": "Umurimo uwo ari wo"
+  },
+  "actions": {
+    "exceptions": "Ibidasanzwe",
+    "deactivate": "Guhagarika",
+    "restore": "Gusubizaho"
+  },
+  "blocked": {
+    "self": "Ntushobora guhindura umurimo cyangwa imiterere yawe. Saba undi muyobozi.",
+    "noPermission": "Umuyobozi gusa ni we uhindura abakozi."
+  },
+  "empty": {
+    "title": "Ni wowe wenyine uri hano",
+    "body": "Tumira abafasha kuyobora iyi koperative, kandi uhe umwe umwe umurimo ukwiranye n'akazi ke."
+  },
+  "emptyFiltered": {
+    "title": "Nta muntu uhuye n'ibyo washakaga",
+    "body": "Gerageza indi miterere cyangwa undi murimo, cyangwa ukureho ibyungurujwe urebe bose."
+  },
+  "invite": {
+    "action": "Tumira umukozi",
+    "title": "Tumira umukozi",
+    "description": "We ubwe ahitamo ijambobanga rye akoresheje umurongo tumwoherereza, ku bw'ibyo ntiworigira mu maboko.",
+    "emailHint": "Umurongo wo kwinjira woherezwa hano",
+    "rolePlaceholder": "Hitamo umurimo",
+    "submit": "Ohereza ubutumire",
+    "sentTitle": "{{name}} yongewemo",
+    "sentNewAccount": "Twamuremeye konti kuri {{email}} kandi twamwoherereje umurongo wo guhitamo ijambobanga.",
+    "sentExistingAccount": "{{email}} yari asanzwe afite konti, ku bw'ibyo twayongera kuri iyi koperative."
+  },
+  "deactivate": {
+    "title": "Guhagarika {{name}}?",
+    "consequence": "Ahita atakaza uburenganzira kuri iyi koperative. Amateka ye asigara, kandi ushobora kumusubizaho."
+  },
+  "overrides": {
+    "title": "Ibidasanzwe kuri {{name}}",
+    "description": "Hindura ibyo uyu muntu umwe yemerewe, utaremye undi murimo mushya.",
+    "denyWins": "Iyo kwemerera no kwangira bipinganye, kwangira ni ko bitwara.",
+    "inheritedAllowed": "Biva ku murimo we: aremerewe",
+    "inheritedDenied": "Biva ku murimo we: ntiyemerewe",
+    "grant": "Mwemerere, nk'ikidasanzwe",
+    "deny": "Mwangire, nk'ikidasanzwe",
+    "effectFor": "Ikidasanzwe kuri: {{permission}}",
+    "save": "Bika impinduka {{count}}"
+  }
+}

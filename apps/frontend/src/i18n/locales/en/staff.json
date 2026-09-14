@@ -1,0 +1,67 @@
+{
+  "title": "Staff",
+  "description": "Who works at this cooperative and what each of them may do",
+  "tableCaption": "Staff of this cooperative, with their role and status",
+  "you": "(you)",
+  "loadFailed": "We could not load the staff list.",
+  "changeRoleFor": "Change the role of {{name}}",
+  "fields": {
+    "fullName": "Name",
+    "email": "Email address",
+    "role": "Role",
+    "jobTitle": "Job title",
+    "status": "Status",
+    "exceptions": "Exceptions"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Not active"
+  },
+  "filters": {
+    "allStatuses": "Any status",
+    "allRoles": "Any role"
+  },
+  "actions": {
+    "exceptions": "Exceptions",
+    "deactivate": "Deactivate",
+    "restore": "Restore"
+  },
+  "blocked": {
+    "self": "You cannot change your own role or status. Ask another manager.",
+    "noPermission": "Only a manager can change staff."
+  },
+  "empty": {
+    "title": "You are the only person here",
+    "body": "Invite the people who help run this cooperative, and give each of them the role that matches their work."
+  },
+  "emptyFiltered": {
+    "title": "Nobody matches these filters",
+    "body": "Try a different status or role, or clear the filters to see everyone."
+  },
+  "invite": {
+    "action": "Invite staff",
+    "title": "Invite a member of staff",
+    "description": "They choose their own password from a link, so you never handle it.",
+    "emailHint": "We send the sign-in link here",
+    "rolePlaceholder": "Choose a role",
+    "submit": "Send invitation",
+    "sentTitle": "{{name}} has been added",
+    "sentNewAccount": "We created an account for {{email}} and sent them a link to choose a password.",
+    "sentExistingAccount": "{{email}} already had an account, so we added it to this cooperative."
+  },
+  "deactivate": {
+    "title": "Deactivate {{name}}?",
+    "consequence": "They lose access to this cooperative straight away. Their history stays, and you can restore them later."
+  },
+  "overrides": {
+    "title": "Exceptions for {{name}}",
+    "description": "Change what this one person may do, without inventing a new role for them.",
+    "denyWins": "Where a grant and a refusal disagree, the refusal wins.",
+    "inheritedAllowed": "From their role: allowed",
+    "inheritedDenied": "From their role: not allowed",
+    "grant": "Allow, as an exception",
+    "deny": "Refuse, as an exception",
+    "effectFor": "Exception for: {{permission}}",
+    "save": "Save {{count}} change(s)"
+  }
+}

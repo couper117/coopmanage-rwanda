@@ -27,6 +27,10 @@
     "staff": "Abakozi",
     "settings": "Igenamiterere",
     "audit": "Urutonde rw'ibikorwa",
-    "profile": "Konti yanjye"
-  }
+    "profile": "Konti yanjye",
+    "preferences": "Ibyo wahisemo"
+  },
+  "switchCooperative": "Hindura koperative",
+  "yourCooperatives": "Koperative zawe",
+  "noCooperative": "Nta koperative yatoranyijwe"
 }

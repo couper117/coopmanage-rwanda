@@ -5,6 +5,7 @@ import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import { hashToken } from '../src/lib/tokens.js'
 import { lockoutMinutes } from '../src/modules/auth/auth.service.js'
 import {
+  addStaff,
   cleanupFixtures,
   createCooperative,
   createStaffSession,
@@ -571,3 +572,58 @@ async function issueResetToken(userId: string, expiresAt?: Date): Promise<string
   })
   return token
 }
+
+describe('platform administrators in the session', () => {
+  /**
+   * A platform administrator holds the `platform:*` keys wherever they are. `GET /auth/me` runs
+   * under neither resolver, so without an explicit union it reported no platform permissions and
+   * the administration screens refused their own administrator. This is the regression guard.
+   */
+  it('reports the platform permissions with no cooperative named', async () => {
+    const user = await createUser({ isPlatformAdmin: true })
+    const session = await login(app, user)
+
+    const response = await request(app)
+      .get(`${API_PREFIX}/auth/me`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .expect(200)
+
+    expect(response.body.data.permissions).toContain('platform:cooperatives:view')
+    expect(response.body.data.permissions).toContain('platform:users:manage')
+    expect(response.body.data.cooperative).toBeNull()
+  })
+
+  it('keeps them when a cooperative is named and the administrator is also staff there', async () => {
+    const cooperative = await createCooperative('Admin Is Also Staff')
+    const user = await createUser({ isPlatformAdmin: true })
+    await addStaff(cooperative.id, user.id, 'VIEWER')
+    const session = await login(app, user)
+
+    const response = await request(app)
+      .get(`${API_PREFIX}/auth/me`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('X-Cooperative-Id', cooperative.id)
+      .expect(200)
+
+    // Their cooperative role and their platform role, both reported.
+    expect(response.body.data.roleKey).toBe('VIEWER')
+    expect(response.body.data.permissions).toContain('members:view')
+    expect(response.body.data.permissions).toContain('platform:cooperatives:view')
+  })
+
+  it('reports no platform permissions for an ordinary user', async () => {
+    const cooperative = await createCooperative('Ordinary Only')
+    const staff = await createStaffSession(app, cooperative, 'MANAGER')
+
+    const response = await request(app)
+      .get(`${API_PREFIX}/auth/me`)
+      .set('Authorization', `Bearer ${staff.accessToken}`)
+      .set('X-Cooperative-Id', cooperative.id)
+      .expect(200)
+
+    const platformKeys = (response.body.data.permissions as string[]).filter((key) =>
+      key.startsWith('platform:'),
+    )
+    expect(platformKeys).toEqual([])
+  })
+})

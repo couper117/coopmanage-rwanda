@@ -27,6 +27,10 @@
     "staff": "Staff",
     "settings": "Settings",
     "audit": "Audit log",
-    "profile": "My account"
-  }
+    "profile": "My account",
+    "preferences": "Preferences"
+  },
+  "switchCooperative": "Switch cooperative",
+  "yourCooperatives": "Your cooperatives",
+  "noCooperative": "No cooperative selected"
 }

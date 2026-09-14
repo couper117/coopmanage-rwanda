@@ -1,9 +1,9 @@
 import { Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ConnectionIndicator } from '@/components/ConnectionIndicator'
+import { CooperativeSwitcher } from '@/components/CooperativeSwitcher'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { UserMenu } from '@/components/UserMenu'
-import { Badge } from '@/components/ui'
 import { useActiveMembership } from '@/features/auth/useSession'
 import { useUiStore } from '@/stores/uiStore'
 
@@ -25,18 +25,7 @@ export function TopBar() {
 
       <div className="flex min-w-0 flex-1 items-center gap-2">
         {membership ? (
-          <>
-            <p className="truncate text-base font-medium text-ink">{membership.cooperativeName}</p>
-            {/*
-              A demonstration cooperative is labelled everywhere its name appears, so nobody
-              mistakes seeded figures for their own records.
-            */}
-            {membership.isDemo ? (
-              <Badge tone="warning" className="shrink-0">
-                {t('common:demoData')}
-              </Badge>
-            ) : null}
-          </>
+          <CooperativeSwitcher />
         ) : (
           <p className="hidden truncate text-sm font-medium text-ink-secondary sm:block">
             {t('common:appTagline')}

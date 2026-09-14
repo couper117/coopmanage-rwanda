@@ -176,6 +176,19 @@ export async function cleanupFixtures(): Promise<void> {
   }
 
   await prisma.cooperative.deleteMany({ where: { id: { in: cooperativeIds } } })
+
+  // Settings record who last changed them, with RESTRICT on that reference, because in production
+  // a user is suspended and never deleted. A test does delete them, so the authorship is cleared
+  // first; the setting itself is not the user's and survives without them.
+  await prisma.systemSetting.updateMany({
+    where: { updatedById: { in: userIds } },
+    data: { updatedById: null },
+  })
+  await prisma.cooperativeSetting.updateMany({
+    where: { updatedById: { in: userIds } },
+    data: { updatedById: null },
+  })
+
   await prisma.user.deleteMany({ where: { id: { in: userIds } } })
 
   createdCooperativeIds.clear()

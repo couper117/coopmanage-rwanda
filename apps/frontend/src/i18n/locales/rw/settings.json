@@ -1,0 +1,62 @@
+{
+  "cooperative": {
+    "title": "Umwirondoro wa koperative",
+    "description": "Koperative yawe ni iyihe n'aho ikorera",
+    "identityTitle": "Iyandikwa rya koperative",
+    "identityDescription": "Byashyizweho igihe koperative yaremwaga",
+    "identityNote": "Kode, ubwoko n'ifaranga bishyirwaho na sisitemu, ntibihindurwa hano.",
+    "code": "Kode ya koperative",
+    "type": "Ubwoko",
+    "currency": "Ifaranga",
+    "detailsTitle": "Amakuru arambuye",
+    "readOnly": "Ushobora kureba aya makuru ariko ntushobora kuyahindura. Umuyobozi ni we ubishobora.",
+    "name": "Izina rya koperative",
+    "registrationNumber": "Nomero y'iyandikwa muri RCA",
+    "tinNumber": "Nomero ya TIN",
+    "province": "Intara",
+    "district": "Akarere",
+    "sector": "Umurenge",
+    "cell": "Akagari",
+    "village": "Umudugudu",
+    "addressLine": "Aderesi y'umuhanda",
+    "phone": "Telefone y'ibiro",
+    "phoneHint": "Urugero 0788 123 456",
+    "email": "Imeyili y'ibiro",
+    "defaultLocale": "Ururimi rusanzwe",
+    "defaultLocaleHint": "Ururimi abakozi bashya batangirira kuri rwo",
+    "memberCodePrefix": "Imbanziriza ya kode y'umunyamuryango",
+    "memberCodePrefixHint": "Kode z'abanyamuryango zisa nka {{example}}",
+    "save": "Bika impinduka",
+    "saved": "Impinduka zawe zabitswe.",
+    "loadFailed": "Ntitwashoboye kuzana umwirondoro wa koperative."
+  },
+  "preferences": {
+    "title": "Ibyo wahisemo",
+    "description": "Hitamo ibice bya CoopManage koperative yawe ikoresha",
+    "modulesTitle": "Ibice bya sisitemu",
+    "modulesDescription": "Hagarika ibyo udakoresha. Nta kintu gisibwa, kandi ushobora kubisubizaho igihe icyo ari cyo cyose.",
+    "readOnly": "Ushobora kureba ibi ariko ntushobora kubihindura. Umuyobozi ni we ubishobora.",
+    "saved": "Byabitswe",
+    "loadFailed": "Ntitwashoboye kuzana ibyo wahisemo.",
+    "alwaysOnTitle": "Bihari buri gihe",
+    "alwaysOnDescription": "Koperative yose ibikenera, ku bw'ibyo ntibihagarikwa.",
+    "modules": {
+      "contributions": "Amafaranga yo kwinjira, ubwizigame n'imigabane",
+      "inventory": "Ibyinjira, ibisohoka n'ibibarurwa mu bubiko",
+      "products": "Urutonde rw'ibyo koperative yawe ikora",
+      "sales": "Kugurisha ku baguzi, hamwe n'inyemezabwishyu",
+      "buyers": "Amashyirahamwe ugurisha",
+      "meetings": "Inama, abitabiriye n'ibyemezo",
+      "documents": "Impapuro z'iyandikwa, amasezerano n'ibyemezo",
+      "announcements": "Amatangazo ku banyamuryango n'abakozi",
+      "assistant": "Kubaza ibibazo ku nyandiko zawe"
+    }
+  },
+  "provinces": {
+    "KIGALI": "Umujyi wa Kigali",
+    "NORTHERN": "Intara y'Amajyaruguru",
+    "SOUTHERN": "Intara y'Amajyepfo",
+    "EASTERN": "Intara y'Iburasirazuba",
+    "WESTERN": "Intara y'Iburengerazuba"
+  }
+}

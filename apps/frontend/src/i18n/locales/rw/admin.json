@@ -1,0 +1,276 @@
+{
+  "cooperatives": {
+    "title": "Koperative",
+    "description": "Koperative zose ziri kuri sisitemu, imiterere yazo n'umubare w'abakozi bazo.",
+    "tableCaption": "Urutonde rwa koperative ziri kuri sisitemu, hamwe n'imiterere, aho ziherereye n'abakozi bazo.",
+    "newButton": "Koperative nshya",
+    "search": {
+      "label": "Shakisha koperative",
+      "placeholder": "Izina, kode cyangwa akarere"
+    },
+    "statusFilter": {
+      "label": "Imiterere",
+      "all": "Imiterere yose"
+    },
+    "demoFilter": {
+      "label": "Shyiramo koperative z'imyitozo",
+      "description": "Koperative zashyiriweho imyitozo n'igerageza."
+    },
+    "status": {
+      "ACTIVE": "Ikora",
+      "SUSPENDED": "Yahagaritswe",
+      "ARCHIVED": "Yashyinguwe"
+    },
+    "demoBadge": "Imyitozo",
+    "columns": {
+      "name": "Koperative",
+      "type": "Icyo ikora",
+      "status": "Imiterere",
+      "location": "Aho iherereye",
+      "staff": "Abakozi",
+      "created": "Iyandikwa",
+      "actions": "Ibikorwa"
+    },
+    "staffValue": "{{active}} kuri {{total}}",
+    "location": "Akarere ka {{district}}, {{province}}",
+    "empty": {
+      "title": "Nta koperative irahari",
+      "body": "Shyiraho koperative ya mbere hamwe n'umuntu uzayiyobora."
+    },
+    "noResults": {
+      "title": "Nta koperative ihuye n'ibyo washakishije",
+      "body": "Gerageza andi magambo, cyangwa usibe muyunguruzi kugira ngo wongere ubone koperative zose."
+    },
+    "error": {
+      "body": "Ntitwashoboye kuzana urutonde rwa koperative. Reba umurandasi wawe hanyuma wongere ugerageze."
+    },
+    "pagination": {
+      "summary": "Urebye kuva {{from}} kugera {{to}} mu {{total}}"
+    },
+    "actions": {
+      "suspend": "Guhagarika",
+      "restore": "Gusubizaho",
+      "archive": "Gushyingura"
+    },
+    "confirm": {
+      "suspend": {
+        "title": "Uhagarika {{name}}?",
+        "body": "Abakozi bayo basohorwa ako kanya kandi nta muntu ushobora kuyikoramo kugeza uyisubijeho.",
+        "confirm": "Hagarika koperative"
+      },
+      "restore": {
+        "title": "Usubizaho {{name}}?",
+        "body": "Abakozi bayo bashobora kongera kwinjira bakomeze aho bari bagejeje.",
+        "confirm": "Subizaho koperative"
+      },
+      "archive": {
+        "title": "Ushyingura {{name}}?",
+        "body": "Inyandiko zigumaho kugira ngo zibashe kurebwa, ariko koperative ifungwa burundu. Banza uhagarike abakozi basigaye.",
+        "confirm": "Shyingura koperative"
+      }
+    },
+    "form": {
+      "title": "Koperative nshya",
+      "description": "Koperative n'umuyobozi wayo wa mbere bashyirwaho icyarimwe.",
+      "submit": "Shyiraho koperative",
+      "managerSection": "Umuyobozi wa mbere",
+      "managerHint": "Uyu muntu yoherezwa umurongo wo kwihitiramo ijambobanga, akaba umuyobozi.",
+      "typesError": "Ntitwashoboye kuzana ubwoko bwa koperative. Funga hanyuma wongere ugerageze."
+    },
+    "fields": {
+      "name": "Izina rya koperative",
+      "code": "Kode ngufi",
+      "codeHint": "Inyuguti nkuru, imibare na kadomo, urugero ABAHUZA-HUYE.",
+      "type": "Icyo koperative ikora",
+      "typePlaceholder": "Hitamo ubwoko",
+      "registrationNumber": "Nomero y'iyandikwa",
+      "province": "Intara",
+      "provincePlaceholder": "Hitamo intara",
+      "district": "Akarere",
+      "sector": "Umurenge",
+      "cell": "Akagari",
+      "village": "Umudugudu",
+      "locale": "Ururimi rwo gutangira",
+      "localePlaceholder": "Koresha urwa sisitemu",
+      "managerFullName": "Amazina yose y'umuyobozi",
+      "managerEmail": "Aderesi ya imeyili y'umuyobozi"
+    },
+    "fieldErrors": {
+      "name": "Andika izina rya koperative rifite nibura inyuguti eshatu.",
+      "code": "Koresha inyuguti nkuru, imibare na kadomo gusa, utangire ku nyuguti.",
+      "type": "Hitamo icyo koperative ikora.",
+      "province": "Hitamo intara.",
+      "district": "Andika akarere.",
+      "sector": "Andika umurenge.",
+      "cell": "Andika akagari.",
+      "village": "Andika umudugudu.",
+      "managerFullName": "Andika amazina yose y'umuyobozi.",
+      "managerEmail": "Andika aderesi ya imeyili nyayo y'umuyobozi."
+    },
+    "created": {
+      "withAccount": "{{name}} yiteguye. Twohereje {{email}} umurongo wo kwihitiramo ijambobanga.",
+      "existingAccount": "{{name}} yiteguye. {{email}} yari asanzwe afite konti, ubu ni umuyobozi wayo."
+    }
+  },
+  "users": {
+    "title": "Abakoresha sisitemu",
+    "description": "Konti zose, koperative zirimo, n'abemerewe gucunga sisitemu yose.",
+    "tableCaption": "Urutonde rwa konti ziri kuri sisitemu, imiterere yazo, uburenganzira bwa sisitemu na koperative zirimo.",
+    "newButton": "Ukoresha mushya",
+    "search": {
+      "label": "Shakisha abantu",
+      "placeholder": "Izina cyangwa aderesi ya imeyili"
+    },
+    "statusFilter": {
+      "label": "Imiterere",
+      "all": "Imiterere yose"
+    },
+    "status": {
+      "ACTIVE": "Ikora",
+      "SUSPENDED": "Yahagaritswe"
+    },
+    "columns": {
+      "name": "Umuntu",
+      "status": "Imiterere",
+      "platformAdmin": "Uburenganzira kuri sisitemu",
+      "cooperatives": "Koperative arimo",
+      "lastLogin": "Ubwanyuma yinjiye",
+      "actions": "Ibikorwa"
+    },
+    "platformAdmin": {
+      "yes": "Acunga sisitemu",
+      "no": "Konti isanzwe"
+    },
+    "memberships": {
+      "none": "Ntari mu koperative"
+    },
+    "lastLogin": {
+      "never": "Ntiyinjiye na rimwe"
+    },
+    "mustChangePassword": "Ntiyashyizeho ijambobanga",
+    "locked": "Yafunzwe kugeza {{when}}",
+    "self": {
+      "badge": "Ni wowe",
+      "reason": "Ntushobora guhindura uburenganzira bwawe. Saba undi ucunga sisitemu abikore."
+    },
+    "empty": {
+      "title": "Nta konti irahari",
+      "body": "Shyiraho konti ya mbere kugira ngo hagire umuntu ushobora kwinjira."
+    },
+    "noResults": {
+      "title": "Nta muntu uhuye n'ibyo washakishije",
+      "body": "Gerageza andi magambo, cyangwa usibe muyunguruzi kugira ngo wongere ubone bose."
+    },
+    "error": {
+      "body": "Ntitwashoboye kuzana urutonde rwa konti. Reba umurandasi wawe hanyuma wongere ugerageze."
+    },
+    "pagination": {
+      "summary": "Urebye kuva {{from}} kugera {{to}} mu {{total}}"
+    },
+    "actions": {
+      "suspend": "Guhagarika",
+      "restore": "Gusubizaho",
+      "grantAdmin": "Muhe uburenganzira",
+      "revokeAdmin": "Mwambure uburenganzira"
+    },
+    "confirm": {
+      "suspend": {
+        "title": "Uhagarika {{name}}?",
+        "body": "Asohorwa ako kanya kandi ntashobora kongera kwinjira kugeza usubijeho konti ye.",
+        "confirm": "Hagarika konti"
+      },
+      "restore": {
+        "title": "Usubizaho {{name}}?",
+        "body": "Ashobora kongera kwinjira akoresheje ijambobanga asanzwe afite.",
+        "confirm": "Subizaho konti"
+      },
+      "grantAdmin": {
+        "title": "Uha {{name}} uburenganzira kuri sisitemu?",
+        "body": "Azashobora gushyiraho koperative na konti, no kuzihagarika, kuri sisitemu yose.",
+        "confirm": "Muhe uburenganzira kuri sisitemu"
+      },
+      "revokeAdmin": {
+        "title": "Wambura {{name}} uburenganzira kuri sisitemu?",
+        "body": "Akomeza akazi ke mu koperative ariko ntakibona amapaji ya sisitemu.",
+        "confirm": "Mwambure uburenganzira kuri sisitemu"
+      }
+    },
+    "form": {
+      "title": "Ukoresha mushya",
+      "description": "Konti ishyirwaho idafite ijambobanga; twohereza umurongo wo kwiyihitiramo.",
+      "submit": "Shyiraho konti"
+    },
+    "fields": {
+      "fullName": "Amazina yose",
+      "email": "Aderesi ya imeyili",
+      "emailHint": "Umurongo wo kwihitiramo ijambobanga wohererezwa hano.",
+      "platformAdmin": "Yemerewe gucunga sisitemu",
+      "platformAdminHint": "Ubu uburenganzira buhabwa abantu bake bacunga sisitemu yose.",
+      "locale": "Ururimi rwo gutangira",
+      "localePlaceholder": "Koresha urwa sisitemu"
+    },
+    "fieldErrors": {
+      "fullName": "Andika amazina yose y'uwo muntu.",
+      "email": "Andika aderesi ya imeyili nyayo."
+    },
+    "created": "{{name}} ashobora kwihitiramo ijambobanga akoresheje umurongo twohereje kuri {{email}}."
+  },
+  "settings": {
+    "title": "Igenamiterere rya sisitemu",
+    "description": "Igenamiterere rireba sisitemu yose, atari koperative imwe.",
+    "panel": {
+      "title": "Koperative nshya",
+      "description": "Ibyo koperative ihabwa igihe ishyizweho."
+    },
+    "fields": {
+      "defaultLocale": "Ururimi koperative nshya itangirira",
+      "defaultLocaleHint": "Koperative izashyirwaho kuva ubu izifungura muri uru rurimi. Izisanzweho zigumana urwazo."
+    },
+    "saved": "Byabitswe. Koperative nshya zizatangira muri uru rurimi.",
+    "error": {
+      "save": "Ntitwashoboye kubika iryo genamiterere. Ongera ugerageze.",
+      "load": "Ntitwashoboye kuzana igenamiterere rya sisitemu."
+    }
+  },
+  "health": {
+    "title": "Ubuzima bwa sisitemu",
+    "description": "Kumenya niba sisitemu isubiza, n'ingano y'ibyo ibitse.",
+    "refresh": "Ongera ugenzure",
+    "database": {
+      "title": "Ububiko bw'amakuru",
+      "reachable": "Ububiko bw'amakuru burasubiza, mu milisegonda {{latency}}.",
+      "reachableNoLatency": "Ububiko bw'amakuru burasubiza.",
+      "unreachable": "Ububiko bw'amakuru ntiburasubiza. Nta kintu gishobora kubikwa cyangwa gusomwa kugeza bugarutse.",
+      "badgeOk": "Burasubiza",
+      "badgeDown": "Ntiburasubiza"
+    },
+    "counts": {
+      "title": "Ibyo sisitemu ibitse",
+      "cooperatives": "Koperative",
+      "activeCooperatives": "Koperative zikora",
+      "users": "Konti",
+      "activeUsers": "Konti zikora",
+      "platformAdmins": "Abacunga sisitemu"
+    },
+    "checkedAt": "Byagenzuwe saa {{when}}",
+    "error": {
+      "body": "Ntitwashoboye kureba ubuzima bwa sisitemu. Ongera ugerageze."
+    }
+  },
+  "apiErrors": {
+    "archiveHasStaff": "Banza uhagarike abakozi bakiri gukora muri iyi koperative mbere yo kuyishyingura.",
+    "notSelf": "Ntushobora guhindura uburenganzira bwawe. Saba undi ucunga sisitemu abikore.",
+    "lastPlatformAdmin": "Uyu ni we wenyine usigaye ucunga sisitemu. Banza ushyireho undi.",
+    "cooperativeCodeTaken": "Indi koperative isanzwe ikoresha iyo kode ngufi. Hitamo indi.",
+    "emailTaken": "Konti ifite iyo aderesi ya imeyili isanzwe ihari.",
+    "managerSuspended": "Iyo konti yahagaritswe. Banza uyisubizeho mbere yo kumugira umuyobozi.",
+    "registrationNumberTaken": "Indi koperative isanzwe yanditse kuri iyo nomero."
+  },
+  "provinces": {
+    "KIGALI": "Umujyi wa Kigali",
+    "NORTHERN": "Intara y'Amajyaruguru",
+    "SOUTHERN": "Intara y'Amajyepfo",
+    "EASTERN": "Intara y'Iburasirazuba",
+    "WESTERN": "Intara y'Iburengerazuba"
+  }
+}

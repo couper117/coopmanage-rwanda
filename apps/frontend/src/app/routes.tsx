@@ -6,6 +6,10 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import { adminRoutes } from '@/features/admin/adminRoutes'
+import { CooperativeSettingsPage } from '@/pages/settings/CooperativeSettingsPage'
+import { PreferencesPage } from '@/pages/settings/PreferencesPage'
+import { StaffPage } from '@/pages/settings/StaffPage'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
@@ -23,7 +27,7 @@ import { ALL_NAV_ITEMS } from './navigation'
  * router and assert what a user actually sees.
  */
 const pendingRoutes: RouteObject[] = ALL_NAV_ITEMS.filter(
-  (item) => item.availableFromPhase > 2,
+  (item) => item.availableFromPhase > 3,
 ).map((item) => ({
   path: item.to,
   element: <ModulePendingPage moduleKey={item.key} phase={item.availableFromPhase} />,
@@ -43,6 +47,31 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'profile', element: <ProfilePage /> },
+      {
+        path: 'settings/cooperative',
+        element: (
+          <RequirePermission permission="cooperative:view">
+            <CooperativeSettingsPage />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'settings/preferences',
+        element: (
+          <RequirePermission permission="cooperative:view">
+            <PreferencesPage />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'settings/staff',
+        element: (
+          <RequirePermission permission="staff:view">
+            <StaffPage />
+          </RequirePermission>
+        ),
+      },
+      ...adminRoutes,
       {
         path: 'settings/audit',
         element: (

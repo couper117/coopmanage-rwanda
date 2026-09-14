@@ -1,0 +1,276 @@
+{
+  "cooperatives": {
+    "title": "Cooperatives",
+    "description": "Every cooperative on the platform, with its status and its staff numbers.",
+    "tableCaption": "Cooperatives on the platform, with status, location and staff numbers.",
+    "newButton": "New cooperative",
+    "search": {
+      "label": "Search cooperatives",
+      "placeholder": "Name, code or district"
+    },
+    "statusFilter": {
+      "label": "Status",
+      "all": "Any status"
+    },
+    "demoFilter": {
+      "label": "Include demonstration cooperatives",
+      "description": "Cooperatives created for training and trials."
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "ARCHIVED": "Archived"
+    },
+    "demoBadge": "Demonstration",
+    "columns": {
+      "name": "Cooperative",
+      "type": "Type",
+      "status": "Status",
+      "location": "Where",
+      "staff": "Staff",
+      "created": "Registered",
+      "actions": "Actions"
+    },
+    "staffValue": "{{active}} of {{total}}",
+    "location": "{{district}} District, {{province}}",
+    "empty": {
+      "title": "No cooperatives yet",
+      "body": "Create the first cooperative together with the person who will manage it."
+    },
+    "noResults": {
+      "title": "No cooperative matches these filters",
+      "body": "Try another search, or clear the filters to see every cooperative again."
+    },
+    "error": {
+      "body": "We could not load the cooperatives. Check your connection and try again."
+    },
+    "pagination": {
+      "summary": "Showing {{from}} to {{to}} of {{total}}"
+    },
+    "actions": {
+      "suspend": "Suspend",
+      "restore": "Restore",
+      "archive": "Archive"
+    },
+    "confirm": {
+      "suspend": {
+        "title": "Suspend {{name}}?",
+        "body": "Its staff are signed out at once and nobody can work in the cooperative until you restore it.",
+        "confirm": "Suspend cooperative"
+      },
+      "restore": {
+        "title": "Restore {{name}}?",
+        "body": "Its staff can sign in again and carry on where they left off.",
+        "confirm": "Restore cooperative"
+      },
+      "archive": {
+        "title": "Archive {{name}}?",
+        "body": "The records are kept for reference but the cooperative is closed for good. Deactivate the remaining staff first.",
+        "confirm": "Archive cooperative"
+      }
+    },
+    "form": {
+      "title": "New cooperative",
+      "description": "The cooperative and its first manager are created in one step.",
+      "submit": "Create cooperative",
+      "managerSection": "First manager",
+      "managerHint": "This person receives a link to set their own password and becomes the manager.",
+      "typesError": "We could not load the cooperative types. Close this and try again."
+    },
+    "fields": {
+      "name": "Cooperative name",
+      "code": "Short code",
+      "codeHint": "Capital letters, digits and hyphens, for example ABAHUZA-HUYE.",
+      "type": "What the cooperative does",
+      "typePlaceholder": "Choose a type",
+      "registrationNumber": "Registration number",
+      "province": "Province",
+      "provincePlaceholder": "Choose a province",
+      "district": "District",
+      "sector": "Sector",
+      "cell": "Cell",
+      "village": "Village",
+      "locale": "Starting language",
+      "localePlaceholder": "Use the platform default",
+      "managerFullName": "Manager's full name",
+      "managerEmail": "Manager's email address"
+    },
+    "fieldErrors": {
+      "name": "Give the cooperative a name of at least three letters.",
+      "code": "Use capital letters, digits and hyphens only, starting with a letter.",
+      "type": "Choose what the cooperative does.",
+      "province": "Choose the province.",
+      "district": "Write the district.",
+      "sector": "Write the sector.",
+      "cell": "Write the cell.",
+      "village": "Write the village.",
+      "managerFullName": "Write the manager's full name.",
+      "managerEmail": "Write a valid email address for the manager."
+    },
+    "created": {
+      "withAccount": "{{name}} is ready. We sent {{email}} a link for setting a password.",
+      "existingAccount": "{{name}} is ready. {{email}} already had an account and is now its manager."
+    }
+  },
+  "users": {
+    "title": "People using the platform",
+    "description": "Every account, the cooperatives it belongs to, and who may administer the platform.",
+    "tableCaption": "Accounts on the platform, with status, platform rights and cooperative memberships.",
+    "newButton": "New user",
+    "search": {
+      "label": "Search people",
+      "placeholder": "Name or email address"
+    },
+    "statusFilter": {
+      "label": "Status",
+      "all": "Any status"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "columns": {
+      "name": "Person",
+      "status": "Status",
+      "platformAdmin": "Platform rights",
+      "cooperatives": "Cooperatives",
+      "lastLogin": "Last signed in",
+      "actions": "Actions"
+    },
+    "platformAdmin": {
+      "yes": "Administers the platform",
+      "no": "Ordinary account"
+    },
+    "memberships": {
+      "none": "No cooperative yet"
+    },
+    "lastLogin": {
+      "never": "Has never signed in"
+    },
+    "mustChangePassword": "Password not set yet",
+    "locked": "Locked until {{when}}",
+    "self": {
+      "badge": "This is you",
+      "reason": "You cannot change your own access. Ask another platform administrator to do it."
+    },
+    "empty": {
+      "title": "No accounts yet",
+      "body": "Create the first account so somebody can sign in to the platform."
+    },
+    "noResults": {
+      "title": "Nobody matches these filters",
+      "body": "Try another search, or clear the filters to see everybody again."
+    },
+    "error": {
+      "body": "We could not load the accounts. Check your connection and try again."
+    },
+    "pagination": {
+      "summary": "Showing {{from}} to {{to}} of {{total}}"
+    },
+    "actions": {
+      "suspend": "Suspend",
+      "restore": "Restore",
+      "grantAdmin": "Make administrator",
+      "revokeAdmin": "Withdraw administrator"
+    },
+    "confirm": {
+      "suspend": {
+        "title": "Suspend {{name}}?",
+        "body": "They are signed out at once and cannot sign in again until you restore the account.",
+        "confirm": "Suspend account"
+      },
+      "restore": {
+        "title": "Restore {{name}}?",
+        "body": "They can sign in again with the password they already have.",
+        "confirm": "Restore account"
+      },
+      "grantAdmin": {
+        "title": "Give {{name}} platform rights?",
+        "body": "They will be able to create cooperatives and accounts, and to suspend them, across the whole platform.",
+        "confirm": "Give platform rights"
+      },
+      "revokeAdmin": {
+        "title": "Withdraw platform rights from {{name}}?",
+        "body": "They keep their cooperative work but lose every platform screen.",
+        "confirm": "Withdraw platform rights"
+      }
+    },
+    "form": {
+      "title": "New user",
+      "description": "The account is created without a password; we send a link for setting one.",
+      "submit": "Create account"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email address",
+      "emailHint": "The link for setting a password goes here.",
+      "platformAdmin": "May administer the platform",
+      "platformAdminHint": "Give this only to the few people who look after the whole platform.",
+      "locale": "Starting language",
+      "localePlaceholder": "Use the platform default"
+    },
+    "fieldErrors": {
+      "fullName": "Write the person's full name.",
+      "email": "Write a valid email address."
+    },
+    "created": "{{name}} can now set a password using the link we sent to {{email}}."
+  },
+  "settings": {
+    "title": "Platform settings",
+    "description": "The settings that apply to the whole platform rather than to one cooperative.",
+    "panel": {
+      "title": "New cooperatives",
+      "description": "What a cooperative gets when it is created."
+    },
+    "fields": {
+      "defaultLocale": "Starting language for a new cooperative",
+      "defaultLocaleHint": "A cooperative created from now on opens in this language. The ones already there keep theirs."
+    },
+    "saved": "Saved. New cooperatives will start in this language.",
+    "error": {
+      "save": "We could not save that setting. Try again.",
+      "load": "We could not load the platform settings."
+    }
+  },
+  "health": {
+    "title": "Platform health",
+    "description": "Whether the platform is answering, and how much it is carrying.",
+    "refresh": "Check again",
+    "database": {
+      "title": "Database",
+      "reachable": "The database is answering, in {{latency}} milliseconds.",
+      "reachableNoLatency": "The database is answering.",
+      "unreachable": "The database is not answering. Nothing can be saved or read until it recovers.",
+      "badgeOk": "Reachable",
+      "badgeDown": "Not reachable"
+    },
+    "counts": {
+      "title": "What the platform holds",
+      "cooperatives": "Cooperatives",
+      "activeCooperatives": "Active cooperatives",
+      "users": "Accounts",
+      "activeUsers": "Active accounts",
+      "platformAdmins": "Platform administrators"
+    },
+    "checkedAt": "Checked at {{when}}",
+    "error": {
+      "body": "We could not read the platform health. Try again."
+    }
+  },
+  "apiErrors": {
+    "archiveHasStaff": "Deactivate the staff who are still working there before archiving this cooperative.",
+    "notSelf": "You cannot change your own access. Ask another platform administrator to do it.",
+    "lastPlatformAdmin": "This is the only platform administrator left. Appoint another one first.",
+    "cooperativeCodeTaken": "Another cooperative already uses that short code. Choose a different one.",
+    "emailTaken": "An account with that email address already exists.",
+    "managerSuspended": "That account is suspended. Restore it before making the person a manager.",
+    "registrationNumberTaken": "Another cooperative is already registered with that number."
+  },
+  "provinces": {
+    "KIGALI": "Kigali City",
+    "NORTHERN": "Northern Province",
+    "SOUTHERN": "Southern Province",
+    "EASTERN": "Eastern Province",
+    "WESTERN": "Western Province"
+  }
+}

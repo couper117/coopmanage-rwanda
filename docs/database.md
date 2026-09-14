@@ -186,6 +186,15 @@ footer text, and other per-tenant toggles that do not deserve a column.
 
 `id`, `key` unique, `value` jsonb, `updated_by_id`, `updated_at`. Platform-wide configuration.
 
+Neither settings table accepts an arbitrary key. Both are validated against the catalogue in
+`packages/shared/src/settings.ts`, which declares each key, the shape of its value and its default.
+An unknown key is refused, and a stored value that no longer fits its validator falls back to the
+default rather than breaking every screen that reads it.
+
+`updated_by_id` is `RESTRICT`, in line with the convention, because in production a user is
+suspended rather than deleted. The test teardown clears that authorship before removing a test
+user, which is the only context where a user is genuinely deleted.
+
 ---
 
 ## 5. Members (M4)

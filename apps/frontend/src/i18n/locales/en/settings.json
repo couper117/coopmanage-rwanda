@@ -1,0 +1,62 @@
+{
+  "cooperative": {
+    "title": "Cooperative profile",
+    "description": "Who your cooperative is and where it operates",
+    "identityTitle": "Registered identity",
+    "identityDescription": "Set when the cooperative was created",
+    "identityNote": "The code, type and currency are set by the platform and cannot be changed here.",
+    "code": "Cooperative code",
+    "type": "Type",
+    "currency": "Currency",
+    "detailsTitle": "Details",
+    "readOnly": "You can see these details but not change them. A manager can update them.",
+    "name": "Cooperative name",
+    "registrationNumber": "RCA registration number",
+    "tinNumber": "TIN number",
+    "province": "Province",
+    "district": "District",
+    "sector": "Sector",
+    "cell": "Cell",
+    "village": "Village",
+    "addressLine": "Street address",
+    "phone": "Office phone",
+    "phoneHint": "For example 0788 123 456",
+    "email": "Office email",
+    "defaultLocale": "Default language",
+    "defaultLocaleHint": "The language new staff start in",
+    "memberCodePrefix": "Member code prefix",
+    "memberCodePrefixHint": "Member codes look like {{example}}",
+    "save": "Save changes",
+    "saved": "Your changes have been saved.",
+    "loadFailed": "We could not load the cooperative profile."
+  },
+  "preferences": {
+    "title": "Preferences",
+    "description": "Choose which parts of CoopManage your cooperative uses",
+    "modulesTitle": "Modules",
+    "modulesDescription": "Switch off what you do not use. Nothing is deleted, and you can switch it back on at any time.",
+    "readOnly": "You can see these preferences but not change them. A manager can update them.",
+    "saved": "Saved",
+    "loadFailed": "We could not load your preferences.",
+    "alwaysOnTitle": "Always available",
+    "alwaysOnDescription": "Every cooperative needs these, so they cannot be switched off.",
+    "modules": {
+      "contributions": "Membership fees, savings and share capital",
+      "inventory": "Stock received, issued and counted",
+      "products": "The list of what your cooperative handles",
+      "sales": "Sales to buyers, with receipts",
+      "buyers": "The organisations you sell to",
+      "meetings": "Meetings, attendance and decisions",
+      "documents": "Registration papers, contracts and certificates",
+      "announcements": "Notices for members and staff",
+      "assistant": "Asking questions about your own records"
+    }
+  },
+  "provinces": {
+    "KIGALI": "Kigali City",
+    "NORTHERN": "Northern Province",
+    "SOUTHERN": "Southern Province",
+    "EASTERN": "Eastern Province",
+    "WESTERN": "Western Province"
+  }
+}

@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
+  ALL_PERMISSIONS,
   COOPERATIVE_PERMISSIONS,
   ROLE_PERMISSIONS,
   type PermissionKey,
@@ -156,12 +157,35 @@ describe('2. route inventory test', () => {
   })
 
   it('names every permission a route declares in the shared catalogue', () => {
+    const catalogue = new Set<string>(ALL_PERMISSIONS)
     for (const route of routes) {
       if (route.access.kind !== 'PERMISSION') continue
       expect(
-        [...COOPERATIVE_PERMISSIONS].includes(route.access.permission as never),
-        `${route.path} declares ${route.access.permission}, which is not a cooperative permission`,
+        catalogue.has(route.access.permission),
+        `${route.path} declares ${route.access.permission}, which is not in the catalogue`,
       ).toBe(true)
+    }
+  })
+
+  /**
+   * Scope has to match the namespace. A cooperative route guarded by a `platform:*` key would be
+   * unreachable by any staff role, and a platform route guarded by a cooperative key would be
+   * reachable by ordinary staff — which is the more dangerous of the two mistakes.
+   */
+  it('guards cooperative routes with cooperative permissions and platform routes with platform ones', () => {
+    const cooperativeKeys = new Set<string>(COOPERATIVE_PERMISSIONS)
+    for (const route of routes) {
+      if (route.access.kind !== 'PERMISSION') continue
+      const isPlatformPath = route.path.startsWith('/admin')
+      const isPlatformKey = route.access.permission.startsWith('platform:')
+
+      expect(
+        isPlatformKey,
+        `${route.path} is ${isPlatformPath ? 'a platform' : 'a cooperative'} route but declares ${route.access.permission}`,
+      ).toBe(isPlatformPath)
+      if (!isPlatformPath) {
+        expect(cooperativeKeys.has(route.access.permission)).toBe(true)
+      }
     }
   })
 })
@@ -180,7 +204,14 @@ describe('3. cross-tenant test', () => {
    * The sweep is derived from the registry rather than from a hand-kept list, so a route added in
    * a later phase is covered the moment it is registered and cannot be forgotten.
    */
-  const tenantRoutes = registeredRoutes().filter((route) => route.access.kind === 'PERMISSION')
+  /**
+   * Cooperative-scoped routes only. The `/admin` surface carries no tenant at all and is swept
+   * separately in `tenancy.test.ts`, where a caller who is not a platform administrator is
+   * expected to get 404 rather than 403.
+   */
+  const tenantRoutes = registeredRoutes().filter(
+    (route) => route.access.kind === 'PERMISSION' && !route.path.startsWith('/admin'),
+  )
 
   it('has tenant-scoped routes to sweep', () => {
     expect(tenantRoutes.length).toBeGreaterThan(0)

@@ -34,5 +34,22 @@
   "tokenExpired": "Your session has expired. Please sign in again.",
   "invalidCredentials": "That email address and password do not match an account.",
   "accountLocked": "Too many failed attempts. Try again in {{minutes}} minutes.",
-  "resetTokenInvalid": "This reset link has expired or has already been used. Please ask for a new one."
+  "resetTokenInvalid": "This reset link has expired or has already been used. Please ask for a new one.",
+  "cooperative": {
+    "registrationNumberTaken": "That registration number is already in use by another cooperative."
+  },
+  "staff": {
+    "lastManager": "This is the only active manager. Appoint another manager first.",
+    "notSelf": "You cannot change your own role or status. Ask another manager to do it.",
+    "alreadyMember": "That person is already a member of staff here.",
+    "accountSuspended": "That account is suspended. A platform administrator must restore it first."
+  },
+  "admin": {
+    "cooperativeCodeTaken": "That cooperative code is already in use.",
+    "emailTaken": "An account with that email address already exists.",
+    "archiveHasStaff": "Deactivate the remaining staff before archiving this cooperative.",
+    "managerSuspended": "That account is suspended. Restore it before making them a manager.",
+    "notSelf": "You cannot change your own access. Ask another platform administrator.",
+    "lastPlatformAdmin": "This is the only platform administrator. Appoint another one first."
+  }
 }

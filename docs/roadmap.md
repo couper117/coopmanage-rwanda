@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 2 complete.** Phase 3 is next.
+Status: **Phase 3 complete.** Phase 4 is next.
 
 ---
 
@@ -193,7 +193,7 @@ logged. Phase 12 brings SMS and with it the first real channel.
 
 ---
 
-### Phase 3 — Cooperatives, staff, tenancy
+### Phase 3 — Cooperatives, staff, tenancy ✅
 
 - Cooperative creation, profile, logo, settings; cooperative types
 - Staff invitation, role assignment, deactivation, permission overrides
@@ -201,8 +201,40 @@ logged. Phase 12 brings SMS and with it the first real channel.
 - Platform administration: cooperative list, create, suspend; platform user management
 - The cross-tenant test harness, seeded with two cooperatives
 
-**Exit:** a user of Cooperative A receives `404` on every one of Cooperative B's identifiers, proven
-by the automated route sweep, and platform access is written to the audit log.
+Migration **M3** creates `CooperativeSetting` and `SystemSetting`, and the settings catalogue in
+`packages/shared/src/settings.ts` declares every key either may hold, so neither table can become
+an arbitrary JSON dump.
+
+**Exit:** met. The cross-tenant sweep in `apps/backend/test/tenancy.test.ts` is driven from the
+route registry, so a route added in a later phase is swept the moment it is registered; a route
+carrying a path parameter must be accounted for in one of its two tables or the build fails. It
+proves that Cooperative A's manager gets `403 NO_COOPERATIVE_ACCESS` on every tenant-scoped route
+when the header names Cooperative B, `404 NOT_FOUND` for every one of B's identifiers from inside
+A, and the same answer for an identifier that never existed as for one belonging to B. Every
+`/admin` route answers `404` to an ordinary manager. A platform administrator reaching into a
+cooperative writes `platform.tenant_access` to the audit log and still cannot write anything there.
+
+Four things are worth recording, because each one changed a decision or fixed a real defect.
+
+**Creating a cooperative did not let its manager in.** The transaction created the cooperative, the
+account and the membership, with a random password nobody knew and no way to set one. A test caught
+it, and the reset-link logic is now one function, `issuePasswordSetupLink`, shared by cooperative
+creation, platform user creation and staff invitation, because all three create an account for
+somebody else.
+
+**Prisma 7 reports a unique violation somewhere new.** The constraint name moved from `meta.target`
+to `meta.driverAdapterError.cause.constraint.index`, so a duplicate registration number surfaced as
+an opaque 500 instead of a 409. `lib/dbErrors.ts` now walks the metadata rather than reading one
+path, and pins both shapes in a unit test.
+
+**The phone validator rejected the way people write phone numbers.** `+250 788 123 456` failed
+because of where the spaces fell. Separators are now stripped before the digits are checked, and
+every number is stored as `+250788123456`. This lives in `packages/shared/src/phone.ts` because
+Phase 4 needs exactly the same rule for members, where a phone number is optional.
+
+**A cooperative can never be left unadministrable.** Demoting or deactivating the only active
+manager is refused, and nobody may change their own role or status. The platform has the same rule
+for its own administrators. Each one is a 409 with a message that says what to do instead.
 
 ---
 

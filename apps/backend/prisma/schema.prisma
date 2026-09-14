@@ -155,6 +155,8 @@ model User {
   invitedStaff        CooperativeStaff[]        @relation("StaffInviter")
   grantedOverrides    StaffPermissionOverride[]
   auditEntries        AuditLog[]
+  updatedCoopSettings CooperativeSetting[]
+  updatedSysSettings  SystemSetting[]
 
   @@index([status])
   @@map("users")
@@ -230,10 +232,11 @@ model Cooperative {
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  type     CooperativeType    @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  type     CooperativeType      @relation(fields: [typeId], references: [id], onDelete: Restrict)
   staff    CooperativeStaff[]
   units    UnitOfMeasure[]
   auditLog AuditLog[]
+  settings CooperativeSetting[]
 
   @@index([status])
   @@map("cooperatives")
@@ -343,4 +346,40 @@ model UnitOfMeasure {
   @@index([cooperativeId, isActive])
   @@index([baseUnitId])
   @@map("units_of_measure")
+}
+
+// ---------------------------------------------------------------------------
+// M3 (Phase 3) — configuration.
+// Per-tenant and platform-wide settings that do not deserve a column: low-stock
+// defaults, enabled modules, receipt footers, and the platform's own switches.
+// ---------------------------------------------------------------------------
+
+model CooperativeSetting {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  key           String
+  value         Json
+  updatedById   String?  @map("updated_by_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  updatedBy   User?       @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@unique([cooperativeId, key])
+  @@index([cooperativeId])
+  @@map("cooperative_settings")
+}
+
+model SystemSetting {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key         String   @unique
+  value       Json
+  updatedById String?  @map("updated_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@map("system_settings")
 }
