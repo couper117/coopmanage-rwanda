@@ -10,6 +10,7 @@ import {
   createStaffSession,
   createUser,
   login,
+  testEmail,
   setOverride,
   type Session,
   type TestUser,
@@ -65,7 +66,7 @@ describe('listing staff', () => {
   it('lets a secretary see the roster but not change it', async () => {
     await as(secretary, 'get', '/staff').expect(200)
     await as(secretary, 'post', '/staff/invite')
-      .send({ email: 'x@example.test', fullName: 'Ineza Aline', roleKey: 'VIEWER' })
+      .send({ email: testEmail('x'), fullName: 'Ineza Aline', roleKey: 'VIEWER' })
       .expect(403)
   })
 
@@ -77,7 +78,7 @@ describe('listing staff', () => {
 
 describe('inviting staff', () => {
   it('creates an account, links it and reports that the account is new', async () => {
-    const email = `invitee-${Date.now()}@example.test`
+    const email = testEmail('invitee')
     const response = await as(manager, 'post', '/staff/invite')
       .send({
         email,
@@ -101,7 +102,7 @@ describe('inviting staff', () => {
   })
 
   it('issues a single-use reset token so the person sets their own password', async () => {
-    const email = `token-${Date.now()}@example.test`
+    const email = testEmail('token')
     await as(manager, 'post', '/staff/invite')
       .send({ email, fullName: 'Habimana Eric', roleKey: 'VIEWER' })
       .expect(201)
@@ -141,7 +142,7 @@ describe('inviting staff', () => {
 
   it('refuses to grant a platform role through an invitation', async () => {
     await as(manager, 'post', '/staff/invite')
-      .send({ email: 'esc@example.test', fullName: 'Escalation Attempt', roleKey: 'SYSTEM_ADMIN' })
+      .send({ email: testEmail('esc'), fullName: 'Escalation Attempt', roleKey: 'SYSTEM_ADMIN' })
       .expect(422)
   })
 
@@ -433,7 +434,7 @@ describe('roles and permissions reference', () => {
 
 describe('audit trail', () => {
   it('records an invitation with who did it', async () => {
-    const email = `audited-${Date.now()}@example.test`
+    const email = testEmail('audited')
     await as(manager, 'post', '/staff/invite')
       .send({ email, fullName: 'Audited Person', roleKey: 'VIEWER' })
       .expect(201)

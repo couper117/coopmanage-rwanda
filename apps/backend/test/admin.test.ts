@@ -10,6 +10,7 @@ import {
   createStaffSession,
   createUser,
   login,
+  testEmail,
   type Session,
   type TestCooperative,
   type TestUser,
@@ -124,7 +125,7 @@ describe('cooperatives', () => {
 
   it('creates a cooperative and its first manager together', async () => {
     const code = `NEW-${randomUUID().slice(0, 6)}`.toUpperCase()
-    const email = `manager-${randomUUID().slice(0, 8)}@example.test`
+    const email = testEmail('manager')
     createdCooperativeCodes.push(code)
     createdUserEmails.push(email)
 
@@ -155,7 +156,7 @@ describe('cooperatives', () => {
 
   it('makes the new manager able to sign in only after setting a password', async () => {
     const code = `PWD-${randomUUID().slice(0, 6)}`.toUpperCase()
-    const email = `pwd-${randomUUID().slice(0, 8)}@example.test`
+    const email = testEmail('pwd')
     createdCooperativeCodes.push(code)
     createdUserEmails.push(email)
 
@@ -187,7 +188,7 @@ describe('cooperatives', () => {
 
   it('rolls back entirely when the code is already taken', async () => {
     const existing = await prisma.cooperative.findFirstOrThrow({ select: { code: true } })
-    const email = `rollback-${randomUUID().slice(0, 8)}@example.test`
+    const email = testEmail('rollback')
 
     const response = await asAdmin('post', '/admin/cooperatives')
       .send({
@@ -220,7 +221,7 @@ describe('cooperatives', () => {
         sector: 'Remera',
         cell: 'Rukiri',
         village: 'Amahoro',
-        manager: { email: 'bad@example.test', fullName: 'Bad Type' },
+        manager: { email: testEmail('bad'), fullName: 'Bad Type' },
       })
       .expect(422)
   })
@@ -293,7 +294,7 @@ describe('users', () => {
   })
 
   it('creates a user with an unusable password and a reset token', async () => {
-    const email = `created-${randomUUID().slice(0, 8)}@example.test`
+    const email = testEmail('created')
     createdUserEmails.push(email)
 
     const response = await asAdmin('post', '/admin/users')
@@ -402,7 +403,7 @@ describe('platform settings', () => {
       .expect(200)
 
     const code = `LOC-${randomUUID().slice(0, 6)}`.toUpperCase()
-    const email = `locale-${randomUUID().slice(0, 8)}@example.test`
+    const email = testEmail('locale')
     createdCooperativeCodes.push(code)
     createdUserEmails.push(email)
 

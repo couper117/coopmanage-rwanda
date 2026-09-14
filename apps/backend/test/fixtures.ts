@@ -16,6 +16,22 @@ import { clearPermissionCache } from '../src/modules/auth/permissions.service.js
 /** Marks every row a test creates, so teardown can find them all without guessing. */
 export const TEST_TAG = `test-${randomUUID().slice(0, 8)}`
 
+/** The domain every test account uses. Nothing real is ever on it. */
+export const TEST_EMAIL_DOMAIN = '@example.test'
+
+/**
+ * Builds an address for an account a test will create *through the API* — an invited member of
+ * staff, or the first manager of a new cooperative. Those rows never pass through the helpers
+ * here, so nothing tracks their ids and they were being left behind in the database.
+ *
+ * The suite's own `TEST_TAG` is in the address, which is what lets teardown find them. Scoping by
+ * the tag rather than by the whole test domain matters: vitest runs test files in parallel against
+ * one database, so a purge of everything on the domain deletes rows another file is still using.
+ */
+export function testEmail(prefix: string): string {
+  return `${prefix}-${TEST_TAG}-${randomUUID().slice(0, 6)}${TEST_EMAIL_DOMAIN}`
+}
+
 export const TEST_PASSWORD = 'correct-horse-battery-staple'
 
 const createdUserIds = new Set<string>()
@@ -191,7 +207,50 @@ export async function cleanupFixtures(): Promise<void> {
 
   await prisma.user.deleteMany({ where: { id: { in: userIds } } })
 
+  await purgeApiCreatedTestUsers()
+
   createdCooperativeIds.clear()
   createdUserIds.clear()
   clearPermissionCache()
+}
+
+/**
+ * Removes the accounts an endpoint created during this suite: invited staff, and the first manager
+ * of a cooperative created through the platform API. Matched by this suite's own tag, so it cannot
+ * touch a real account, a seeded one, or another test file's rows.
+ */
+async function purgeApiCreatedTestUsers(): Promise<void> {
+  const strays = await prisma.user.findMany({
+    where: { email: { contains: TEST_TAG } },
+    select: { id: true },
+  })
+  if (strays.length === 0) return
+  const ids = strays.map((row) => row.id)
+
+  await prisma.staffPermissionOverride.deleteMany({ where: { staff: { userId: { in: ids } } } })
+  await prisma.cooperativeStaff.deleteMany({ where: { userId: { in: ids } } })
+  await prisma.cooperativeStaff.updateMany({
+    where: { invitedById: { in: ids } },
+    data: { invitedById: null },
+  })
+  await prisma.refreshSession.deleteMany({ where: { userId: { in: ids } } })
+  await prisma.passwordResetToken.deleteMany({ where: { userId: { in: ids } } })
+  await prisma.systemSetting.updateMany({
+    where: { updatedById: { in: ids } },
+    data: { updatedById: null },
+  })
+  await prisma.cooperativeSetting.updateMany({
+    where: { updatedById: { in: ids } },
+    data: { updatedById: null },
+  })
+
+  await prisma.$executeRawUnsafe('ALTER TABLE audit_log DISABLE TRIGGER USER')
+  try {
+    await prisma.auditLog.deleteMany({ where: { actorUserId: { in: ids } } })
+    await prisma.auditLog.deleteMany({ where: { entityId: { in: ids } } })
+  } finally {
+    await prisma.$executeRawUnsafe('ALTER TABLE audit_log ENABLE TRIGGER USER')
+  }
+
+  await prisma.user.deleteMany({ where: { id: { in: ids } } })
 }
