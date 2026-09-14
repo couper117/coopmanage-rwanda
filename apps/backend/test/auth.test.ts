@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { API_PREFIX, createApp } from '../src/app.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import { hashToken } from '../src/lib/tokens.js'
+import { FORGOT_PASSWORD_LIMITS, LOGIN_LIMITS } from '../src/middleware/rateLimit.js'
 import { lockoutMinutes } from '../src/modules/auth/auth.service.js'
 import {
   addStaff,
@@ -626,4 +627,40 @@ describe('platform administrators in the session', () => {
     )
     expect(platformKeys).toEqual([])
   })
+})
+
+describe('login rate limits', () => {
+  /**
+   * The limits themselves are disabled under test, so this asserts the configuration rather than
+   * the behaviour: several staff of one cooperative share a single public address, and a per-IP
+   * allowance as tight as the per-account one locks the whole office out of its own records the
+   * moment a fourth person arrives. The per-account limit is what defends an account.
+   */
+  it('allows far more sign-ins per address than per account', () => {
+    expect(LOGIN_LIMITS.perEmail).toBe(5)
+    expect(LOGIN_LIMITS.perIp).toBeGreaterThanOrEqual(30)
+    expect(LOGIN_LIMITS.perIp).toBeGreaterThan(LOGIN_LIMITS.perEmail * 5)
+  })
+
+  it('does the same for password reset', () => {
+    expect(FORGOT_PASSWORD_LIMITS.perEmail).toBe(3)
+    expect(FORGOT_PASSWORD_LIMITS.perIp).toBeGreaterThan(FORGOT_PASSWORD_LIMITS.perEmail * 5)
+  })
+
+  it('lets a whole office sign in one after another', async () => {
+    const cooperative = await createCooperative('Shared Connection Cooperative')
+    const staff = await Promise.all([
+      createStaffSession(app, cooperative, 'MANAGER'),
+      createStaffSession(app, cooperative, 'ACCOUNTANT'),
+      createStaffSession(app, cooperative, 'SECRETARY'),
+      createStaffSession(app, cooperative, 'INVENTORY_OFFICER'),
+      createStaffSession(app, cooperative, 'VIEWER'),
+    ])
+
+    // A sixth sign-in from the same address, which the original per-IP limit of five refused.
+    const sixth = await createUser()
+    const session = await login(app, sixth)
+    expect(session.accessToken.length).toBeGreaterThan(0)
+    expect(staff).toHaveLength(5)
+  }, 60_000)
 })

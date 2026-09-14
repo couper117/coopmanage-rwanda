@@ -51,13 +51,38 @@ function byEmail(options: { windowMs: number; limit: number }): RateLimitRequest
   })
 }
 
-/** POST /auth/login: 5 per 15 minutes per IP and per email. */
-export const loginIpLimiter = build({ windowMs: 15 * MINUTE, limit: 5 })
-export const loginEmailLimiter = byEmail({ windowMs: 15 * MINUTE, limit: 5 })
+/**
+ * POST /auth/login.
+ *
+ * The per-email limit is the one that defends the account: five attempts against one address in
+ * fifteen minutes, which stops credential stuffing without help from anywhere else. Progressive
+ * lockout on the account itself sits behind it.
+ *
+ * The per-IP limit is deliberately much looser, and the reason is the users. A Rwandan
+ * cooperative office is one internet connection behind one public address, shared by the manager,
+ * the accountant, the secretary and the inventory officer. At five per fifteen minutes the fourth
+ * person to arrive in the morning cannot sign in, and neither can anyone else until the window
+ * passes — the software locking the whole office out of itself. Sixty still stops a single host
+ * from working through a list of addresses, which is what the per-IP limit is for; the per-email
+ * limit is what protects any individual account.
+ */
+export const LOGIN_LIMITS = { perIp: 60, perEmail: 5 } as const
+export const loginIpLimiter = build({ windowMs: 15 * MINUTE, limit: LOGIN_LIMITS.perIp })
+export const loginEmailLimiter = byEmail({ windowMs: 15 * MINUTE, limit: LOGIN_LIMITS.perEmail })
 
-/** POST /auth/forgot-password: 3 per hour per IP and per email. */
-export const forgotPasswordIpLimiter = build({ windowMs: 60 * MINUTE, limit: 3 })
-export const forgotPasswordEmailLimiter = byEmail({ windowMs: 60 * MINUTE, limit: 3 })
+/**
+ * POST /auth/forgot-password. Three per hour per address, for the same reason: it is the address
+ * that is being protected. The per-IP allowance again assumes a shared office connection.
+ */
+export const FORGOT_PASSWORD_LIMITS = { perIp: 30, perEmail: 3 } as const
+export const forgotPasswordIpLimiter = build({
+  windowMs: 60 * MINUTE,
+  limit: FORGOT_PASSWORD_LIMITS.perIp,
+})
+export const forgotPasswordEmailLimiter = byEmail({
+  windowMs: 60 * MINUTE,
+  limit: FORGOT_PASSWORD_LIMITS.perEmail,
+})
 
 /**
  * Liveness is polled continuously by the hosting platform and touches nothing, so it is exempt.

@@ -83,7 +83,10 @@ browser, so ordinary endpoints are not CSRF-exposed. The one cookie-authenticate
 
 ## 8. Rate limiting and abuse
 
-Limits are listed in `api.md` §1. Login and password reset are limited per IP and per account.
+Limits are listed in `api.md` §1. Login and password reset are limited per account tightly and per
+IP loosely, and the asymmetry is deliberate: staff of one cooperative share a single public
+address, so a tight per-IP limit locks the whole office out at once while doing nothing the
+per-account limit does not already do better.
 The assistant is limited per user and again per cooperative, and SMS per cooperative, because both
 cost money. Limits return `429`
 with a `Retry-After` header rather than failing silently.

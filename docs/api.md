@@ -95,6 +95,12 @@ returns unfiltered data.
 
 ### Rate limits
 
+The two authentication limits are deliberately asymmetric. The per-email limit is what protects an
+account, and it is tight. The per-IP limit is loose, because a cooperative office is one internet
+connection shared by all its staff: a tight per-IP limit means the fourth person to sign in that
+morning cannot, and neither can anyone else until the window passes. A limit that locks a
+cooperative out of its own records is not security, it is an outage.
+
 Limits apply to the whole API rather than being opted into per route, so an endpoint added later is
 covered without anyone remembering to enable it. The limit follows the request method; an endpoint
 needing something tighter adds its own on top. Liveness is exempt, because a hosting platform polls
@@ -103,8 +109,8 @@ connection and an anonymous caller must not be able to drive unbounded queries a
 
 | Scope                        | Limit                                                |
 | ---------------------------- | ---------------------------------------------------- |
-| `POST /auth/login`           | 5 per 15 min per IP **and** per email                |
-| `POST /auth/forgot-password` | 3 per hour per IP and per email                      |
+| `POST /auth/login`           | 5 per 15 min per email, 60 per 15 min per IP         |
+| `POST /auth/forgot-password` | 3 per hour per email, 30 per hour per IP             |
 | Mutating endpoints           | 60 per minute per user                               |
 | Read endpoints               | 300 per minute per user                              |
 | File upload                  | 20 per hour per user                                 |
