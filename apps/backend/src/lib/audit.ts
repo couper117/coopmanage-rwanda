@@ -95,6 +95,23 @@ export async function writeAudit(actor: AuditActor, input: AuditInput): Promise<
   }
 }
 
+/**
+ * Writes the trail entry inside the caller's transaction, so the entry and the action it records
+ * either both exist or neither does.
+ *
+ * `writeAudit` deliberately swallows a failure, because telling a cooperative their member was not
+ * registered when it was would be worse than a missing log line. That trade-off is wrong for an
+ * action whose whole point is being auditable — posting money — so this one lets the error
+ * propagate and take the transaction down with it.
+ */
+export async function auditWithin(
+  tx: Prisma.TransactionClient,
+  actor: AuditActor,
+  input: AuditInput,
+): Promise<void> {
+  await tx.auditLog.create({ data: buildRow(actor, input) })
+}
+
 /** The row, so a caller inside a transaction can insert it with `tx.auditLog.create`. */
 export function buildAuditRow(actor: AuditActor, input: AuditInput) {
   return buildRow(actor, input)

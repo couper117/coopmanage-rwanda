@@ -7,7 +7,7 @@ import { Alert, Button, EmptyState, Panel, SkeletonText } from '@/components/ui'
 import { fetchAuditPage } from '@/features/audit/audit.api'
 import { useApiError } from '@/hooks/useApiErrorMessage'
 import { useAuthStore } from '@/stores/authStore'
-import { toI18nKey } from '@/lib/messageKey'
+import { toI18nKey, translateParams } from '@/lib/messageKey'
 
 /**
  * Who did what, when. Read only by design: the trail is append-only in the database, and the
@@ -113,7 +113,7 @@ function Row({ entry, language }: { entry: AuditEntry; language: string }) {
           rendering an empty cell.
         */}
         {t(toI18nKey(entry.messageKey), {
-          ...entry.messageParams,
+          ...translateParams(entry.messageParams, (key) => t(key)),
           defaultValue: entry.action,
         })}
       </td>

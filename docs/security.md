@@ -38,6 +38,15 @@ Password rules: minimum 10 characters, checked against a list of the most common
 composition rules that push people towards `Password1!`. Invited staff must change the password on
 first login.
 
+The Argon2id parameters are 19 MiB of memory and three passes, which is what RFC 9106 recommends
+for a memory-constrained server. **Under `NODE_ENV=test` only, the cost drops to the library
+minimum.** The suite signs several hundred sessions in across thirteen parallel worker processes,
+and at production cost that contention was enough to push unrelated tests past their timeouts.
+`apps/backend/test/password.test.ts` asserts the parameter set used everywhere else, so the
+reduction cannot reach a deployment without that test failing. Nothing else about hashing differs:
+the cost is encoded in each stored hash, so raising the parameters later leaves old hashes
+verifying and replaces them at their owner's next sign-in.
+
 ## 3. Authorization and tenancy
 
 Covered in full by `permissions.md`. The two invariants: every non-public route declares a

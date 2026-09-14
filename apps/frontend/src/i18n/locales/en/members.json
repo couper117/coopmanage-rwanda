@@ -1,0 +1,357 @@
+{
+  "title": "Members",
+  "description": "Everyone who belongs to this cooperative, and what each of them has contributed.",
+  "tableCaption": "Members of this cooperative, with their member code, status, location and joining date.",
+  "loadFailed": "We could not load the member register. Check your connection and try again.",
+  "notFound": {
+    "title": "That member is not here",
+    "body": "The record may have been opened from an old link, or it belongs to another cooperative."
+  },
+  "stats": {
+    "total": "Members in the register",
+    "active": "Active members",
+    "newThisMonth": "Joined this month",
+    "withoutPhone": "Without a phone number",
+    "withoutPhoneHint": "This many members cannot be reached by SMS and have to be told another way.",
+    "wholeRegister": "These figures cover the whole register, not the filtered list below."
+  },
+  "search": {
+    "label": "Search members",
+    "placeholder": "Name, member code or phone number"
+  },
+  "sort": {
+    "label": "Order",
+    "lastName": "Family name, A to Z",
+    "-lastName": "Family name, Z to A",
+    "memberCode": "Member code, lowest first",
+    "-memberCode": "Member code, highest first",
+    "joinedOn": "Joining date, oldest first",
+    "-joinedOn": "Joining date, newest first"
+  },
+  "filters": {
+    "show": "Filters",
+    "showWithCount": "Filters ({{total}})",
+    "status": "Status",
+    "position": "Position",
+    "gender": "Gender",
+    "district": "District",
+    "sector": "Sector",
+    "joinedFrom": "Joined on or after",
+    "joinedTo": "Joined on or before",
+    "hasPhone": "Phone number",
+    "anyStatus": "Any status",
+    "anyPosition": "Any position",
+    "anyGender": "Any gender",
+    "anyPhone": "With or without a phone",
+    "hasPhoneYes": "Has a phone number",
+    "hasPhoneNo": "Has no phone number",
+    "activeLabel": "Filters in use",
+    "searchField": "Search",
+    "chip": "{{field}}: {{value}}",
+    "remove": "Stop filtering by {{field}}"
+  },
+  "columns": {
+    "name": "Name",
+    "memberCode": "Member code",
+    "phone": "Phone",
+    "location": "Where they live",
+    "position": "Position",
+    "status": "Status",
+    "joinedOn": "Joined"
+  },
+  "noPhone": "No phone",
+  "noLocation": "Not recorded",
+  "status": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspended",
+    "EXITED": "Left the cooperative"
+  },
+  "position": {
+    "MEMBER": "Member",
+    "COMMITTEE": "Committee",
+    "SECRETARY": "Secretary",
+    "TREASURER": "Treasurer",
+    "VICE_CHAIR": "Vice chairperson",
+    "CHAIRPERSON": "Chairperson"
+  },
+  "gender": {
+    "FEMALE": "Woman",
+    "MALE": "Man",
+    "OTHER": "Other",
+    "UNSPECIFIED": "Not stated"
+  },
+  "province": {
+    "KIGALI": "Kigali City",
+    "NORTHERN": "Northern Province",
+    "SOUTHERN": "Southern Province",
+    "EASTERN": "Eastern Province",
+    "WESTERN": "Western Province"
+  },
+  "empty": {
+    "title": "No members yet",
+    "body": "Add your first cooperative member to start building the register. A name is all you need."
+  },
+  "emptyFiltered": {
+    "title": "Nobody matches these filters",
+    "body": "Try a different status or position, or clear the filters to see the whole register."
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}} members"
+  },
+  "actions": {
+    "add": "Add member",
+    "export": "Export CSV",
+    "edit": "Edit details",
+    "changeStatus": "Change status",
+    "recordContribution": "Record contribution",
+    "backToList": "Back to members"
+  },
+  "export": {
+    "failed": "We could not produce the file. Check your connection and try again."
+  },
+  "form": {
+    "createTitle": "Add a member",
+    "createDescription": "A first and family name is all that is required. Everything else can be filled in later from the office.",
+    "editTitle": "Edit {{name}}",
+    "editDescription": "Change what you know. Leaving a field empty clears what was stored there.",
+    "submitCreate": "Add member",
+    "submitSave": "Save changes",
+    "identitySection": "Who they are",
+    "contactSection": "How to reach them",
+    "locationSection": "Where they live",
+    "membershipSection": "Their membership",
+    "created": "{{name}} was added to the register as {{code}}.",
+    "updated": "{{name}}’s details were saved."
+  },
+  "fields": {
+    "firstName": "First name",
+    "lastName": "Family name",
+    "gender": "Gender",
+    "genderPlaceholder": "Choose if you know it",
+    "dateOfBirth": "Date of birth",
+    "nationalId": "National identity number",
+    "nationalIdHint": "Sixteen digits, as printed on the card.",
+    "phone": "Phone number",
+    "phoneHint": "Many members have no phone. Leave this empty when there is none.",
+    "email": "Email address",
+    "province": "Province",
+    "provincePlaceholder": "Choose a province",
+    "district": "District",
+    "sector": "Sector",
+    "cell": "Cell",
+    "village": "Village",
+    "joinedOn": "Date they joined",
+    "joinedOnHint": "Today, unless they joined earlier.",
+    "position": "Position in the cooperative",
+    "positionPlaceholder": "Ordinary member",
+    "notes": "Notes",
+    "notesHint": "Anything the office should remember about this member."
+  },
+  "fieldErrors": {
+    "firstName": "A first name is needed.",
+    "lastName": "A family name is needed.",
+    "nationalId": "A national identity number is sixteen digits.",
+    "phone": "That is not a Rwandan mobile number. Leave the field empty if there is none.",
+    "email": "That is not a valid email address.",
+    "dateOfBirth": "Write the date of birth as a real date.",
+    "joinedOn": "Write the joining date as a real date."
+  },
+  "statusDialog": {
+    "title": "Change the status of {{name}}",
+    "description": "A member is never deleted. Their record and their contribution history always stay in the books.",
+    "status": "New status",
+    "reason": "Reason",
+    "reasonHint": "Kept with the record, so the change can be explained later.",
+    "exitedOn": "Date they left",
+    "exitedOnHint": "The register keeps the period they were a member.",
+    "exitedOnRequired": "Say which day they left the cooperative.",
+    "submit": "Save the status",
+    "changed": "{{name}} is now shown as {{status}}."
+  },
+  "confirmStatus": {
+    "title": "Set {{name}} to {{status}}?",
+    "body": "They stop counting as an active member from now on. Everything already recorded stays exactly as it is, and you can set them back to active at any time.",
+    "confirm": "Yes, change the status"
+  },
+  "profile": {
+    "memberSince": "Member since {{date}}",
+    "exited": "Left on {{date}}",
+    "exitReason": "Reason given: {{reason}}",
+    "detailsTitle": "Recorded details",
+    "detailsDescription": "What the office holds about this member.",
+    "noValue": "Not recorded",
+    "nationalId": "National identity number",
+    "dateOfBirth": "Date of birth",
+    "email": "Email address",
+    "phone": "Phone number",
+    "address": "Where they live",
+    "position": "Position",
+    "notes": "Notes",
+    "createdAt": "Record created",
+    "updatedAt": "Last changed"
+  },
+  "summary": {
+    "shares": "Value of shares held",
+    "sharesQuantity": "{{quantity}} shares",
+    "contributions": "Contributions received",
+    "contributionsCount": "From {{quantity}} payments",
+    "payments": "Paid out to the member",
+    "quantitySupplied": "Produce delivered",
+    "documents": "Attached documents",
+    "notAvailableYet": "Not available until phase {{phase}}",
+    "notAvailable": "Not available yet",
+    "withheld": "Your role does not cover this figure"
+  },
+  "timeline": {
+    "title": "History",
+    "description": "Everything recorded for this member, newest first.",
+    "emptyTitle": "Nothing recorded yet",
+    "emptyBody": "Record a contribution or a share, and it will appear here with its date.",
+    "registered": "Joined the cooperative as {{code}}",
+    "exited": "Left the cooperative",
+    "share": {
+      "PURCHASE": "Bought {{quantity}} shares",
+      "TRANSFER_IN": "Received {{quantity}} shares from another member",
+      "TRANSFER_OUT": "Passed {{quantity}} shares to another member",
+      "REDEMPTION": "Cashed in {{quantity}} shares"
+    },
+    "contribution": {
+      "MEMBERSHIP_FEE": "Paid the membership fee",
+      "SAVINGS": "Paid into savings",
+      "SHARE_CAPITAL": "Paid towards share capital",
+      "SPECIAL_LEVY": "Paid a special levy",
+      "PENALTY": "Paid a penalty",
+      "OTHER": "Made a contribution"
+    }
+  },
+  "contributions": {
+    "title": "Contributions",
+    "description": "Money this member has paid to the cooperative.",
+    "caption": "Contributions from this member, with the date, type, amount and method of payment.",
+    "columns": {
+      "paidOn": "Date",
+      "type": "Type",
+      "amount": "Amount",
+      "method": "Paid by",
+      "reference": "Reference",
+      "status": "Status"
+    },
+    "total": "Total received",
+    "emptyTitle": "No contributions recorded",
+    "emptyBody": "When this member pays a fee, savings or a levy, record it here so the books match the cash.",
+    "withheld": "Your role does not cover contributions, so this list is not shown.",
+    "loadFailed": "We could not load this member’s contributions.",
+    "type": {
+      "MEMBERSHIP_FEE": "Membership fee",
+      "SAVINGS": "Savings",
+      "SHARE_CAPITAL": "Share capital",
+      "SPECIAL_LEVY": "Special levy",
+      "PENALTY": "Penalty",
+      "OTHER": "Other contribution"
+    },
+    "status": {
+      "POSTED": "Recorded",
+      "VOID": "Cancelled"
+    }
+  },
+  "shares": {
+    "title": "Shares",
+    "description": "Shares this member holds in the cooperative.",
+    "caption": "Share movements for this member, with the date, type, quantity and value.",
+    "holding": "Holding now",
+    "holdingQuantity": "{{quantity}} shares",
+    "columns": {
+      "issuedOn": "Date",
+      "type": "Movement",
+      "quantity": "Quantity",
+      "unitValue": "Value each",
+      "totalValue": "Total value",
+      "certificate": "Written certificate",
+      "status": "Status"
+    },
+    "emptyTitle": "No shares recorded",
+    "emptyBody": "This member holds no shares yet. A share purchase is recorded from the shares screen.",
+    "withheld": "Your role does not cover shares, so this list is not shown.",
+    "loadFailed": "We could not load this member’s shares.",
+    "type": {
+      "PURCHASE": "Bought",
+      "TRANSFER_IN": "Received",
+      "TRANSFER_OUT": "Passed on",
+      "REDEMPTION": "Cashed in"
+    },
+    "status": {
+      "POSTED": "Recorded",
+      "VOID": "Cancelled"
+    }
+  },
+  "method": {
+    "CASH": "Cash",
+    "MOBILE_MONEY": "Mobile money",
+    "BANK": "Bank transfer",
+    "CHEQUE": "Cheque",
+    "OTHER": "Another way"
+  },
+  "contributionDialog": {
+    "title": "Record a contribution",
+    "description": "For {{name}}, {{code}}. The money is written into the cooperative’s books at the same time.",
+    "submit": "Record the contribution",
+    "restate": "This records {{amount}} received from {{name}}.",
+    "recorded": "{{amount}} was recorded for {{name}}, reference {{reference}}.",
+    "noCategories": "No income categories have been set up yet, so a contribution cannot be posted to the books. Ask whoever keeps the accounts to add one."
+  },
+  "contributionFields": {
+    "type": "What the money is for",
+    "typePlaceholder": "Choose what it is for",
+    "amount": "Amount in RWF",
+    "amountHint": "Whole francs, for example 5000.",
+    "paidOn": "Date paid",
+    "method": "How it was paid",
+    "category": "Income category",
+    "categoryPlaceholder": "Choose a category",
+    "reference": "Receipt or transaction number",
+    "note": "Note"
+  },
+  "contributionErrors": {
+    "type": "Say what the money is for.",
+    "amount": "Write an amount greater than zero, using digits only.",
+    "method": "Say how the money was paid.",
+    "categoryId": "Choose the income category this money belongs to.",
+    "paidOn": "Write the date of payment as a real date."
+  },
+  "apiErrors": {
+    "nationalIdTaken": "Another member is already recorded with that national identity number.",
+    "contributionAlreadyVoid": "That contribution has already been cancelled."
+  },
+  "ledger": {
+    "title": "Contributions",
+    "description": "Every contribution the cooperative has received, newest first.",
+    "caption": "Contributions across the whole cooperative, with the member, the date, the amount and how it was paid.",
+    "filters": {
+      "from": "Paid from",
+      "to": "Paid until"
+    },
+    "anyType": "Any purpose",
+    "anyStatus": "Any state",
+    "columns": {
+      "member": "Member",
+      "reference": "Reference",
+      "action": "Action"
+    },
+    "filteredTotal": "Total for these filters",
+    "cancel": "Cancel",
+    "cancelTitle": "Cancel this contribution?",
+    "cancelDescription": "{{amount}} RWF recorded for {{name}}.",
+    "cancelConsequence": "The contribution stays in the record, and a matching reversal is written into the cooperative's books so the balance returns to what it was. Nothing is deleted.",
+    "cancelConfirm": "Cancel the contribution",
+    "cancelled": "The contribution for {{name}} was cancelled. The reversal is {{reference}}.",
+    "reason": "Why it is being cancelled",
+    "reasonHint": "One line, for example: recorded twice by mistake.",
+    "reasonRequired": "Say why this contribution is being cancelled.",
+    "emptyTitle": "No contributions yet",
+    "emptyBody": "A contribution is recorded from a member's profile, and appears here as soon as it is.",
+    "emptyFilteredTitle": "Nothing matches these filters",
+    "emptyFilteredBody": "Widen the dates or clear the filters to see more.",
+    "keep": "Keep it recorded"
+  }
+}

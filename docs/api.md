@@ -187,6 +187,9 @@ only once something reads it.
 | POST   | `/members/:id/shares/:shareId/void` | `shares:manage`                                |
 | GET    | `/members/:id/contributions`        | `contributions:view`                           |
 | POST   | `/members/:id/contributions`        | `contributions:create`                         |
+| GET    | `/members/form-options`             | `members:view`                                 |
+| GET    | `/contributions`                    | `contributions:view`                           |
+| POST   | `/contributions/:id/void`           | `contributions:void`                           |
 
 `GET /members` filters: `q`, `status`, `position`, `gender`, `district`, `sector`, `joinedFrom`,
 `joinedTo`, `hasPhone`. `/members/:id/summary` returns the figures behind the member profile, and each
@@ -196,6 +199,19 @@ needs `inventory:view` and attached documents need `documents:view`. Blocks the 
 see are omitted, and the payload names which ones were withheld so the interface can say so
 rather than display a misleading zero. Blocks whose tables arrive in a later phase are reported
 the same way until then. The timeline filters its entries by the same rule.
+
+`GET /contributions` is the cooperative-wide ledger, filtered by `memberId`, `type`, `status`,
+`from` and `to`. Its `meta.totalAmount` covers the whole filtered set rather than the page
+returned, because that is the figure a treasurer is asked for. `GET /members/form-options` returns
+the active income categories a contribution or a share purchase can be posted against, so the form
+needs one request rather than two.
+
+Voiding is the only correction. `POST /contributions/:id/void` and
+`POST /members/:id/shares/:shareId/void` mark the record `VOID` with a reason and write a reversal
+of the opposite kind into the ledger, carrying the original's accounting date so a correction never
+moves money between periods already reported on. Both rows stay visible. Voiding something already
+void is a `409`. A member's share holding and contribution totals are recomputed from the `POSTED`
+rows every time, so there is no stored balance to drift.
 
 There is no `DELETE /members/:id`. Deactivation is the only exit path.
 
@@ -360,7 +376,7 @@ This is the same reasoning that makes a wrong-tenant record report "not found" r
 | ------------------------------------------------------------------------------------ | ---------------------------------------------------- | --------------------------------------------------------- |
 | `/login`, `/forgot-password`, `/reset-password/:token`                               | Authentication                                       | public                                                    |
 | `/`                                                                                  | Dashboard                                            | `dashboard:view`                                          |
-| `/members`, `/members/new`, `/members/:id`, `/members/:id/edit`                      | Members                                              | `members:view` / `members:create` / `members:update`      |
+| `/members`, `/members/:id`                                                           | Members (adding and editing are dialogs, see below)  | `members:view`                                            |
 | `/finance`                                                                           | Money in, money out, balance                         | `finance:view`                                            |
 | `/finance/transactions`, `/finance/transactions/new`                                 | Ledger and entry                                     | `finance:view` / `finance:create`                         |
 | `/finance/categories`                                                                | Categories                                           | `finance:view`, editing needs `finance:categories:manage` |
@@ -386,6 +402,12 @@ This is the same reasoning that makes a wrong-tenant record report "not found" r
 | `/settings/audit`                                                                    | Audit log                                            | `audit:view`                                              |
 | `/profile`                                                                           | Own account and language                             | authenticated                                             |
 | `/admin/*`                                                                           | Platform administration, including platform settings | `platform:*`                                              |
+
+Adding and editing a member are dialogs over the register rather than the `/members/new` and
+`/members/:id/edit` routes planned here. A secretary registering people at a meeting adds several
+in a row, and a dialog keeps the list, the filters and the place in it; a route would throw that
+away and come back to page one each time. The form is the same component in both cases and both
+are still guarded by `members:create` and `members:update` on the control and on every request.
 
 ---
 

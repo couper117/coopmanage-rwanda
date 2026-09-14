@@ -560,7 +560,7 @@ implies a different phase is wrong.
 | M1        | 1     | `Permission`, `Role`, `RolePermission`, `CooperativeType`                                                                                 |
 | M2        | 2     | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog`, `UnitOfMeasure` |
 | M3        | 3     | `CooperativeSetting`, `SystemSetting`                                                                                                     |
-| M4        | 4     | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey`                                        |
+| M4 ✅     | 4     | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey`                                        |
 | M6        | 6     | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification`                                           |
 | M7        | 7     | `Buyer`, `Sale`, `SaleItem`                                                                                                               |
 | M8        | 8     | `ReportRun`                                                                                                                               |
@@ -593,3 +593,12 @@ draft of this document:
 
 There is no M5. Phase 5 adds indexes and seeded categories but creates no new table, which is the
 expected shape when a phase builds a module on tables an earlier phase had to create.
+
+**M4 as applied** (`20260914145445_m4_members_and_money`). Beyond what Prisma generates, the
+migration hand-appends the check constraints that keep a monetary row honest — a positive amount, a
+reversal that cannot point at itself — three trigram GIN indexes so a secretary can search on part
+of a name, part of a member code or the last digits of a phone number, and a partial unique index on
+the national identity number that applies per cooperative and ignores nulls, because the same person
+may belong to two cooperatives and most members have not given the number at all. Every reference
+in these tables is `RESTRICT`: in production none of these rows is ever deleted, a member who leaves
+is marked as having left, and a wrong figure is reversed rather than edited.

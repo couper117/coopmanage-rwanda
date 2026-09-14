@@ -30,30 +30,32 @@ this table, it is added here first and then used.
 
 ## 2. Money
 
-| English              | Kinyarwanda            | Notes                                                          |
-| -------------------- | ---------------------- | -------------------------------------------------------------- |
-| Money                | Amafaranga             |                                                                |
-| Money in / Income    | Amafaranga yinjiye     | Preferred over the formal _Injiza_ on dashboards               |
-| Money out / Expenses | Amafaranga yasohotse   |                                                                |
-| Balance              | Amafaranga asigaye     | Literally "the money remaining", which is what a manager wants |
-| Payment              | Ubwishyu               | To pay: _kwishyura_                                            |
-| Contribution         | Umusanzu               | Plural: _Imisanzu_                                             |
-| Share                | Umugabane              | Plural: _Imigabane_                                            |
-| Share capital        | Imigabane y'igishoro   |                                                                |
-| Membership fee       | Amafaranga yo kwinjira |                                                                |
-| Savings              | Ubwizigame             |                                                                |
-| Penalty              | Ihazabu                |                                                                |
-| Price                | Igiciro                |                                                                |
-| Unit price           | Igiciro cya buri kimwe |                                                                |
-| Total                | Igiteranyo             |                                                                |
-| Amount               | Ingano y'amafaranga    | Use _Ingano_ alone only for quantities                         |
-| Category             | Icyiciro               | Plural: _Ibyiciro_                                             |
-| Cash                 | Amafaranga mu ntoki    |                                                                |
-| Mobile money         | Mobile money           | Kept in English; this is how it is said                        |
-| Bank                 | Banki                  |                                                                |
-| Receipt              | Inyemezabwishyu        |                                                                |
-| Invoice              | Fagitire               |                                                                |
-| Currency: RWF        | RWF                    | Never translated                                               |
+| English               | Kinyarwanda            | Notes                                                          |
+| --------------------- | ---------------------- | -------------------------------------------------------------- |
+| Money                 | Amafaranga             |                                                                |
+| Money in / Income     | Amafaranga yinjiye     | Preferred over the formal _Injiza_ on dashboards               |
+| Money out / Expenses  | Amafaranga yasohotse   |                                                                |
+| Balance               | Amafaranga asigaye     | Literally "the money remaining", which is what a manager wants |
+| Payment               | Ubwishyu               | To pay: _kwishyura_                                            |
+| Contribution          | Umusanzu               | Plural: _Imisanzu_                                             |
+| Share                 | Umugabane              | Plural: _Imigabane_                                            |
+| Share capital         | Imigabane y'igishoro   |                                                                |
+| Membership fee        | Amafaranga yo kwinjira |                                                                |
+| Savings               | Ubwizigame             |                                                                |
+| Penalty               | Ihazabu                |                                                                |
+| Price                 | Igiciro                |                                                                |
+| Unit price            | Igiciro cya buri kimwe |                                                                |
+| Total                 | Igiteranyo             |                                                                |
+| Amount                | Ingano y'amafaranga    | Use _Ingano_ alone only for quantities                         |
+| Category              | Icyiciro               | Plural: _Ibyiciro_                                             |
+| Cash                  | Amafaranga mu ntoki    |                                                                |
+| Mobile money          | Mobile money           | Kept in English; this is how it is said                        |
+| Bank                  | Banki                  |                                                                |
+| Receipt               | Inyemezabwishyu        |                                                                |
+| Reversal / Correction | Igikosora              | The entry that cancels another. Plural: _Ibikosora_            |
+| Cancelled (a record)  | Byahagaritswe          | A thing. _Yahagaritswe_ for a person, as in a suspended member |
+| Invoice               | Fagitire               |                                                                |
+| Currency: RWF         | RWF                    | Never translated                                               |
 
 ## 3. Stock and products
 
@@ -165,6 +167,11 @@ this table, it is added here first and then used.
   qualify it.
 - **Guhagarika** covers both cancelling and suspending. Use _Kureka_ for abandoning an unsaved form
   and _Guhagarika_ for putting a record or a member out of service.
+- **English "Cancel" has the same problem, and it is worse.** On the contributions ledger a dialog
+  would otherwise carry "Cancel" to dismiss it beside "Cancel the contribution" to go ahead, which
+  are opposites. Where a screen cancels a record, the dismiss button says what keeping it means —
+  "Keep it recorded" — and never the shared _Cancel_. Kinyarwanda is already unambiguous here
+  because _Kureka_ and _Guhagarika_ are different words.
 - Do not translate **RWF**, **SMS**, **PDF**, **CSV** or **Mobile money**. Rwandan office staff use
   these terms in English and a translation would be less clear, not more.
 - Prefer the everyday word over the formal or academic one. The reader is a cooperative secretary in

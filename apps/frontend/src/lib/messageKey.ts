@@ -15,3 +15,28 @@ export function toI18nKey(key: string): string {
   if (!KNOWN_NAMESPACES.has(head)) return key
   return `${head}:${key.slice(separator + 1)}`
 }
+
+/**
+ * Resolves any parameter whose value names a translation key.
+ *
+ * The backend sends an enum inside an audit entry as a key rather than as its raw value, because
+ * `SAVINGS` in the middle of a Kinyarwanda sentence is not a translation. Anything that does not
+ * name a real namespace is left exactly as it arrived, which is what keeps a member's name, an
+ * amount or a reference untouched.
+ */
+export function translateParams(
+  params: Record<string, unknown> | null | undefined,
+  translate: (key: string) => string,
+): Record<string, unknown> {
+  if (!params) return {}
+  const resolved: Record<string, unknown> = {}
+  for (const [name, value] of Object.entries(params)) {
+    if (typeof value !== 'string') {
+      resolved[name] = value
+      continue
+    }
+    const key = toI18nKey(value)
+    resolved[name] = key === value ? value : translate(key)
+  }
+  return resolved
+}

@@ -1,7 +1,8 @@
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { HEADERS } from '@coopmanage/shared'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import {
   addStaff,
@@ -17,7 +18,7 @@ import {
   type TestCooperative,
 } from './fixtures.js'
 
-const app = createApp()
+const app = testApp()
 
 let cooperative: TestCooperative
 let manager: TestUser & Session & { staffId: string }

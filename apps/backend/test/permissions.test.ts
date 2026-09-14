@@ -9,7 +9,8 @@ import {
   type PermissionKey,
   type RoleKey,
 } from '@coopmanage/shared'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import { registeredRoutes } from '../src/lib/routeRegistry.js'
 import '../src/routes.js'
@@ -30,7 +31,7 @@ import {
  * permission model can be trusted: each one closes a way the model could be correct on paper and
  * wrong in the running application.
  */
-const app = createApp()
+const app = testApp()
 
 let cooperativeA: TestCooperative
 let cooperativeB: TestCooperative

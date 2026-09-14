@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { HEADERS } from '@coopmanage/shared'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import {
   cleanupFixtures,
@@ -16,7 +17,7 @@ import {
   type TestUser,
 } from './fixtures.js'
 
-const app = createApp()
+const app = testApp()
 
 let admin: TestUser & Session
 let secondAdmin: TestUser & Session

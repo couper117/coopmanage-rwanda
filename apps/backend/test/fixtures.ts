@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import request from 'supertest'
+import type { Server } from 'node:http'
 import type { Express } from 'express'
 import type { PermissionKey, RoleKey } from '@coopmanage/shared'
 import { API_PREFIX } from '../src/app.js'
@@ -31,6 +32,12 @@ export const TEST_EMAIL_DOMAIN = '@example.test'
 export function testEmail(prefix: string): string {
   return `${prefix}-${TEST_TAG}-${randomUUID().slice(0, 6)}${TEST_EMAIL_DOMAIN}`
 }
+
+/**
+ * What supertest is pointed at. A file hands over the long-lived listener from `server.ts`
+ * rather than the bare Express app, so no new port is bound per request.
+ */
+export type TestTarget = Server | Express
 
 export const TEST_PASSWORD = 'correct-horse-battery-staple'
 
@@ -137,7 +144,7 @@ export interface Session {
   cookies: string[]
 }
 
-export async function login(app: Express, user: TestUser): Promise<Session> {
+export async function login(app: TestTarget, user: TestUser): Promise<Session> {
   const response = await request(app)
     .post(`${API_PREFIX}/auth/login`)
     .send({ email: user.email, password: user.password })
@@ -152,7 +159,7 @@ export async function login(app: Express, user: TestUser): Promise<Session> {
 
 /** A ready-to-use staff member: user, membership and a live session. */
 export async function createStaffSession(
-  app: Express,
+  app: TestTarget,
   cooperative: TestCooperative,
   roleKey: RoleKey,
 ): Promise<TestUser & Session & { staffId: string }> {
@@ -163,12 +170,13 @@ export async function createStaffSession(
 }
 
 /**
- * Removes everything the run created, in dependency order.
+ * Removes what this file created, in dependency order, as the file finishes.
  *
- * The audit trigger is switched off for the duration. It is the mechanism that makes the trail
- * append only in every other context, and `audit.test.ts` asserts it is active; a test database
- * that could not be cleaned would instead grow without limit and eventually make the suite
- * depend on rows from a previous run.
+ * Deliberately stops short of the audit trail, the cooperatives and the accounts. Removing an
+ * audit row means switching off the append-only trigger, which is a change to the table for every
+ * connection, and vitest runs test files in parallel; a cooperative cannot go while its trail
+ * remains, and neither can a user. All three are handled once after the whole run, by
+ * `purge.ts`, where nothing is executing alongside it.
  */
 export async function cleanupFixtures(): Promise<void> {
   const cooperativeIds = [...createdCooperativeIds]
@@ -182,75 +190,22 @@ export async function cleanupFixtures(): Promise<void> {
   await prisma.refreshSession.deleteMany({ where: { userId: { in: userIds } } })
   await prisma.passwordResetToken.deleteMany({ where: { userId: { in: userIds } } })
 
-  await prisma.$executeRawUnsafe('ALTER TABLE audit_log DISABLE TRIGGER USER')
-  try {
-    await prisma.auditLog.deleteMany({
-      where: { OR: [{ cooperativeId: { in: cooperativeIds } }, { actorUserId: { in: userIds } }] },
-    })
-  } finally {
-    await prisma.$executeRawUnsafe('ALTER TABLE audit_log ENABLE TRIGGER USER')
-  }
-
-  await prisma.cooperative.deleteMany({ where: { id: { in: cooperativeIds } } })
-
-  // Settings record who last changed them, with RESTRICT on that reference, because in production
-  // a user is suspended and never deleted. A test does delete them, so the authorship is cleared
-  // first; the setting itself is not the user's and survives without them.
-  await prisma.systemSetting.updateMany({
-    where: { updatedById: { in: userIds } },
-    data: { updatedById: null },
+  // Members and money, in dependency order. Every reference in the M4 tables is RESTRICT, because
+  // in production none of these rows is ever deleted: a member who leaves is marked as having
+  // left, and a wrong figure is reversed. A test database still has to be emptiable, so the
+  // reversal link is cleared first and the rows are then removed child before parent.
+  await prisma.financeTransaction.updateMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+    data: { reversalOfId: null },
   })
-  await prisma.cooperativeSetting.updateMany({
-    where: { updatedById: { in: userIds } },
-    data: { updatedById: null },
-  })
-
-  await prisma.user.deleteMany({ where: { id: { in: userIds } } })
-
-  await purgeApiCreatedTestUsers()
+  await prisma.memberShare.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.contribution.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.financeTransaction.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.member.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.financeCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.idempotencyKey.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
 
   createdCooperativeIds.clear()
   createdUserIds.clear()
   clearPermissionCache()
-}
-
-/**
- * Removes the accounts an endpoint created during this suite: invited staff, and the first manager
- * of a cooperative created through the platform API. Matched by this suite's own tag, so it cannot
- * touch a real account, a seeded one, or another test file's rows.
- */
-async function purgeApiCreatedTestUsers(): Promise<void> {
-  const strays = await prisma.user.findMany({
-    where: { email: { contains: TEST_TAG } },
-    select: { id: true },
-  })
-  if (strays.length === 0) return
-  const ids = strays.map((row) => row.id)
-
-  await prisma.staffPermissionOverride.deleteMany({ where: { staff: { userId: { in: ids } } } })
-  await prisma.cooperativeStaff.deleteMany({ where: { userId: { in: ids } } })
-  await prisma.cooperativeStaff.updateMany({
-    where: { invitedById: { in: ids } },
-    data: { invitedById: null },
-  })
-  await prisma.refreshSession.deleteMany({ where: { userId: { in: ids } } })
-  await prisma.passwordResetToken.deleteMany({ where: { userId: { in: ids } } })
-  await prisma.systemSetting.updateMany({
-    where: { updatedById: { in: ids } },
-    data: { updatedById: null },
-  })
-  await prisma.cooperativeSetting.updateMany({
-    where: { updatedById: { in: ids } },
-    data: { updatedById: null },
-  })
-
-  await prisma.$executeRawUnsafe('ALTER TABLE audit_log DISABLE TRIGGER USER')
-  try {
-    await prisma.auditLog.deleteMany({ where: { actorUserId: { in: ids } } })
-    await prisma.auditLog.deleteMany({ where: { entityId: { in: ids } } })
-  } finally {
-    await prisma.$executeRawUnsafe('ALTER TABLE audit_log ENABLE TRIGGER USER')
-  }
-
-  await prisma.user.deleteMany({ where: { id: { in: ids } } })
 }

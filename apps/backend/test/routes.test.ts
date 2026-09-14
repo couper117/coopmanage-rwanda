@@ -1,12 +1,13 @@
 import request from 'supertest'
 import { afterAll, describe, expect, it } from 'vitest'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma } from '../src/lib/prisma.js'
 import { registeredRoutes } from '../src/lib/routeRegistry.js'
 // Importing the router populates the registry as a side effect of module loading.
 import '../src/routes.js'
 
-const app = createApp()
+const app = testApp()
 
 afterAll(async () => {
   await disconnectPrisma()

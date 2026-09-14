@@ -51,5 +51,17 @@
     "managerSuspended": "That account is suspended. Restore it before making them a manager.",
     "notSelf": "You cannot change your own access. Ask another platform administrator.",
     "lastPlatformAdmin": "This is the only platform administrator. Appoint another one first."
+  },
+  "member": {
+    "nationalIdTaken": "Another member of this cooperative is already recorded with that national identity number."
+  },
+  "contribution": {
+    "alreadyVoid": "That contribution has already been cancelled."
+  },
+  "share": {
+    "alreadyVoid": "That share movement has already been cancelled."
+  },
+  "finance": {
+    "alreadyVoid": "That entry has already been cancelled."
   }
 }

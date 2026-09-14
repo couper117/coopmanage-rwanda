@@ -51,5 +51,17 @@
     "managerSuspended": "Iyo konti yahagaritswe. Yisubizeho mbere yo kuyigira umuyobozi.",
     "notSelf": "Ntushobora guhindura uburenganzira bwawe. Saba undi ushinzwe sisitemu.",
     "lastPlatformAdmin": "Uyu ni we ushinzwe sisitemu umwe gusa. Banza ushyireho undi."
+  },
+  "member": {
+    "nationalIdTaken": "Undi munyamuryango w'iyi koperative asanzwe yanditswe kuri iyo nomero y'irangamuntu."
+  },
+  "contribution": {
+    "alreadyVoid": "Uwo musanzu usanzwe warahagaritswe."
+  },
+  "share": {
+    "alreadyVoid": "Iyo migabane isanzwe yarahagaritswe."
+  },
+  "finance": {
+    "alreadyVoid": "Icyo cyanditswe gisanzwe cyarahagaritswe."
   }
 }

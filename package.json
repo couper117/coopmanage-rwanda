@@ -29,7 +29,7 @@
     "db:studio": "npm run db:studio -w @coopmanage/backend",
     "db:reset": "npm run db:reset -w @coopmanage/backend",
     "prepare": "git config core.hooksPath .githooks || true",
-    "db:purge-test-data": "docker exec -i coopmanage-db psql -U coopmanage -d coopmanage -v ON_ERROR_STOP=1 -f - < scripts/purge-test-data.sql"
+    "db:purge-test-data": "npm run --workspace @coopmanage/backend purge-test-data"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

@@ -12,9 +12,11 @@ import {
 import argon2 from 'argon2'
 import { randomBytes } from 'node:crypto'
 import { COOPERATIVE_TYPES } from './seed-data/cooperative-types.js'
+import { buildDemoMembers, DEMO_FINANCE_CATEGORIES } from './seed-data/demo-members.js'
 import { DEMO_COOPERATIVE, DEMO_STAFF } from './seed-data/demo-cooperative.js'
 import { assertDescriptionsComplete, PERMISSION_DESCRIPTIONS } from './seed-data/permissions.js'
 import { ROLE_DESCRIPTIONS } from './seed-data/roles.js'
+import { nextFinanceReference, nextMemberCode } from '../src/lib/references.js'
 import { SYSTEM_UNITS } from './seed-data/units.js'
 
 /**
@@ -347,6 +349,220 @@ async function seedDemoCooperative(): Promise<void> {
   }
 
   console.log(`  demonstration cooperative: ${DEMO_COOPERATIVE.name} (${DEMO_STAFF.length} staff)`)
+
+  await seedFinanceCategories(cooperative.id)
+  await seedDemoMembers(cooperative.id)
+}
+
+/**
+ * Finance categories for a cooperative.
+ *
+ * A contribution cannot be recorded without one, so seeding these is what makes the demonstration
+ * cooperative usable rather than a shell. They are marked `isSystem`, which means they can be
+ * deactivated but not deleted.
+ */
+async function seedFinanceCategories(cooperativeId: string): Promise<void> {
+  for (const [kind, entries] of [
+    ['INCOME', DEMO_FINANCE_CATEGORIES.income],
+    ['EXPENSE', DEMO_FINANCE_CATEGORIES.expense],
+  ] as const) {
+    for (const entry of entries) {
+      await prisma.financeCategory.upsert({
+        where: { cooperativeId_kind_name: { cooperativeId, kind, name: entry.name } },
+        create: { cooperativeId, kind, name: entry.name, nameRw: entry.nameRw, isSystem: true },
+        update: { nameRw: entry.nameRw, isActive: true },
+      })
+    }
+  }
+}
+
+/**
+ * The register, and the money that hangs off it.
+ *
+ * Idempotent like the rest of the seed: it does nothing when the register is already populated,
+ * so running the seed twice does not double the cooperative's membership. Member codes come from
+ * the same allocator the application uses, so the demonstration data is indistinguishable from
+ * data a secretary entered.
+ */
+async function seedDemoMembers(cooperativeId: string): Promise<void> {
+  const existing = await prisma.member.count({ where: { cooperativeId } })
+  if (existing > 0) {
+    console.log(`  demonstration members: ${existing} already present, left alone`)
+    return
+  }
+
+  const [feeCategory, savingsCategory, shareCategory] = await Promise.all([
+    prisma.financeCategory.findFirstOrThrow({
+      where: { cooperativeId, kind: 'INCOME', name: 'Membership fees' },
+      select: { id: true },
+    }),
+    prisma.financeCategory.findFirstOrThrow({
+      where: { cooperativeId, kind: 'INCOME', name: 'Savings deposits' },
+      select: { id: true },
+    }),
+    prisma.financeCategory.findFirstOrThrow({
+      where: { cooperativeId, kind: 'INCOME', name: 'Share capital' },
+      select: { id: true },
+    }),
+  ])
+
+  // The demonstration manager, credited as the person who registered every member, so the audit
+  // trail and the "recorded by" fields read like a real cooperative's.
+  const managerEmail = DEMO_STAFF[0]?.email
+  const manager = managerEmail
+    ? await prisma.user.findUnique({ where: { email: managerEmail }, select: { id: true } })
+    : null
+
+  const members = buildDemoMembers(120)
+  let contributions = 0
+  let shares = 0
+
+  for (const [index, seed] of members.entries()) {
+    const joinedOn = new Date(`${seed.joinedOn}T00:00:00.000Z`)
+
+    // One transaction per member, so the code allocation is atomic exactly as it is in the
+    // application. Slower than a bulk insert, and the right thing: the seed exercises the same
+    // path a secretary does.
+    await prisma.$transaction(async (tx) => {
+      const memberCode = await nextMemberCode(tx, cooperativeId)
+      const member = await tx.member.create({
+        data: {
+          cooperativeId,
+          memberCode,
+          firstName: seed.firstName,
+          lastName: seed.lastName,
+          gender: seed.gender,
+          phone: seed.phone,
+          province: 'NORTHERN',
+          district: seed.district,
+          sector: seed.sector,
+          cell: seed.cell,
+          village: seed.village,
+          joinedOn,
+          position: seed.position,
+          status: seed.status,
+          exitedOn: seed.status === 'EXITED' ? joinedOn : null,
+          exitReason: seed.status === 'EXITED' ? 'Moved away from the district' : null,
+          createdById: manager?.id ?? null,
+          updatedById: manager?.id ?? null,
+        },
+        select: { id: true, memberCode: true },
+      })
+
+      // A membership fee for everyone, so every member has at least one figure on their profile.
+      const fee = 5000
+      const feeReference = await nextFinanceReference(tx, cooperativeId, 'IN', joinedOn)
+      const feeTransaction = await tx.financeTransaction.create({
+        data: {
+          cooperativeId,
+          reference: feeReference,
+          kind: 'INCOME',
+          categoryId: feeCategory.id,
+          amount: fee,
+          occurredAt: joinedOn,
+          method: 'CASH',
+          description: `MEMBERSHIP_FEE from ${seed.firstName} ${seed.lastName} (${member.memberCode})`,
+          sourceType: 'CONTRIBUTION',
+          memberId: member.id,
+          createdById: manager?.id ?? null,
+        },
+        select: { id: true },
+      })
+      await tx.contribution.create({
+        data: {
+          cooperativeId,
+          memberId: member.id,
+          type: 'MEMBERSHIP_FEE',
+          amount: fee,
+          paidOn: joinedOn,
+          method: 'CASH',
+          financeTransactionId: feeTransaction.id,
+          createdById: manager?.id ?? null,
+        },
+      })
+      contributions += 1
+
+      // Savings for roughly half, in varying amounts, so the totals are not uniform.
+      if (index % 2 === 0) {
+        const amount = 10000 + (index % 9) * 2500
+        const paidOn = new Date(Date.UTC(2026, index % 9, (index % 27) + 1))
+        const reference = await nextFinanceReference(tx, cooperativeId, 'IN', paidOn)
+        const transaction = await tx.financeTransaction.create({
+          data: {
+            cooperativeId,
+            reference,
+            kind: 'INCOME',
+            categoryId: savingsCategory.id,
+            amount,
+            occurredAt: paidOn,
+            method: index % 4 === 0 ? 'MOBILE_MONEY' : 'CASH',
+            description: `SAVINGS from ${seed.firstName} ${seed.lastName} (${member.memberCode})`,
+            sourceType: 'CONTRIBUTION',
+            memberId: member.id,
+            createdById: manager?.id ?? null,
+          },
+          select: { id: true },
+        })
+        await tx.contribution.create({
+          data: {
+            cooperativeId,
+            memberId: member.id,
+            type: 'SAVINGS',
+            amount,
+            paidOn,
+            method: index % 4 === 0 ? 'MOBILE_MONEY' : 'CASH',
+            financeTransactionId: transaction.id,
+            createdById: manager?.id ?? null,
+          },
+        })
+        contributions += 1
+      }
+
+      // Shares for about a third, so the share ledger has something in it.
+      if (index % 3 === 0) {
+        const quantity = 1 + (index % 8)
+        const unitValue = 10000
+        const totalValue = quantity * unitValue
+        const issuedOn = new Date(Date.UTC(2026, (index % 6) + 1, (index % 25) + 1))
+        const reference = await nextFinanceReference(tx, cooperativeId, 'IN', issuedOn)
+        const transaction = await tx.financeTransaction.create({
+          data: {
+            cooperativeId,
+            reference,
+            kind: 'INCOME',
+            categoryId: shareCategory.id,
+            amount: totalValue,
+            occurredAt: issuedOn,
+            method: 'CASH',
+            description: `Share capital from ${seed.firstName} ${seed.lastName} (${member.memberCode})`,
+            sourceType: 'SHARE_PURCHASE',
+            memberId: member.id,
+            createdById: manager?.id ?? null,
+          },
+          select: { id: true },
+        })
+        await tx.memberShare.create({
+          data: {
+            cooperativeId,
+            memberId: member.id,
+            type: 'PURCHASE',
+            quantity,
+            unitValue,
+            totalValue,
+            issuedOn,
+            certificateNo: `CERT-${member.memberCode}`,
+            financeTransactionId: transaction.id,
+            createdById: manager?.id ?? null,
+          },
+        })
+        shares += 1
+      }
+    })
+  }
+
+  console.log(
+    `  demonstration members: ${members.length}, contributions: ${contributions}, share purchases: ${shares}`,
+  )
 }
 
 function reportPasswords(): void {

@@ -1,7 +1,8 @@
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { HEADERS } from '@coopmanage/shared'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import { registeredRoutes, type RegisteredRoute } from '../src/lib/routeRegistry.js'
 import '../src/routes.js'
@@ -17,7 +18,7 @@ import {
   type TestCooperative,
 } from './fixtures.js'
 
-const app = createApp()
+const app = testApp()
 
 /**
  * The cross-tenant sweep. This is the automated proof behind the Phase 3 exit criterion and the
@@ -35,6 +36,9 @@ interface Tenant {
   cooperative: TestCooperative
   manager: TestUser & Session & { staffId: string }
   otherStaffId: string
+  memberId: string
+  contributionId: string
+  shareId: string
 }
 
 let a: Tenant
@@ -46,7 +50,49 @@ async function buildTenant(name: string): Promise<Tenant> {
   const manager = await createStaffSession(app, cooperative, 'MANAGER')
   const second = await createUser()
   const { staffId } = await addStaff(cooperative.id, second.id, 'SECRETARY')
-  return { cooperative, manager, otherStaffId: staffId }
+
+  // A member, a contribution and a share purchase, so the sweep has genuine records of this
+  // cooperative to try against the other one. A fictional identifier would pass the test for the
+  // wrong reason.
+  const category = await seedIncomeCategory(cooperative.id)
+  const member = await request(app)
+    .post(`${API_PREFIX}/members`)
+    .set('Authorization', `Bearer ${manager.accessToken}`)
+    .set(HEADERS.cooperativeId, cooperative.id)
+    .send({ firstName: 'Uwase', lastName: name.replace(/\s+/g, '') })
+    .expect(201)
+
+  const contribution = await request(app)
+    .post(`${API_PREFIX}/members/${member.body.data.id as string}/contributions`)
+    .set('Authorization', `Bearer ${manager.accessToken}`)
+    .set(HEADERS.cooperativeId, cooperative.id)
+    .send({ type: 'MEMBERSHIP_FEE', amount: '5000', method: 'CASH', categoryId: category })
+    .expect(201)
+
+  const share = await request(app)
+    .post(`${API_PREFIX}/members/${member.body.data.id as string}/shares`)
+    .set('Authorization', `Bearer ${manager.accessToken}`)
+    .set(HEADERS.cooperativeId, cooperative.id)
+    .send({ type: 'PURCHASE', quantity: 2, unitValue: '10000', categoryId: category })
+    .expect(201)
+
+  return {
+    cooperative,
+    manager,
+    otherStaffId: staffId,
+    memberId: member.body.data.id as string,
+    contributionId: contribution.body.data.id as string,
+    shareId: share.body.data.id as string,
+  }
+}
+
+/** A cooperative needs at least one income category before a contribution can be posted. */
+async function seedIncomeCategory(cooperativeId: string): Promise<string> {
+  const category = await prisma.financeCategory.create({
+    data: { cooperativeId, kind: 'INCOME', name: 'Membership fees', isSystem: true },
+    select: { id: true },
+  })
+  return category.id
 }
 
 beforeAll(async () => {
@@ -78,6 +124,33 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
     '/staff/:id': { id: b.otherStaffId, body: { jobTitle: 'Umunyamabanga' } },
     '/staff/:id/deactivate': { id: b.otherStaffId, body: {} },
     '/staff/:id/overrides': { id: b.otherStaffId, body: { overrides: [] } },
+    '/members/:id': { id: b.memberId, body: { notes: 'edited from the wrong cooperative' } },
+    '/members/:id/status': { id: b.memberId, body: { status: 'INACTIVE' } },
+    '/members/:id/summary': { id: b.memberId },
+    '/members/:id/timeline': { id: b.memberId },
+    '/members/:id/shares': {
+      id: b.memberId,
+      body: { type: 'REDEMPTION', quantity: 1, unitValue: '1000' },
+    },
+    '/members/:id/contributions': {
+      id: b.memberId,
+      body: { type: 'SAVINGS', amount: '1000', method: 'CASH', categoryId: b.cooperative.id },
+    },
+    '/contributions/:id/void': { id: b.contributionId, body: {} },
+  }
+}
+
+/**
+ * Routes whose path carries two identifiers. The member is substituted with Cooperative B's
+ * member and the share with Cooperative B's share, so the whole address belongs to the other
+ * cooperative rather than being half valid.
+ */
+function foreignPairs(): Record<string, { values: Record<string, string>; body?: object }> {
+  return {
+    '/members/:id/shares/:shareId/void': {
+      values: { id: b.memberId, shareId: b.shareId },
+      body: {},
+    },
   }
 }
 
@@ -160,28 +233,36 @@ describe("tenant isolation: another cooperative's identifiers report not found",
     registeredRoutes().filter((route) => isTenantScoped(route) && route.path.includes(':'))
 
   it('accounts for every parameterised tenant-scoped route', () => {
-    const table = foreignIdentifiers()
+    const single = foreignIdentifiers()
+    const pairs = foreignPairs()
     const unaccounted = [
       ...new Set(
         parameterised()
           .map((route) => route.path)
-          .filter((path) => !(path in table) && !NOT_AN_IDENTIFIER.includes(path)),
+          .filter(
+            (path) => !(path in single) && !(path in pairs) && !NOT_AN_IDENTIFIER.includes(path),
+          ),
       ),
     ]
     expect(
       unaccounted,
-      `add these routes to foreignIdentifiers() or NOT_AN_IDENTIFIER in tenancy.test.ts: ${unaccounted.join(', ')}`,
+      `add these routes to foreignIdentifiers(), foreignPairs() or NOT_AN_IDENTIFIER in tenancy.test.ts: ${unaccounted.join(', ')}`,
     ).toEqual([])
   })
 
   it("answers 404 for Cooperative B's identifiers inside Cooperative A", async () => {
     const table = foreignIdentifiers()
+    const pairs = foreignPairs()
     let swept = 0
 
     for (const route of parameterised()) {
       const entry = table[route.path]
-      if (!entry) continue
-      const path = route.path.replace(/:(\w+)/g, () => entry.id)
+      const pair = pairs[route.path]
+      if (!entry && !pair) continue
+
+      const path = pair
+        ? route.path.replace(/:(\w+)/g, (_match, name: string) => pair.values[name] as string)
+        : route.path.replace(/:(\w+)/g, () => (entry as { id: string }).id)
 
       // A's own manager, A's own header, B's identifier.
       const method = route.method.toLowerCase() as 'get' | 'post' | 'patch' | 'put' | 'delete'
@@ -189,7 +270,7 @@ describe("tenant isolation: another cooperative's identifiers report not found",
         [method](`${API_PREFIX}${path}`)
         .set('Authorization', `Bearer ${a.manager.accessToken}`)
         .set(HEADERS.cooperativeId, a.cooperative.id)
-        .send(entry.body ?? {})
+        .send((pair ?? entry)?.body ?? {})
 
       expect(
         response.status,

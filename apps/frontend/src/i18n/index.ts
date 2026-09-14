@@ -10,6 +10,7 @@ import enAuth from './locales/en/auth.json'
 import enCommon from './locales/en/common.json'
 import enDashboard from './locales/en/dashboard.json'
 import enErrors from './locales/en/errors.json'
+import enMembers from './locales/en/members.json'
 import enModules from './locales/en/modules.json'
 import enNav from './locales/en/nav.json'
 import enProfile from './locales/en/profile.json'
@@ -22,6 +23,7 @@ import rwAuth from './locales/rw/auth.json'
 import rwCommon from './locales/rw/common.json'
 import rwDashboard from './locales/rw/dashboard.json'
 import rwErrors from './locales/rw/errors.json'
+import rwMembers from './locales/rw/members.json'
 import rwModules from './locales/rw/modules.json'
 import rwNav from './locales/rw/nav.json'
 import rwProfile from './locales/rw/profile.json'
@@ -47,6 +49,7 @@ export const resources = {
     profile: enProfile,
     settings: enSettings,
     staff: enStaff,
+    members: enMembers,
     admin: enAdmin,
     audit: enAudit,
     dashboard: enDashboard,
@@ -61,6 +64,7 @@ export const resources = {
     profile: rwProfile,
     settings: rwSettings,
     staff: rwStaff,
+    members: rwMembers,
     admin: rwAdmin,
     audit: rwAudit,
     dashboard: rwDashboard,

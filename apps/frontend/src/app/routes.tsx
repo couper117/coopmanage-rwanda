@@ -7,6 +7,7 @@ import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
+import { contributionRoutes, memberRoutes } from '@/features/members/memberRoutes'
 import { CooperativeSettingsPage } from '@/pages/settings/CooperativeSettingsPage'
 import { PreferencesPage } from '@/pages/settings/PreferencesPage'
 import { StaffPage } from '@/pages/settings/StaffPage'
@@ -26,8 +27,21 @@ import { ALL_NAV_ITEMS } from './navigation'
  * Exported as data rather than as a built router so tests can mount the same tree in a memory
  * router and assert what a user actually sees.
  */
+
+/**
+ * The screens that exist, by path, so a module still waiting for its phase keeps its status route
+ * and one that has arrived loses it automatically. Deriving the set from the routes themselves
+ * means adding a screen cannot leave a placeholder shadowing it.
+ */
+const BUILT_PATHS = new Set(
+  [...memberRoutes, ...contributionRoutes]
+    .map((route) => route.path)
+    .filter((path): path is string => path !== undefined)
+    .map((path) => (path.startsWith('/') ? path : `/${path}`)),
+)
+
 const pendingRoutes: RouteObject[] = ALL_NAV_ITEMS.filter(
-  (item) => item.availableFromPhase > 3,
+  (item) => item.availableFromPhase > 3 && !BUILT_PATHS.has(item.to),
 ).map((item) => ({
   path: item.to,
   element: <ModulePendingPage moduleKey={item.key} phase={item.availableFromPhase} />,
@@ -71,6 +85,8 @@ export const routes: RouteObject[] = [
           </RequirePermission>
         ),
       },
+      ...memberRoutes,
+      ...contributionRoutes,
       ...adminRoutes,
       {
         path: 'settings/audit',

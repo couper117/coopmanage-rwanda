@@ -30,6 +30,17 @@
     "tenantAccess": "Umuyobozi wa sisitemu yafunguye {{cooperative}} ({{path}})"
   },
   "member": {
-    "created": "Umunyamuryango yanditswe"
+    "created": "{{member}} yanditswe nka {{code}}",
+    "updated": "Amakuru ya {{member}} yahinduwe",
+    "statusChanged": "{{member}} yavuye ku {{from}} akajya ku {{to}}",
+    "shareRecorded": "Imigabane {{quantity}} yanditswe kuri {{member}} nka {{type}}",
+    "shareVoided": "Imigabane {{quantity}} yanditswe kuri {{member}} nka {{type}} yahagaritswe",
+    "contributionRecorded": "{{amount}} RWF yanditswe kuri {{member}} nka {{type}}",
+    "contributionVoided": "Umusanzu wa {{amount}} RWF wa {{member}} warahagaritswe",
+    "exported": "Urutonde rw'abanyamuryango rwasohotse, abanyamuryango {{count}}"
+  },
+  "finance": {
+    "posted": "{{amount}} RWF yinjijwe muri {{category}}, inomero {{reference}}",
+    "voided": "Icyanditswe {{reference}} cyahagaritswe kigakosorwa na {{reversal}}"
   }
 }

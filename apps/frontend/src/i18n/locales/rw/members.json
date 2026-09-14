@@ -1,0 +1,357 @@
+{
+  "title": "Abanyamuryango",
+  "description": "Abantu bose bari muri iyi koperative, n'ibyo umwe umwe yatanze.",
+  "tableCaption": "Abanyamuryango b'iyi koperative, hamwe na nimero zabo, imiterere, aho batuye n'itariki yinjiye.",
+  "loadFailed": "Ntitwashoboye kuzana urutonde rw'abanyamuryango. Reba interineti hanyuma ugerageze.",
+  "notFound": {
+    "title": "Uwo munyamuryango ntabonetse",
+    "body": "Ushobora kuba wafunguye umurongo ushaje, cyangwa uwo muntu ari mu yindi koperative."
+  },
+  "stats": {
+    "total": "Abanyamuryango bose",
+    "active": "Abanyamuryango bakora",
+    "newThisMonth": "Binjiye uku kwezi",
+    "withoutPhone": "Badafite telefone",
+    "withoutPhoneHint": "Aba banyamuryango ntibashobora kugezwaho ubutumwa kuri SMS, bagomba kumenyeshwa ubundi buryo.",
+    "wholeRegister": "Iyi mibare ireba urutonde rwose, atari abagaragara mu rutonde rwungurujwe."
+  },
+  "search": {
+    "label": "Shakisha abanyamuryango",
+    "placeholder": "Izina, nimero y'umunyamuryango cyangwa nimero ya telefone"
+  },
+  "sort": {
+    "label": "Gutondeka",
+    "lastName": "Izina ry'umuryango, kuva kuri A kugera kuri Z",
+    "-lastName": "Izina ry'umuryango, kuva kuri Z kugera kuri A",
+    "memberCode": "Nimero y'umunyamuryango, ntoya mbere",
+    "-memberCode": "Nimero y'umunyamuryango, nini mbere",
+    "joinedOn": "Itariki yinjiye, ishaje mbere",
+    "-joinedOn": "Itariki yinjiye, nshya mbere"
+  },
+  "filters": {
+    "show": "Muyunguruzi",
+    "showWithCount": "Muyunguruzi ({{total}})",
+    "status": "Imiterere",
+    "position": "Inshingano",
+    "gender": "Igitsina",
+    "district": "Akarere",
+    "sector": "Umurenge",
+    "joinedFrom": "Yinjiye kuva ku itariki",
+    "joinedTo": "Yinjiye kugeza ku itariki",
+    "hasPhone": "Nimero ya telefone",
+    "anyStatus": "Imiterere iyo ari yo",
+    "anyPosition": "Inshingano iyo ari yo",
+    "anyGender": "Igitsina icyo ari cyo",
+    "anyPhone": "Bafite cyangwa badafite telefone",
+    "hasPhoneYes": "Bafite nimero ya telefone",
+    "hasPhoneNo": "Badafite nimero ya telefone",
+    "activeLabel": "Ibyungurujwe bikoreshwa",
+    "searchField": "Gushakisha",
+    "chip": "{{field}} ni {{value}}",
+    "remove": "Reka kuyungurura kuri {{field}}"
+  },
+  "columns": {
+    "name": "Izina",
+    "memberCode": "Nimero y'umunyamuryango",
+    "phone": "Telefone",
+    "location": "Aho atuye",
+    "position": "Inshingano",
+    "status": "Imiterere",
+    "joinedOn": "Yinjiye"
+  },
+  "noPhone": "Nta telefone",
+  "noLocation": "Ntibyanditswe",
+  "status": {
+    "ACTIVE": "Akora",
+    "INACTIVE": "Ntakora",
+    "SUSPENDED": "Yahagaritswe",
+    "EXITED": "Yavuye mu koperative"
+  },
+  "position": {
+    "MEMBER": "Umunyamuryango",
+    "COMMITTEE": "Komite",
+    "SECRETARY": "Umunyamabanga",
+    "TREASURER": "Umubitsi",
+    "VICE_CHAIR": "Visi perezida",
+    "CHAIRPERSON": "Perezida wa koperative"
+  },
+  "gender": {
+    "FEMALE": "Umugore",
+    "MALE": "Umugabo",
+    "OTHER": "Ikindi",
+    "UNSPECIFIED": "Ntibyavuzwe"
+  },
+  "province": {
+    "KIGALI": "Umujyi wa Kigali",
+    "NORTHERN": "Intara y'Amajyaruguru",
+    "SOUTHERN": "Intara y'Amajyepfo",
+    "EASTERN": "Intara y'Iburasirazuba",
+    "WESTERN": "Intara y'Iburengerazuba"
+  },
+  "empty": {
+    "title": "Nta munyamuryango uracyanditswe",
+    "body": "Andika umunyamuryango wa mbere utangire urutonde. Izina ryonyine rirahagije."
+  },
+  "emptyFiltered": {
+    "title": "Nta munyamuryango uhuye n'ibyo washakaga",
+    "body": "Gerageza indi miterere cyangwa indi nshingano, cyangwa ukureho ibyungurujwe urebe bose."
+  },
+  "pagination": {
+    "summary": "Hagaragara kuva ku {{from}} kugeza ku {{to}} muri {{total}} b'abanyamuryango"
+  },
+  "actions": {
+    "add": "Kongeramo umunyamuryango",
+    "export": "Gukuramo CSV",
+    "edit": "Guhindura amakuru",
+    "changeStatus": "Guhindura imiterere",
+    "recordContribution": "Kwandika umusanzu",
+    "backToList": "Subira ku banyamuryango"
+  },
+  "export": {
+    "failed": "Ntitwashoboye gukora iyo dosiye. Reba interineti hanyuma ugerageze."
+  },
+  "form": {
+    "createTitle": "Andika umunyamuryango mushya",
+    "createDescription": "Izina ribanza n'izina ry'umuryango ni byo bisabwa gusa. Ibindi byose bishobora kwandikwa nyuma mu biro.",
+    "editTitle": "Guhindura {{name}}",
+    "editDescription": "Hindura ibyo uzi. Iyo usize umwanya ubusa, ibyari byanditswe birakurwaho.",
+    "submitCreate": "Andika umunyamuryango",
+    "submitSave": "Bika impinduka",
+    "identitySection": "Uwo ari we",
+    "contactSection": "Uko wamubona",
+    "locationSection": "Aho atuye",
+    "membershipSection": "Ubunyamuryango bwe",
+    "created": "{{name}} yongewe ku rutonde afite nimero {{code}}.",
+    "updated": "Amakuru ya {{name}} yabitswe."
+  },
+  "fields": {
+    "firstName": "Izina ribanza",
+    "lastName": "Izina ry'umuryango",
+    "gender": "Igitsina",
+    "genderPlaceholder": "Hitamo niba ubizi",
+    "dateOfBirth": "Itariki y'amavuko",
+    "nationalId": "Nimero y'indangamuntu",
+    "nationalIdHint": "Imibare cumi n'itandatu, nk'iyanditse ku ndangamuntu.",
+    "phone": "Nimero ya telefone",
+    "phoneHint": "Abanyamuryango benshi nta telefone bafite. Sige umwanya ubusa iyo nta yo ihari.",
+    "email": "Imeyili",
+    "province": "Intara",
+    "provincePlaceholder": "Hitamo intara",
+    "district": "Akarere",
+    "sector": "Umurenge",
+    "cell": "Akagari",
+    "village": "Umudugudu",
+    "joinedOn": "Itariki yinjiye",
+    "joinedOnHint": "Uyu munsi, keretse yinjiye mbere.",
+    "position": "Inshingano mu koperative",
+    "positionPlaceholder": "Umunyamuryango usanzwe",
+    "notes": "Ibisobanuro",
+    "notesHint": "Ikintu cyose ibiro bikwiye kwibuka kuri uyu munyamuryango."
+  },
+  "fieldErrors": {
+    "firstName": "Izina ribanza rirasabwa.",
+    "lastName": "Izina ry'umuryango rirasabwa.",
+    "nationalId": "Nimero y'indangamuntu igizwe n'imibare cumi n'itandatu.",
+    "phone": "Iyo si nimero ya telefone yo mu Rwanda. Sige umwanya ubusa niba nta yo ihari.",
+    "email": "Iyo imeyili ntiyemewe.",
+    "dateOfBirth": "Andika itariki y'amavuko nk'itariki nyayo.",
+    "joinedOn": "Andika itariki yinjiye nk'itariki nyayo."
+  },
+  "statusDialog": {
+    "title": "Guhindura imiterere ya {{name}}",
+    "description": "Umunyamuryango ntasibwa na rimwe. Amakuru ye n'amateka y'imisanzu ye abaho iteka mu bitabo.",
+    "status": "Imiterere nshya",
+    "reason": "Impamvu",
+    "reasonHint": "Ibikwa hamwe n'amakuru ye, kugira ngo impinduka ishobore gusobanurwa nyuma.",
+    "exitedOn": "Itariki yavuyeho",
+    "exitedOnHint": "Urutonde rugumana igihe yamaze ari umunyamuryango.",
+    "exitedOnRequired": "Vuga umunsi yavuye mu koperative.",
+    "submit": "Bika imiterere",
+    "changed": "{{name}} ubu agaragara nka {{status}}."
+  },
+  "confirmStatus": {
+    "title": "Shyira {{name}} kuri {{status}}?",
+    "body": "Ntazongera kubarwa nk'umunyamuryango ukora kuva ubu. Ibyanditswe byose bikomeza kuba uko byari, kandi ushobora kumusubizaho igihe icyo ari cyo.",
+    "confirm": "Yego, hindura imiterere"
+  },
+  "profile": {
+    "memberSince": "Umunyamuryango kuva {{date}}",
+    "exited": "Yavuye ku {{date}}",
+    "exitReason": "Impamvu yatanzwe ni {{reason}}",
+    "detailsTitle": "Amakuru yanditswe",
+    "detailsDescription": "Ibyo ibiro bifite kuri uyu munyamuryango.",
+    "noValue": "Ntibyanditswe",
+    "nationalId": "Nimero y'indangamuntu",
+    "dateOfBirth": "Itariki y'amavuko",
+    "email": "Imeyili",
+    "phone": "Nimero ya telefone",
+    "address": "Aho atuye",
+    "position": "Inshingano",
+    "notes": "Ibisobanuro",
+    "createdAt": "Amakuru yanditswe ku",
+    "updatedAt": "Yahinduwe bwa nyuma"
+  },
+  "summary": {
+    "shares": "Agaciro k'imigabane afite",
+    "sharesQuantity": "Imigabane {{quantity}}",
+    "contributions": "Imisanzu yatanzwe",
+    "contributionsCount": "Biturutse ku bwishyu {{quantity}}",
+    "payments": "Amafaranga yahawe umunyamuryango",
+    "quantitySupplied": "Umusaruro yatanze",
+    "documents": "Inyandiko ziherekeza",
+    "notAvailableYet": "Ntibiraboneka kugeza ku cyiciro cya {{phase}}",
+    "notAvailable": "Ntibiraboneka",
+    "withheld": "Inshingano yawe ntiyemerera kureba iyi mibare"
+  },
+  "timeline": {
+    "title": "Amateka",
+    "description": "Ibyose byanditswe kuri uyu munyamuryango, ibya vuba mbere.",
+    "emptyTitle": "Nta kintu kiracyanditswe",
+    "emptyBody": "Andika umusanzu cyangwa umugabane, bizagaragara hano n'itariki yabyo.",
+    "registered": "Yinjiye mu koperative afite nimero {{code}}",
+    "exited": "Yavuye mu koperative",
+    "share": {
+      "PURCHASE": "Yaguze imigabane {{quantity}}",
+      "TRANSFER_IN": "Yahawe imigabane {{quantity}} n'undi munyamuryango",
+      "TRANSFER_OUT": "Yahaye undi munyamuryango imigabane {{quantity}}",
+      "REDEMPTION": "Yagurishije imigabane {{quantity}}"
+    },
+    "contribution": {
+      "MEMBERSHIP_FEE": "Yishyuye amafaranga yo kwinjira",
+      "SAVINGS": "Yashyize amafaranga mu bwizigame",
+      "SHARE_CAPITAL": "Yishyuye imigabane y'igishoro",
+      "SPECIAL_LEVY": "Yatanze umusanzu wihariye",
+      "PENALTY": "Yishyuye ihazabu",
+      "OTHER": "Yatanze umusanzu"
+    }
+  },
+  "contributions": {
+    "title": "Imisanzu",
+    "description": "Amafaranga uyu munyamuryango yatanze mu koperative.",
+    "caption": "Imisanzu y'uyu munyamuryango, hamwe n'itariki, ubwoko, ingano n'uburyo bw'ubwishyu.",
+    "columns": {
+      "paidOn": "Itariki",
+      "type": "Ubwoko",
+      "amount": "Ingano y'amafaranga",
+      "method": "Uburyo bwakoreshejwe",
+      "reference": "Nimero y'ubwishyu",
+      "status": "Imiterere"
+    },
+    "total": "Igiteranyo cyinjiye",
+    "emptyTitle": "Nta musanzu wanditswe",
+    "emptyBody": "Iyo uyu munyamuryango yishyuye amafaranga yo kwinjira, ubwizigame cyangwa umusanzu, wandike hano kugira ngo ibitabo bihure n'amafaranga.",
+    "withheld": "Inshingano yawe ntirebana n'imisanzu, ni yo mpamvu uru rutonde rutagaragara.",
+    "loadFailed": "Ntitwashoboye kuzana imisanzu y'uyu munyamuryango.",
+    "type": {
+      "MEMBERSHIP_FEE": "Amafaranga yo kwinjira",
+      "SAVINGS": "Ubwizigame",
+      "SHARE_CAPITAL": "Imigabane y'igishoro",
+      "SPECIAL_LEVY": "Umusanzu wihariye",
+      "PENALTY": "Ihazabu",
+      "OTHER": "Undi musanzu"
+    },
+    "status": {
+      "POSTED": "Byanditswe",
+      "VOID": "Byahagaritswe"
+    }
+  },
+  "shares": {
+    "title": "Imigabane",
+    "description": "Imigabane uyu munyamuryango afite mu koperative.",
+    "caption": "Uko imigabane y'uyu munyamuryango yagenze, hamwe n'itariki, ubwoko, ingano n'agaciro.",
+    "holding": "Afite ubu",
+    "holdingQuantity": "Imigabane {{quantity}}",
+    "columns": {
+      "issuedOn": "Itariki",
+      "type": "Icyagenze",
+      "quantity": "Ingano",
+      "unitValue": "Agaciro ka buri umwe",
+      "totalValue": "Agaciro yose",
+      "certificate": "Icyemezo cyanditse",
+      "status": "Imiterere"
+    },
+    "emptyTitle": "Nta mugabane wanditswe",
+    "emptyBody": "Uyu munyamuryango ntaragira imigabane. Kugura umugabane bwandikirwa ku rupapuro rw'imigabane.",
+    "withheld": "Inshingano yawe ntirebana n'imigabane, ni yo mpamvu uru rutonde rutagaragara.",
+    "loadFailed": "Ntitwashoboye kuzana imigabane y'uyu munyamuryango.",
+    "type": {
+      "PURCHASE": "Yaguze",
+      "TRANSFER_IN": "Yahawe",
+      "TRANSFER_OUT": "Yatanze",
+      "REDEMPTION": "Yagurishije"
+    },
+    "status": {
+      "POSTED": "Byanditswe",
+      "VOID": "Byahagaritswe"
+    }
+  },
+  "method": {
+    "CASH": "Amafaranga mu ntoki",
+    "MOBILE_MONEY": "Kuri Mobile money",
+    "BANK": "Kwohereza kuri banki",
+    "CHEQUE": "Sheki",
+    "OTHER": "Ubundi buryo"
+  },
+  "contributionDialog": {
+    "title": "Kwandika umusanzu",
+    "description": "Kuri {{name}}, {{code}}. Amafaranga yandikwa mu bitabo bya koperative icyarimwe.",
+    "submit": "Andika umusanzu",
+    "restate": "Ibi byandika {{amount}} yakiriwe kuri {{name}}.",
+    "recorded": "{{amount}} yanditswe kuri {{name}}, nimero {{reference}}.",
+    "noCategories": "Nta byiciro by'amafaranga yinjira biracyashyizweho, bityo umusanzu ntushobora kwandikwa mu bitabo. Saba ushinzwe ibaruramari kongeramo icyiciro."
+  },
+  "contributionFields": {
+    "type": "Icyo amafaranga agenewe",
+    "typePlaceholder": "Hitamo icyo agenewe",
+    "amount": "Ingano y'amafaranga mu RWF",
+    "amountHint": "Amafaranga yuzuye, urugero 5000.",
+    "paidOn": "Itariki yishyuriweho",
+    "method": "Uko yishyuwe",
+    "category": "Icyiciro cy'amafaranga yinjira",
+    "categoryPlaceholder": "Hitamo icyiciro",
+    "reference": "Nimero y'inyemezabwishyu",
+    "note": "Icyitonderwa"
+  },
+  "contributionErrors": {
+    "type": "Vuga icyo amafaranga agenewe.",
+    "amount": "Andika ingano irenze zeru, ukoresheje imibare gusa.",
+    "method": "Vuga uko amafaranga yishyuwe.",
+    "categoryId": "Hitamo icyiciro cy'amafaranga yinjira ayo amafaranga arimo.",
+    "paidOn": "Andika itariki y'ubwishyu nk'itariki nyayo."
+  },
+  "apiErrors": {
+    "nationalIdTaken": "Undi munyamuryango asanzwe yanditswe kuri iyo nimero y'indangamuntu.",
+    "contributionAlreadyVoid": "Uwo musanzu wasanzwe wahagaritswe."
+  },
+  "ledger": {
+    "title": "Imisanzu",
+    "description": "Imisanzu yose koperative yakiriye, iheruka ibanza.",
+    "caption": "Imisanzu ya koperative yose, hamwe n'umunyamuryango, itariki, umubare n'uko yishyuwe.",
+    "filters": {
+      "from": "Kuva ku itariki",
+      "to": "Kugeza ku itariki"
+    },
+    "anyType": "Impamvu iyo ari yo yose",
+    "anyStatus": "Uko byahagaze kose",
+    "columns": {
+      "member": "Umunyamuryango",
+      "reference": "Inomero y'inyandiko",
+      "action": "Igikorwa"
+    },
+    "filteredTotal": "Igiteranyo cy'ibyatoranyijwe",
+    "cancel": "Guhagarika",
+    "cancelTitle": "Uremeza guhagarika uyu musanzu?",
+    "cancelDescription": "{{amount}} RWF yanditswe kuri {{name}}.",
+    "cancelConsequence": "Umusanzu uguma mu nyandiko, kandi mu bitabo bya koperative handikwa igikosora kingana na wo ku buryo umutungo usubira uko wari. Nta kintu gisibwa.",
+    "cancelConfirm": "Emeza guhagarika umusanzu",
+    "cancelled": "Umusanzu wa {{name}} warahagaritswe. Igikosora ni {{reference}}.",
+    "reason": "Impamvu ihagarikirwa",
+    "reasonHint": "Umurongo umwe, urugero: yanditswe kabiri mu makosa.",
+    "reasonRequired": "Tanga impamvu uyu musanzu uhagarikwa.",
+    "emptyTitle": "Nta misanzu iriho",
+    "emptyBody": "Umusanzu wandikwa ku rupapuro rw'umunyamuryango, hanyuma ugaragara hano ako kanya.",
+    "emptyFilteredTitle": "Nta kintu gihuye n'ibyatoranyijwe",
+    "emptyFilteredBody": "Agura igihe cyangwa ukureho ibyatoranyijwe kugira ngo urebe ibindi.",
+    "keep": "Usigare wanditse"
+  }
+}

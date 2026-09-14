@@ -1,9 +1,10 @@
 import request from 'supertest'
 import { afterAll, describe, expect, it } from 'vitest'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { disconnectPrisma } from '../src/lib/prisma.js'
 
-const app = createApp()
+const app = testApp()
 
 afterAll(async () => {
   await disconnectPrisma()

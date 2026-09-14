@@ -1,6 +1,7 @@
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { API_PREFIX, createApp } from '../src/app.js'
+import { API_PREFIX } from '../src/app.js'
+import { testApp } from './server.js'
 import { redactSnapshot } from '../src/lib/audit.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import { registeredRoutes } from '../src/lib/routeRegistry.js'
@@ -13,7 +14,7 @@ import {
   type TestCooperative,
 } from './fixtures.js'
 
-const app = createApp()
+const app = testApp()
 let cooperative: TestCooperative
 
 beforeAll(async () => {

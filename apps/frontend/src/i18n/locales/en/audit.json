@@ -30,6 +30,17 @@
     "tenantAccess": "Platform administrator opened {{cooperative}} ({{path}})"
   },
   "member": {
-    "created": "A member was registered"
+    "created": "{{member}} was registered as {{code}}",
+    "updated": "{{member}}'s details were changed",
+    "statusChanged": "{{member}} was moved from {{from}} to {{to}}",
+    "shareRecorded": "{{quantity}} shares were recorded for {{member}} as {{type}}",
+    "shareVoided": "{{quantity}} shares recorded for {{member}} as {{type}} were cancelled",
+    "contributionRecorded": "{{amount}} RWF was recorded for {{member}} as {{type}}",
+    "contributionVoided": "A contribution of {{amount}} RWF for {{member}} was cancelled",
+    "exported": "The member register was exported, {{count}} members"
+  },
+  "finance": {
+    "posted": "{{amount}} RWF was entered under {{category}}, reference {{reference}}",
+    "voided": "Entry {{reference}} was cancelled and corrected by {{reversal}}"
   }
 }

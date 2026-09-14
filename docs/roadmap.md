@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 3 complete.** Phase 4 is next.
+Status: **Phase 4 complete.** Phase 5 is next.
 
 ---
 
@@ -238,7 +238,7 @@ for its own administrators. Each one is a 409 with a message that says what to d
 
 ---
 
-### Phase 4 — Members
+### Phase 4 — Members ✅
 
 - `lib/money.ts` with full unit-test coverage, and migration **M4** including the finance tables,
   because a contribution posts a linked income row. Nothing writes a monetary value before the
@@ -251,10 +251,67 @@ for its own administrators. Each one is a 409 with a message that says what to d
   they do: quantity supplied in Phase 6, attached documents in Phase 9. Until then the profile
   names them as not yet available rather than showing a zero
 - The members table, the member form, and the "Add member" quick action
+- The cooperative-wide contributions ledger, with the filtered total and the cancellation path
 
-**Exit:** a member can be registered with a name and a joining date and nothing else — no phone, no
-national identity number, no email — and the profile renders correctly. 120 demonstration members
-list, filter and search in under 300 ms.
+**Exit:** met, and verified against the running system rather than only in tests. A member
+registered with nothing but two names came back as `UMU-00122` with a null phone, national identity
+number and email, today's joining date and `ACTIVE` status, and the profile rendered. Against 121
+demonstration members every query is between 44 ms and 58 ms measured end to end, including
+authentication, against a 300 ms budget: the unfiltered list, a name search, a search on phone
+digits, the no-phone filter, the statistics tiles, a sort by member code and the contributions
+ledger. A contribution of 7,500.50 took the cooperative's total from 1,792,500.00 to 1,800,000.50,
+and voiding it wrote reversal `EX-2026-000001` and returned the total to exactly 1,792,500.00. An
+amount of `100.005` is refused with 422 rather than rounded. `DELETE /members/:id` answers 404
+because the route does not exist.
+
+Six things are worth recording, because each one changed a decision or fixed a real defect.
+
+**The whole test suite was failing about a third of the time, and the cause was not in the
+product.** Failures were scattered and never reproduced: a 403 where a 401 belonged, a 400 in place
+of a 409, an occasional socket hang up, each in a different file on each run. Supertest binds a
+fresh ephemeral port for every single request and closes it once the response arrives, and with
+thirteen files in parallel worker processes that is thousands of bind and close cycles a second
+against the same port range. A probe of six workers each making 1,500 requests to the public
+`/health` route returned a **401**, a status that route cannot produce — the connection had been
+delivered to a different worker's server. `apps/backend/test/server.ts` now holds one listener open
+for the lifetime of each file. Twelve consecutive full runs are clean and the suite is twice as
+fast.
+
+**Argon2 at production cost starved the suite of CPU.** Nineteen mebibytes and three passes per
+hash, several hundred sessions, thirteen worker processes, eight cores: enough contention to push
+unrelated tests past a five-second timeout. The cost drops to the library minimum under
+`NODE_ENV=test` only, and `password.test.ts` pins the parameters used everywhere else so the
+reduction cannot reach a deployment unnoticed. Recorded in `security.md` §2.
+
+**Emptying the audit trail cannot be done per test file.** The append-only trigger is what makes
+the trail append-only, and `audit.test.ts` asserts it is active; removing rows means switching the
+trigger off, which changes the table for every connection. Doing it outside a transaction left a
+window in which another file's append-only assertion passed straight through; doing it inside one
+made the access-exclusive lock block every other worker's audit write, which turned into
+sixty-second hook timeouts elsewhere. Destructive cleanup now runs once after the whole suite, in
+`apps/backend/test/purge.ts`, which is also what `npm run db:purge-test-data` calls, so there is one
+definition of what counts as test data.
+
+**An exit date could be omitted by writing it as null.** `status: EXITED` with no `exitedOn` was
+refused, but `exitedOn: null` passed the check and the service filled in today. The register would
+then say a member left today when they left in March, which is exactly the figure a dispute over an
+old contribution turns on. The rule now requires an actual date.
+
+**An audit sentence in Kinyarwanda contained English.** The trail stores a message key and its
+parameters, but an enum among those parameters is a value, so `SAVINGS` landed in the middle of a
+Kinyarwanda sentence. The backend now sends enum parameters as keys — `members.contributions.type.SAVINGS`
+— and the interface resolves any parameter that names a namespace, leaving names, amounts and
+references untouched.
+
+**Adding and editing a member are dialogs, not routes.** A secretary registering people at a
+meeting adds several in a row, and a dialog keeps the list, the filters and the place in it. The
+deviation from the planned `/members/new` route is recorded in `api.md` §3.
+
+Two things are deliberately left for later. Recording and voiding a share movement has no interface
+yet: the endpoints exist and are tested, but share capital belongs with the finance screens, so the
+controls arrive in Phase 5. And the built frontend bundle is now 699 kB, 210 kB gzipped, in a single
+chunk; on the connections this product is used over that wants route-level code splitting, which is
+listed against Phase 16.
 
 ---
 
@@ -401,8 +458,13 @@ Page-by-page review for consistency, spacing, typography, empty, loading and err
 layout, accessibility and form usability. Remove anything that looks generated. Optional dark theme
 only if it can be done completely.
 
+Route-level code splitting belongs here too, because on the connections this product is used over
+the size of the first download is a usability problem rather than a technical one. It was 210 kB
+gzipped in one chunk at the end of Phase 4, and every phase adds to it.
+
 **Exit:** axe reports no violations; a full keyboard walkthrough of every critical flow succeeds;
-the interface is internally consistent screen to screen.
+the interface is internally consistent screen to screen; no route pulls down markedly more than it
+needs.
 
 ---
 

@@ -45,16 +45,16 @@ model Permission {
 }
 
 model Role {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  key           String   @unique
-  nameEn        String   @map("name_en")
-  nameRw        String   @map("name_rw")
-  descriptionEn String   @map("description_en")
-  descriptionRw String   @map("description_rw")
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key           String    @unique
+  nameEn        String    @map("name_en")
+  nameRw        String    @map("name_rw")
+  descriptionEn String    @map("description_en")
+  descriptionRw String    @map("description_rw")
   scope         RoleScope
-  isSystem      Boolean  @default(true) @map("is_system")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  isSystem      Boolean   @default(true) @map("is_system")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   permissions RolePermission[]
   staff       CooperativeStaff[]
@@ -149,14 +149,23 @@ model User {
   createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  refreshSessions     RefreshSession[]
-  passwordResetTokens PasswordResetToken[]
-  staff               CooperativeStaff[]        @relation("StaffUser")
-  invitedStaff        CooperativeStaff[]        @relation("StaffInviter")
-  grantedOverrides    StaffPermissionOverride[]
-  auditEntries        AuditLog[]
-  updatedCoopSettings CooperativeSetting[]
-  updatedSysSettings  SystemSetting[]
+  refreshSessions      RefreshSession[]
+  passwordResetTokens  PasswordResetToken[]
+  staff                CooperativeStaff[]        @relation("StaffUser")
+  invitedStaff         CooperativeStaff[]        @relation("StaffInviter")
+  grantedOverrides     StaffPermissionOverride[]
+  auditEntries         AuditLog[]
+  updatedCoopSettings  CooperativeSetting[]
+  updatedSysSettings   SystemSetting[]
+  membersCreated       Member[]                  @relation("MemberCreatedBy")
+  membersUpdated       Member[]                  @relation("MemberUpdatedBy")
+  sharesCreated        MemberShare[]             @relation("ShareCreatedBy")
+  sharesVoided         MemberShare[]             @relation("ShareVoidedBy")
+  contributionsCreated Contribution[]            @relation("ContributionCreatedBy")
+  contributionsVoided  Contribution[]            @relation("ContributionVoidedBy")
+  financeCreated       FinanceTransaction[]      @relation("FinanceCreatedBy")
+  financeVoided        FinanceTransaction[]      @relation("FinanceVoidedBy")
+  idempotencyKeys      IdempotencyKey[]
 
   @@index([status])
   @@map("users")
@@ -232,11 +241,17 @@ model Cooperative {
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  type     CooperativeType      @relation(fields: [typeId], references: [id], onDelete: Restrict)
-  staff    CooperativeStaff[]
-  units    UnitOfMeasure[]
-  auditLog AuditLog[]
-  settings CooperativeSetting[]
+  type                CooperativeType      @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  staff               CooperativeStaff[]
+  units               UnitOfMeasure[]
+  auditLog            AuditLog[]
+  settings            CooperativeSetting[]
+  members             Member[]
+  memberShares        MemberShare[]
+  contributions       Contribution[]
+  financeCategories   FinanceCategory[]
+  financeTransactions FinanceTransaction[]
+  idempotencyKeys     IdempotencyKey[]
 
   @@index([status])
   @@map("cooperatives")
@@ -382,4 +397,293 @@ model SystemSetting {
   updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@map("system_settings")
+}
+
+// ---------------------------------------------------------------------------
+// M4 (Phase 4) — members, and the money ledger they post into.
+//
+// The finance tables land here rather than in Phase 5 because a contribution
+// creates its linked income row in the same transaction: the contribution is
+// the member-facing view, the finance transaction is the accounting view, and
+// there is exactly one source of truth for the money.
+// ---------------------------------------------------------------------------
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  UNSPECIFIED
+}
+
+enum MemberPosition {
+  MEMBER
+  COMMITTEE
+  SECRETARY
+  TREASURER
+  VICE_CHAIR
+  CHAIRPERSON
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  EXITED
+}
+
+enum ShareTransactionType {
+  PURCHASE
+  TRANSFER_IN
+  TRANSFER_OUT
+  REDEMPTION
+}
+
+enum ContributionType {
+  MEMBERSHIP_FEE
+  SAVINGS
+  SHARE_CAPITAL
+  SPECIAL_LEVY
+  PENALTY
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK
+  CHEQUE
+  OTHER
+}
+
+enum FinanceKind {
+  INCOME
+  EXPENSE
+}
+
+enum FinanceSourceType {
+  MANUAL
+  SALE
+  CONTRIBUTION
+  SHARE_PURCHASE
+  MEMBER_PAYMENT
+  STOCK_PURCHASE
+}
+
+enum PostingStatus {
+  POSTED
+  VOID
+}
+
+enum IdempotencyState {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Member {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String         @map("cooperative_id") @db.Uuid
+  /// `COOP-00452`. Allocated from Cooperative.member_code_sequence inside the insert transaction,
+  /// so two people registering at once cannot be given the same code.
+  memberCode    String         @map("member_code")
+  firstName     String         @map("first_name")
+  lastName      String         @map("last_name")
+  gender        Gender         @default(UNSPECIFIED)
+  dateOfBirth   DateTime?      @map("date_of_birth") @db.Date
+  /// Stored only when supplied, and masked in list responses.
+  nationalId    String?        @map("national_id")
+  /// Never required. Farmers and ordinary members have no smartphones, and the product must work
+  /// perfectly for a member with no phone at all.
+  phone         String?
+  email         String?
+  province      String?
+  district      String?
+  sector        String?
+  cell          String?
+  village       String?
+  joinedOn      DateTime       @map("joined_on") @db.Date
+  position      MemberPosition @default(MEMBER)
+  status        MemberStatus   @default(ACTIVE)
+  exitedOn      DateTime?      @map("exited_on") @db.Date
+  exitReason    String?        @map("exit_reason")
+  photoUrl      String?        @map("photo_url")
+  notes         String?
+  createdById   String?        @map("created_by_id") @db.Uuid
+  updatedById   String?        @map("updated_by_id") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative         Cooperative          @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  createdBy           User?                @relation("MemberCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy           User?                @relation("MemberUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  shares              MemberShare[]        @relation("ShareHolder")
+  shareCounterparties MemberShare[]        @relation("ShareCounterparty")
+  contributions       Contribution[]
+  financeTransactions FinanceTransaction[]
+
+  @@unique([cooperativeId, memberCode])
+  @@index([cooperativeId, status])
+  @@index([cooperativeId, lastName, firstName])
+  @@index([cooperativeId, joinedOn])
+  @@map("members")
+}
+
+/// A ledger, not a balance. Current holding is the sum of inbound minus outbound over non-void
+/// rows, so a correction is a new row and the history stays readable.
+model MemberShare {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId        String               @map("cooperative_id") @db.Uuid
+  memberId             String               @map("member_id") @db.Uuid
+  type                 ShareTransactionType
+  /// Always positive. Direction comes from `type`.
+  quantity             Int
+  unitValue            Decimal              @map("unit_value") @db.Decimal(14, 2)
+  totalValue           Decimal              @map("total_value") @db.Decimal(14, 2)
+  issuedOn             DateTime             @map("issued_on") @db.Date
+  certificateNo        String?              @map("certificate_no")
+  financeTransactionId String?              @unique @map("finance_transaction_id") @db.Uuid
+  counterpartyMemberId String?              @map("counterparty_member_id") @db.Uuid
+  note                 String?
+  status               PostingStatus        @default(POSTED)
+  voidedById           String?              @map("voided_by_id") @db.Uuid
+  voidedAt             DateTime?            @map("voided_at") @db.Timestamptz(3)
+  voidReason           String?              @map("void_reason")
+  createdById          String?              @map("created_by_id") @db.Uuid
+  createdAt            DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative        Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  member             Member              @relation("ShareHolder", fields: [memberId], references: [id], onDelete: Restrict)
+  counterpartyMember Member?             @relation("ShareCounterparty", fields: [counterpartyMemberId], references: [id], onDelete: Restrict)
+  financeTransaction FinanceTransaction? @relation(fields: [financeTransactionId], references: [id], onDelete: Restrict)
+  createdBy          User?               @relation("ShareCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  voidedBy           User?               @relation("ShareVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
+
+  @@index([cooperativeId, memberId])
+  @@index([cooperativeId, issuedOn])
+  @@index([counterpartyMemberId])
+  @@map("member_shares")
+}
+
+model Contribution {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId        String           @map("cooperative_id") @db.Uuid
+  memberId             String           @map("member_id") @db.Uuid
+  type                 ContributionType
+  amount               Decimal          @db.Decimal(14, 2)
+  paidOn               DateTime         @map("paid_on") @db.Date
+  method               PaymentMethod
+  reference            String?
+  financeTransactionId String?          @unique @map("finance_transaction_id") @db.Uuid
+  note                 String?
+  status               PostingStatus    @default(POSTED)
+  voidedById           String?          @map("voided_by_id") @db.Uuid
+  voidedAt             DateTime?        @map("voided_at") @db.Timestamptz(3)
+  voidReason           String?          @map("void_reason")
+  createdById          String?          @map("created_by_id") @db.Uuid
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative        Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  member             Member              @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  financeTransaction FinanceTransaction? @relation(fields: [financeTransactionId], references: [id], onDelete: Restrict)
+  createdBy          User?               @relation("ContributionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  voidedBy           User?               @relation("ContributionVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
+
+  @@index([cooperativeId, memberId, paidOn])
+  @@index([cooperativeId, paidOn])
+  @@map("contributions")
+}
+
+model FinanceCategory {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String      @map("cooperative_id") @db.Uuid
+  kind          FinanceKind
+  name          String
+  nameRw        String?     @map("name_rw")
+  code          String?
+  /// Seeded for the cooperative's type. A system category cannot be deleted, only deactivated.
+  isSystem      Boolean     @default(false) @map("is_system")
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative  Cooperative          @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  transactions FinanceTransaction[]
+
+  @@unique([cooperativeId, kind, name])
+  @@index([cooperativeId, kind, isActive])
+  @@map("finance_categories")
+}
+
+/// The single money ledger. Balance is always the sum of INCOME minus the sum of EXPENSE over
+/// POSTED rows. There is no separate Income, Expense or Payment table: one ledger means one
+/// balance, one export, and one place to get the arithmetic right.
+model FinanceTransaction {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String            @map("cooperative_id") @db.Uuid
+  /// `IN-2026-000123` / `EX-2026-000045`, unique per cooperative.
+  reference     String
+  kind          FinanceKind
+  categoryId    String            @map("category_id") @db.Uuid
+  /// Always positive. Direction lives in `kind`, never in the sign.
+  amount        Decimal           @db.Decimal(14, 2)
+  currency      String            @default("RWF")
+  /// The accounting date the user chose, which is not the date the row was written.
+  occurredAt    DateTime          @map("occurred_at") @db.Date
+  method        PaymentMethod
+  description   String
+  sourceType    FinanceSourceType @default(MANUAL) @map("source_type")
+  memberId      String?           @map("member_id") @db.Uuid
+  status        PostingStatus     @default(POSTED)
+  /// A correcting entry points at the row it reverses. Both stay visible in the history.
+  reversalOfId  String?           @unique @map("reversal_of_id") @db.Uuid
+  voidReason    String?           @map("void_reason")
+  voidedById    String?           @map("voided_by_id") @db.Uuid
+  voidedAt      DateTime?         @map("voided_at") @db.Timestamptz(3)
+  createdById   String?           @map("created_by_id") @db.Uuid
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative  Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  category     FinanceCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  member       Member?             @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  reversalOf   FinanceTransaction? @relation("Reversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversedBy   FinanceTransaction? @relation("Reversal")
+  createdBy    User?               @relation("FinanceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  voidedBy     User?               @relation("FinanceVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
+  contribution Contribution?
+  memberShare  MemberShare?
+
+  @@unique([cooperativeId, reference])
+  @@index([cooperativeId, occurredAt])
+  @@index([cooperativeId, kind, occurredAt])
+  @@index([cooperativeId, categoryId, occurredAt])
+  @@index([cooperativeId, status, occurredAt])
+  @@index([cooperativeId, memberId])
+  @@map("finance_transactions")
+}
+
+/// Makes a retried write safe. A repeat of the same key returns the stored response instead of
+/// creating a second transaction, which is what lets the client retry at all on a flaky
+/// connection without the risk of duplicate money.
+model IdempotencyKey {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId  String           @map("cooperative_id") @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  key            String
+  endpoint       String
+  /// Hash of the request body. A replay with a different body is a mistake, not a retry.
+  requestHash    String           @map("request_hash")
+  responseStatus Int?             @map("response_status")
+  responseBody   Json?            @map("response_body")
+  state          IdempotencyState @default(IN_PROGRESS)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime         @map("expires_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cooperativeId, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
 }
