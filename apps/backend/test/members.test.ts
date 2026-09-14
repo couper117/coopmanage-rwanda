@@ -759,6 +759,49 @@ describe('the member profile', () => {
     expect([...dates].sort().reverse()).toEqual(dates)
   })
 
+  it('shows money paid out to the member, to somebody who may see it', async () => {
+    const member = await addMember({ firstName: 'Gets', lastName: 'Paid' })
+    await as(manager, 'post', '/finance/transactions')
+      .send({
+        kind: 'EXPENSE',
+        categoryId: expenseCategoryId,
+        amount: '185000',
+        method: 'MOBILE_MONEY',
+        description: 'Payment for delivered maize',
+        memberId: member.id,
+      })
+      .expect(201)
+
+    const summary = await as(manager, 'get', `/members/${member.id}/summary`).expect(200)
+    expect(summary.body.data.payments.total).toBe('185000.00')
+
+    const timeline = await as(manager, 'get', `/members/${member.id}/timeline`).expect(200)
+    const payment = (timeline.body.data as { kind: string; amount: string }[]).find(
+      (entry) => entry.kind === 'PAYMENT',
+    )
+    // A member asking when they were paid has to be able to see it, not just a total.
+    expect(payment?.amount).toBe('185000.00')
+  })
+
+  it('leaves the payments out for somebody whose role does not cover them', async () => {
+    const member = await addMember({ firstName: 'Hidden', lastName: 'Payment' })
+    await as(manager, 'post', '/finance/transactions')
+      .send({
+        kind: 'EXPENSE',
+        categoryId: expenseCategoryId,
+        amount: '50000',
+        method: 'CASH',
+        description: 'Payment for delivered maize',
+        memberId: member.id,
+      })
+      .expect(201)
+
+    // A secretary holds contributions:view and shares:view but not finance:view.
+    const timeline = await as(secretary, 'get', `/members/${member.id}/timeline`).expect(200)
+    const kinds = (timeline.body.data as { kind: string }[]).map((entry) => entry.kind)
+    expect(kinds).not.toContain('PAYMENT')
+  })
+
   it('sends a message key and its parameters, never a finished English sentence', async () => {
     const member = await addMember({ firstName: 'Translatable', lastName: 'Timeline' })
     await as(accountant, 'post', `/members/${member.id}/contributions`)

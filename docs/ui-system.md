@@ -206,6 +206,7 @@ styled entirely by our own tokens. One icon library: **lucide-react**, 16 px in 
 | `Button`                                                                                             | Variants `primary`, `secondary`, `ghost`, `danger`, `link`. Heights 32 / 36 / 40. Loading state replaces the leading icon with a spinner, keeps the label, and disables the control                        |
 | `IconButton`                                                                                         | Square, 32 / 36. Requires `aria-label`                                                                                                                                                                     |
 | `Input` `Textarea` `Select`                                                                          | 36 px height, 1 px `--border-strong`, 6 px radius, 12 px inset. On focus the border becomes `--primary-600`, in addition to the standard focus ring                                                        |
+| `SearchSelect`                                                                                       | The picker for a list too long for a `<select>`, added in Phase 5. Matches `Input` when empty; shows the choice with a clear control when full. See below                                                  |
 | `Combobox`                                                                                           | Type-ahead over server-searched options. Used for member, product and buyer pickers                                                                                                                        |
 | `DatePicker` / `DateRangePicker`                                                                     | Text entry plus calendar. Presets: today, this week, this month, last month, this quarter, this year, custom                                                                                               |
 | `FormField`                                                                                          | Label, optional hint, control, error. Error is red text with an icon and is bound by `aria-describedby`                                                                                                    |
@@ -337,6 +338,34 @@ charts and one list:
 Rules: direct labels rather than a legend where there are three or fewer series; axes start at zero
 for bars; no pie chart above three slices; no dual axes; no animation beyond a 150 ms fade on load;
 every chart has a table equivalent reachable in one click, which is also what screen readers get.
+
+**Drawn by hand, not by a library.** The finance overview in Phase 5 is the first screen with a
+chart, and it has no charting package behind it. None is installed, and the content-security policy
+does not permit one from a CDN, which is a deliberate constraint rather than an obstacle: a bar is a
+`div` with a height, and a library that ships a hundred kilobytes to draw twelve of them is a poor
+trade on the connections this product is used over.
+
+Two rules govern the arithmetic. A bar's height is worked out by converting each decimal string to
+its exact number of minor units as a `bigint` and dividing by integers to a tenth of a percent, so
+no amount ever passes through a float. And no figure the reader sees comes from that arithmetic at
+all: every amount on screen is rendered from the original string, and the table beside the chart
+carries the same numbers. An empty bucket keeps a two-pixel sliver rather than vanishing, because a
+gap in a row of bars reads as missing data rather than as nothing having happened.
+
+### The searchable picker
+
+A native `<select>` is the right control almost everywhere here and is used everywhere it fits. It
+does not fit a list of hundreds of members that lives on the server and is found by typing part of
+a name, part of a code, or the last digits of a phone number. `SearchSelect` is that control, and
+it is built on an ordinary text input rather than on a portalled listbox for two reasons: a portal
+inside a dialog is where focus handling goes wrong, and on a phone a list that escapes its
+container ends up half off the screen.
+
+Its keyboard contract is the whole of its value. The arrows move the highlight and wrap at both
+ends, Enter takes the highlighted option, Escape closes without changing anything, and Enter with
+the list closed submits the form as it would in any other field. `aria-activedescendant` names the
+highlighted option to a screen reader without moving focus out of the box, so the user can keep
+typing. A control that could only be used with a mouse would exclude the staff who work fastest.
 
 ---
 

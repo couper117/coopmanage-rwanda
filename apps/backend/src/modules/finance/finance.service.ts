@@ -1060,7 +1060,9 @@ export async function createCategory(
       entityType: 'FinanceCategory',
       entityId: created.id,
       messageKey: 'audit.finance.categoryCreated',
-      messageParams: { name: input.name, kind: `finance.kind.${input.kind}` },
+      // The kind is sent as a translation key, in the audit namespace rather than the finance
+      // one, so an audit sentence does not depend on a screen's own strings being loaded.
+      messageParams: { name: input.name, kind: `audit.finance.kind.${input.kind}` },
       after: { kind: input.kind, name: input.name, nameRw: input.nameRw ?? null },
     },
   )

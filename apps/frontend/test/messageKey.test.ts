@@ -57,6 +57,16 @@ describe('parameters that are themselves keys', () => {
     await changeLanguage('en')
   })
 
+  it('resolves a finance kind sent from the books', () => {
+    const resolved = translateParams({ name: 'Fuel', kind: 'audit.finance.kind.EXPENSE' }, (key) =>
+      i18n.t(key),
+    )
+    // The key lives in the audit namespace rather than the finance one, so an audit sentence does
+    // not depend on a screen's own strings having been loaded.
+    expect(resolved.kind).toBe('money out')
+    expect(resolved.name).toBe('Fuel')
+  })
+
   it('survives an entry with no parameters at all', () => {
     expect(translateParams(null, (key) => key)).toEqual({})
     expect(translateParams(undefined, (key) => key)).toEqual({})

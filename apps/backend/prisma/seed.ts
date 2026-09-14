@@ -12,13 +12,15 @@ import {
 import argon2 from 'argon2'
 import { randomBytes } from 'node:crypto'
 import { COOPERATIVE_TYPES } from './seed-data/cooperative-types.js'
-import { buildDemoFinance } from './seed-data/demo-finance.js'
+import { buildDemoFinance, DEMO_MEMBER_PAYMENTS } from './seed-data/demo-finance.js'
 import { buildDemoMembers } from './seed-data/demo-members.js'
 import { DEMO_COOPERATIVE, DEMO_STAFF } from './seed-data/demo-cooperative.js'
 import { assertDescriptionsComplete, PERMISSION_DESCRIPTIONS } from './seed-data/permissions.js'
 import { ROLE_DESCRIPTIONS } from './seed-data/roles.js'
 import { nextFinanceReference, nextMemberCode } from '../src/lib/references.js'
 import { defaultCategoriesFor } from '../src/modules/finance/finance.categories.js'
+import { voidTransaction } from '../src/modules/finance/finance.service.js'
+import type { RequestContext } from '../src/lib/context.js'
 import { SYSTEM_UNITS } from './seed-data/units.js'
 
 /**
@@ -447,7 +449,143 @@ async function seedDemoFinance(cooperativeId: string): Promise<void> {
     written += 1
   }
 
+  await seedDemoMemberPayments(cooperativeId, byName, manager?.id ?? null)
+  await seedDemoCorrection(cooperativeId, manager)
+
   console.log(`  demonstration ledger: ${written} entries`)
+}
+
+/**
+ * One contribution recorded twice and then cancelled, so the demonstration books show a
+ * correction.
+ *
+ * Every screen in the finance module has to say something about a cancelled entry: the status
+ * column, the two columns naming what corrects what, the row that is muted rather than removed,
+ * and the totals that count neither the mistake nor its correction. With nothing voided in the
+ * demonstration data, none of that is visible and a manager judging the software cannot see that
+ * a mistake is recoverable.
+ *
+ * Done through `voidTransaction`, the same function the API uses, rather than by writing two rows
+ * here. A second definition of what a reversal is would be a second thing to get wrong.
+ */
+async function seedDemoCorrection(
+  cooperativeId: string,
+  manager: { id: string } | null,
+): Promise<void> {
+  if (!manager) return
+
+  const already = await prisma.financeTransaction.count({
+    where: { cooperativeId, status: 'VOID' },
+  })
+  if (already > 0) return
+
+  const account = await prisma.user.findUnique({
+    where: { id: manager.id },
+    select: { id: true, email: true, fullName: true, isPlatformAdmin: true, locale: true },
+  })
+  const cooperative = await prisma.cooperative.findUniqueOrThrow({
+    where: { id: cooperativeId },
+    select: { id: true, name: true, code: true, isDemo: true },
+  })
+  if (!account) return
+
+  // The contribution that gets cancelled is a duplicate the seed writes for the purpose, so no
+  // member's history loses a payment they actually made.
+  const member = await prisma.member.findFirst({
+    where: { cooperativeId, status: 'ACTIVE' },
+    select: { id: true, firstName: true, lastName: true, memberCode: true },
+    orderBy: { memberCode: 'asc' },
+  })
+  const categoryId = (
+    await prisma.financeCategory.findFirst({
+      where: { cooperativeId, kind: 'INCOME', name: 'Membership fees' },
+      select: { id: true },
+    })
+  )?.id
+  if (!member || !categoryId) return
+
+  const ctx: RequestContext = {
+    requestId: 'seed',
+    sessionFamilyId: 'seed',
+    user: account,
+    cooperative,
+    permissions: new Set(),
+  }
+
+  const occurredAt = new Date(Date.UTC(new Date().getUTCFullYear(), 7, 14))
+
+  const duplicate = await prisma.$transaction(async (tx) => {
+    const reference = await nextFinanceReference(tx, cooperativeId, 'IN', occurredAt)
+    const row = await tx.financeTransaction.create({
+      data: {
+        cooperativeId,
+        reference,
+        kind: 'INCOME',
+        categoryId,
+        amount: '5000.00',
+        occurredAt,
+        method: 'CASH',
+        description: `MEMBERSHIP_FEE from ${member.firstName} ${member.lastName} (${member.memberCode})`,
+        sourceType: 'MANUAL',
+        memberId: member.id,
+        createdById: account.id,
+      },
+      select: { id: true },
+    })
+    return row.id
+  })
+
+  await prisma.$transaction((tx) =>
+    voidTransaction(tx, ctx, duplicate, 'Recorded twice by mistake'),
+  )
+}
+
+/**
+ * The twelve members paid individually, so a profile shows a payment rather than nil.
+ *
+ * Attached to the twelve members with the most contributions, because those are the ones who
+ * delivered the most and would be paid the most, which is the shape a manager recognises.
+ */
+async function seedDemoMemberPayments(
+  cooperativeId: string,
+  categoryByName: Map<string, string>,
+  createdById: string | null,
+): Promise<void> {
+  const categoryId = categoryByName.get('EXPENSE:Payments to members')
+  if (!categoryId) return
+
+  const members = await prisma.member.findMany({
+    where: { cooperativeId, status: 'ACTIVE' },
+    select: { id: true, firstName: true, lastName: true, memberCode: true },
+    orderBy: { memberCode: 'asc' },
+    take: DEMO_MEMBER_PAYMENTS.length,
+  })
+
+  const occurredAt = new Date(Date.UTC(new Date().getUTCFullYear(), 8, 3))
+
+  for (const [index, member] of members.entries()) {
+    const amount = DEMO_MEMBER_PAYMENTS[index]
+    if (!amount) continue
+
+    await prisma.$transaction(async (tx) => {
+      const reference = await nextFinanceReference(tx, cooperativeId, 'EX', occurredAt)
+      await tx.financeTransaction.create({
+        data: {
+          cooperativeId,
+          reference,
+          kind: 'EXPENSE',
+          categoryId,
+          amount,
+          occurredAt,
+          method: 'MOBILE_MONEY',
+          description: `Payment for delivered maize to ${member.firstName} ${member.lastName} (${member.memberCode})`,
+          sourceType: 'MANUAL',
+          memberId: member.id,
+          createdById,
+        },
+      })
+    })
+  }
 }
 
 /**

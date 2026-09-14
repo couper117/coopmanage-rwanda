@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
@@ -67,6 +67,8 @@ export const memberKeys = {
     ['members', cooperativeId, 'timeline', id] as const,
   ledger: (cooperativeId: string | null, filters: ContributionFilters) =>
     ['members', cooperativeId, 'ledger', filters] as const,
+  lookup: (cooperativeId: string | null, query: string) =>
+    ['members', cooperativeId, 'lookup', query] as const,
   shares: (cooperativeId: string | null, id: string) =>
     ['members', cooperativeId, 'shares', id] as const,
   contributions: (cooperativeId: string | null, id: string) =>
@@ -466,4 +468,31 @@ export function useVoidContribution() {
   return useMemberMutation((input: { id: string; reason: string }) =>
     voidContribution(input.id, input.reason),
   )
+}
+
+/**
+ * A short list of members matching what somebody has typed, for a picker.
+ *
+ * Separate from `useMembersList` because it answers a different question. The register is a
+ * screen with filters, ordering and pages; this is ten candidates to choose one from, and it is
+ * what lets an expense name the member it was paid to. Without it the member profile's payments
+ * figure could never be anything but nil, because nothing would ever set `memberId` on a ledger
+ * row.
+ *
+ * Exited and suspended members are included deliberately: a final settlement to somebody who has
+ * left the cooperative is exactly the kind of payment that has to be attributable.
+ */
+export function useMemberLookup(query: string, enabled: boolean) {
+  const cooperativeId = useCooperativeId()
+  const debounced = useDebouncedValue(query.trim(), 250)
+
+  return useQuery({
+    queryKey: memberKeys.lookup(cooperativeId, debounced),
+    queryFn: () =>
+      listMembers({ ...EMPTY_MEMBER_FILTERS, q: debounced, sort: 'lastName', pageSize: 10 }),
+    enabled: enabled && cooperativeId !== null,
+    // The previous ten stay on screen while the next ten are fetched, so the list does not blink
+    // empty between keystrokes and offer "no members found" to somebody mid-word.
+    placeholderData: keepPreviousData,
+  })
 }

@@ -223,7 +223,8 @@
       "SPECIAL_LEVY": "Yatanze umusanzu wihariye",
       "PENALTY": "Yishyuye ihazabu",
       "OTHER": "Yatanze umusanzu"
-    }
+    },
+    "payment": "Yishyuwe na koperative kubera {{category}}"
   },
   "contributions": {
     "title": "Imisanzu",

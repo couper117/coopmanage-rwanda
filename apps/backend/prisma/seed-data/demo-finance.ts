@@ -174,11 +174,11 @@ const SEASONAL: DemoEntry[] = [
   {
     kind: 'EXPENSE',
     category: 'Payments to members',
-    amount: '4200000.00',
+    amount: '2900000.00',
     month: 9,
     day: 2,
     method: 'MOBILE_MONEY',
-    description: 'First payment to members for delivered maize',
+    description: 'First payment to members for delivered maize, paid as one batch',
   },
   {
     kind: 'EXPENSE',
@@ -206,3 +206,30 @@ export function buildDemoFinance(year: number): DemoEntry[] {
     .filter((entry) => new Date(Date.UTC(year, entry.month - 1, entry.day)) <= new Date())
     .sort((a, b) => a.month - b.month || a.day - b.day)
 }
+
+/**
+ * Payments to named members, which the batch above deliberately leaves room for.
+ *
+ * A cooperative pays most of its members together, and the single entry covers that. These twelve
+ * are the ones recorded individually, which is what a treasurer does when somebody asks for their
+ * own receipt — and they are the reason the payments block on a member's profile shows a figure
+ * rather than nil. Until Phase 5 nothing could set a member on a ledger row at all, so that block
+ * could never be anything but zero and this data could not exist.
+ *
+ * The amounts differ because deliveries differ. Together with the batch they come to the
+ * 4,200,000 francs the cooperative paid out in September.
+ */
+export const DEMO_MEMBER_PAYMENTS = [
+  '145000.00',
+  '132500.00',
+  '98000.00',
+  '187500.00',
+  '76000.00',
+  '121000.00',
+  '64500.00',
+  '158000.00',
+  '92500.00',
+  '103000.00',
+  '81000.00',
+  '41000.00',
+] as const

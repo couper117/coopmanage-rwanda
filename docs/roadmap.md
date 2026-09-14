@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 5 in progress.** The finance backend is complete; the screens are in review.
+Status: **Phase 5 complete.** Phase 6 is next.
 
 ---
 
@@ -308,14 +308,15 @@ meeting adds several in a row, and a dialog keeps the list, the filters and the 
 deviation from the planned `/members/new` route is recorded in `api.md` §3.
 
 Two things are deliberately left for later. Recording and voiding a share movement has no interface
-yet: the endpoints exist and are tested, but share capital belongs with the finance screens, so the
-controls arrive in Phase 5. And the built frontend bundle is now 699 kB, 210 kB gzipped, in a single
-chunk; on the connections this product is used over that wants route-level code splitting, which is
-listed against Phase 16.
+yet: the endpoints exist and are tested, and the controls belong with the member profile's shares
+panel rather than with the finance screens, so they are listed against Phase 16's pass over the
+member profile. And the built frontend bundle is now 699 kB, 210 kB gzipped, in a single chunk; on
+the connections this product is used over that wants route-level code splitting, which is listed
+against Phase 16.
 
 ---
 
-### Phase 5 — Finance ✅ (backend; screens in review)
+### Phase 5 — Finance ✅
 
 - Categories, transactions, void and reversal, idempotency, all on the M4 tables
 - Summaries by day, week, month and custom range; category breakdown; trends
@@ -336,6 +337,37 @@ same decimal library the implementation uses, and compares that against the summ
 twelve monthly buckets and the ledger footer. Live: one retry key sent twice returned
 `EX-2026-000037` both times and left one row; voiding 99,999.99 francs took the balance from
 1,582,999.75 to 1,482,999.76 and back to 1,582,999.75 exactly.
+
+Four more things are worth recording.
+
+**A member could not be named on a payment, so a Phase 4 screen was dead.** The ledger accepted a
+`memberId` from the first day and nothing could ever send one: the register is hundreds of
+server-searched people and no control existed for choosing one. The payments block on a member's
+profile could therefore never be anything but nil, and the timeline declared a `PAYMENT` case
+nothing produced. `components/ui/SearchSelect.tsx` is the picker that was missing — a combobox over
+a list too long for a `<select>`, keyboard-complete, with no portal so it cannot escape a dialog on
+a phone. Recording money out now names the member, the profile shows the figure, and the timeline
+shows when. The demonstration cooperative pays twelve members individually so both are visible
+without anybody typing an entry first.
+
+**The demonstration books needed a correction in them.** Every finance screen says something about
+a cancelled entry: the status column, the two columns naming what corrects what, the muted row, the
+totals that count neither side. With nothing voided in the demonstration data none of that is
+visible, and a manager judging the software cannot see that a mistake is recoverable. The seed now
+writes one duplicate contribution and cancels it through `voidTransaction`, the same function the
+API uses, rather than writing the two rows itself.
+
+**The chart is drawn without a library, and without a float.** No charting package is installed and
+the content-security policy does not allow one from a CDN, so the movement panel is bars in a grid
+with a real table of the same figures beside it. Heights come from converting each decimal string
+to an exact `bigint` of minor units and dividing by integers to a tenth of a percent, so no amount
+passes through a float and no figure the reader sees comes from that arithmetic at all.
+
+**Two React rules were worth obeying rather than silencing.** The picker held its highlight as a
+list position, which needed an effect to correct whenever the options changed — so it holds the
+highlighted option's value instead and looks it up in whatever the list holds now. The record
+dialog cleared its member in an effect on opening; it clears on closing instead, through the one
+function every close path already goes through.
 
 **A void was applied twice, and the tests caught it before anything else did.** The balance excluded
 a voided row _and_ counted the reversal written to correct it, so cancelling one receipt of 1,000

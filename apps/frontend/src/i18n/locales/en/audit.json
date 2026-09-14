@@ -41,6 +41,14 @@
   },
   "finance": {
     "posted": "{{amount}} RWF was entered under {{category}}, reference {{reference}}",
-    "voided": "Entry {{reference}} was cancelled and corrected by {{reversal}}"
+    "voided": "Entry {{reference}} was cancelled and corrected by {{reversal}}",
+    "updated": "Entry {{reference}} had its category or description changed",
+    "categoryCreated": "The {{kind}} category {{name}} was added",
+    "categoryUpdated": "The category {{name}} was changed",
+    "exported": "The books were exported as {{format}}, {{count}} entries",
+    "kind": {
+      "INCOME": "money in",
+      "EXPENSE": "money out"
+    }
   }
 }

@@ -223,7 +223,8 @@
       "SPECIAL_LEVY": "Paid a special levy",
       "PENALTY": "Paid a penalty",
       "OTHER": "Made a contribution"
-    }
+    },
+    "payment": "Paid by the cooperative for {{category}}"
   },
   "contributions": {
     "title": "Contributions",

@@ -208,7 +208,11 @@ describe('refresh rotation', () => {
     // The losers detected the reuse and revoked the family, so nothing is left alive.
     const live = await prisma.refreshSession.count({ where: { userId: user.id, revokedAt: null } })
     expect(live).toBe(0)
-  })
+    // Five transactions that deliberately serialise on the same row, while fourteen other test
+    // files are working against the same database. The default five-second budget is not enough
+    // for that and produced a flake roughly one run in four, which is the kind of failure that
+    // teaches people to re-run the suite instead of reading it.
+  }, 30_000)
 
   it('never leaves two live tokens in one family', async () => {
     const user = await createUser()

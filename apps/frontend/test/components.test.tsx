@@ -1,7 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { Badge, Button, EmptyState, FormField, Input, Money, Quantity } from '../src/components/ui'
+import { useState } from 'react'
+import {
+  Badge,
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Money,
+  Quantity,
+  SearchSelect,
+  type SearchOption,
+} from '../src/components/ui'
 
 describe('Button', () => {
   it('renders a real button with its label', () => {
@@ -116,5 +127,141 @@ describe('EmptyState', () => {
     )
     expect(screen.getByRole('heading', { name: 'No members yet' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add member' })).toBeInTheDocument()
+  })
+})
+
+/**
+ * The picker used where a native `<select>` cannot go: a list of hundreds of members that lives on
+ * the server and is found by typing. Its keyboard contract is the part that matters, because the
+ * staff who work fastest never touch the mouse.
+ */
+const MEMBERS: SearchOption[] = [
+  { value: 'm1', label: 'Chantal Mukamana', hint: 'ABAH-0001' },
+  { value: 'm2', label: 'Eric Habimana', hint: 'ABAH-0002' },
+  { value: 'm3', label: 'Solange Mutesi', hint: 'ABAH-0003 · Left the cooperative' },
+]
+
+function PickerHarness({ options = MEMBERS }: { options?: SearchOption[] }) {
+  const [value, setValue] = useState<SearchOption | null>(null)
+  const [query, setQuery] = useState('')
+  return (
+    <>
+      <FormField label="Member this concerns" optional>
+        <SearchSelect
+          value={value}
+          onChange={setValue}
+          options={options}
+          query={query}
+          onQueryChange={setQuery}
+          placeholder="Search by name"
+          emptyLabel="No member matches that"
+          loadingLabel="Searching the register"
+          clearLabel="Remove the member"
+        />
+      </FormField>
+      <p>selected: {value ? value.value : 'none'}</p>
+    </>
+  )
+}
+
+describe('SearchSelect', () => {
+  it('is a combobox that says whether its list is open', async () => {
+    render(<PickerHarness />)
+    const input = screen.getByRole('combobox')
+
+    expect(input).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(input)
+    expect(input).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+  })
+
+  it('takes an option with the arrows and Enter, without the mouse', async () => {
+    render(<PickerHarness />)
+    const input = screen.getByRole('combobox')
+    await userEvent.click(input)
+
+    await userEvent.keyboard('{ArrowDown}')
+    await userEvent.keyboard('{Enter}')
+
+    // The highlight starts on the first option, so one press down takes the second.
+    expect(screen.getByText('selected: m2')).toBeInTheDocument()
+    // The list closes once something is chosen, and the box shows the choice rather than the text.
+    expect(screen.queryByRole('listbox')).toBeNull()
+    expect(screen.getByText('Eric Habimana')).toBeInTheDocument()
+    expect(screen.getByText('ABAH-0002')).toBeInTheDocument()
+  })
+
+  it('names the highlighted option for a screen reader without moving focus', async () => {
+    render(<PickerHarness />)
+    const input = screen.getByRole('combobox')
+    await userEvent.click(input)
+
+    const first = screen.getByRole('option', { selected: true })
+    expect(input).toHaveAttribute('aria-activedescendant', first.id)
+    // Focus stays in the box, which is what lets the user keep typing.
+    expect(input).toHaveFocus()
+  })
+
+  it('wraps the highlight round the ends of the list', async () => {
+    render(<PickerHarness />)
+    await userEvent.click(screen.getByRole('combobox'))
+
+    // Up from the first option reaches the last, so a long list can be reached from either end.
+    await userEvent.keyboard('{ArrowUp}')
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByText('selected: m3')).toBeInTheDocument()
+  })
+
+  it('closes on Escape without choosing anything', async () => {
+    render(<PickerHarness />)
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.queryByRole('listbox')).toBeNull()
+    expect(screen.getByText('selected: none')).toBeInTheDocument()
+  })
+
+  it('leaves Enter alone when the list is closed, so a form can still be submitted', async () => {
+    const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault())
+    render(
+      <form onSubmit={onSubmit}>
+        <PickerHarness />
+        <button type="submit">Record</button>
+      </form>,
+    )
+
+    const input = screen.getByRole('combobox')
+    await userEvent.click(input)
+    await userEvent.keyboard('{Escape}')
+    await userEvent.keyboard('{Enter}')
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('selected: none')).toBeInTheDocument()
+  })
+
+  it('says so when a search found nothing', async () => {
+    render(<PickerHarness options={[]} />)
+    await userEvent.click(screen.getByRole('combobox'))
+
+    // "No member matches that" is a different answer from an empty list, which reads as broken.
+    expect(screen.getByText('No member matches that')).toBeInTheDocument()
+  })
+
+  it('lets the choice be taken back', async () => {
+    render(<PickerHarness />)
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByText('selected: m1')).toBeInTheDocument()
+
+    // Naming a member is optional, so unnaming one has to be possible without reopening the form.
+    await userEvent.click(screen.getByRole('button', { name: 'Remove the member' }))
+    expect(screen.getByText('selected: none')).toBeInTheDocument()
+    expect(screen.getByRole('combobox')).toBeInTheDocument()
+  })
+
+  it('carries the label and the optional marker from the field around it', () => {
+    render(<PickerHarness />)
+    // The picker is a field like any other, so it has to be reachable by its label.
+    expect(screen.getByLabelText(/Member this concerns/)).toBe(screen.getByRole('combobox'))
   })
 })

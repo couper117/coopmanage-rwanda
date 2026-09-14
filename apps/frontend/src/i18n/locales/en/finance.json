@@ -1,0 +1,281 @@
+{
+  "overview": {
+    "title": "Income and expenses",
+    "description": "What the cooperative took in, what it paid out, and what is left.",
+    "toLedger": "Open the ledger",
+    "loadFailed": "We could not load these figures. Check your connection and try again.",
+    "headlineLabel": "These three figures cover the whole period chosen below."
+  },
+  "range": {
+    "title": "Period",
+    "description": "Every figure on this screen covers these dates.",
+    "from": "From",
+    "to": "Until",
+    "preset": {
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This year"
+    }
+  },
+  "groupBy": {
+    "label": "Grouped by",
+    "hint": "How much time each pair of bars covers.",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month"
+  },
+  "headline": {
+    "income": "Money in",
+    "expenses": "Money out",
+    "balance": "Balance",
+    "balanceHint": "Including {{opening}} carried in from before this period."
+  },
+  "movement": {
+    "title": "Movement over the period",
+    "description": "One pair of bars for each period: what came in, and what went out.",
+    "empty": "Nothing was recorded in this period.",
+    "bucketLabel": "{{period}}: {{income}} in, {{expenses}} out.",
+    "tableCaption": "The same figures, period by period.",
+    "columns": {
+      "period": "Period",
+      "balance": "Balance at the end"
+    }
+  },
+  "breakdown": {
+    "titleIn": "Where the money came from",
+    "titleOut": "Where the money went",
+    "descriptionIn": "Money in, category by category, largest first.",
+    "descriptionOut": "Money out, category by category, largest first.",
+    "emptyIn": "No money came in during this period.",
+    "emptyOut": "No money went out during this period.",
+    "share": "{{share}}% of the total"
+  },
+  "recent": {
+    "title": "The last few entries",
+    "description": "The five most recent entries of the chosen period.",
+    "seeAll": "See them all",
+    "caption": "The most recent entries of the chosen period, with the date, what the money was for and the amount.",
+    "emptyTitle": "Nothing recorded in this period",
+    "emptyBody": "Choose a wider period, or record the first entry from the ledger."
+  },
+  "ledger": {
+    "title": "Ledger",
+    "description": "Every movement of money the cooperative has recorded, newest first.",
+    "caption": "Entries in the cooperative's books, with the reference, the date, the category, the amount and how the money moved.",
+    "recordIn": "Record money in",
+    "recordOut": "Record money out",
+    "recorded": "{{amount}} was recorded, reference {{reference}}.",
+    "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
+    "exportFailed": "We could not produce the file. Check your connection and try again.",
+    "loadFailed": "We could not load the ledger. Check your connection and try again.",
+    "totalIn": "Total in",
+    "totalOut": "Total out",
+    "totalBalance": "Difference",
+    "totalsCover": "These three cover every page of the current filters.",
+    "emptyTitle": "Nothing in the books yet",
+    "emptyBody": "Record the first movement of money, in or out, and it appears here with its reference.",
+    "emptyFilteredTitle": "Nothing matches these filters",
+    "emptyFilteredBody": "Widen the dates or the amounts, or clear the filters to see the whole ledger."
+  },
+  "search": {
+    "label": "Search the ledger",
+    "placeholder": "Reference, or what the money was for"
+  },
+  "filters": {
+    "show": "Filters",
+    "showWithCount": "Filters ({{total}})",
+    "kind": "Money in or out",
+    "anyKind": "In and out together",
+    "category": "Category",
+    "anyCategory": "Any category",
+    "method": "How the money moved",
+    "anyMethod": "Any way",
+    "status": "State",
+    "anyStatus": "Recorded and cancelled",
+    "from": "Dated from",
+    "to": "Dated until",
+    "minAmount": "At least",
+    "maxAmount": "At most",
+    "amountHint": "Digits only, for example 5000."
+  },
+  "sort": {
+    "label": "Order",
+    "occurredAt": "Date, oldest first",
+    "-occurredAt": "Date, newest first",
+    "amount": "Amount, smallest first",
+    "-amount": "Amount, largest first",
+    "reference": "Reference, lowest first",
+    "-reference": "Reference, highest first"
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}} entries"
+  },
+  "columns": {
+    "reference": "Reference",
+    "occurredAt": "Date",
+    "category": "Category",
+    "description": "What the money was for",
+    "member": "Member",
+    "method": "Paid by",
+    "amount": "Amount",
+    "status": "State",
+    "actions": "Action"
+  },
+  "kind": {
+    "INCOME": "Money in",
+    "EXPENSE": "Money out"
+  },
+  "status": {
+    "POSTED": "Recorded",
+    "VOID": "Cancelled"
+  },
+  "method": {
+    "CASH": "Cash",
+    "MOBILE_MONEY": "Mobile money",
+    "BANK": "Bank transfer",
+    "CHEQUE": "Cheque",
+    "OTHER": "Another way"
+  },
+  "source": {
+    "MANUAL": "Entered by hand",
+    "CONTRIBUTION": "From a member's contribution",
+    "SHARE_PURCHASE": "From a share purchase",
+    "SALE": "From a sale",
+    "PAYMENT": "From a payment to a member",
+    "OTHER": "From another record"
+  },
+  "entry": {
+    "noMember": "Nobody named",
+    "cancelAtSource": "Cancel this from the member's record",
+    "correctionOf": "Corrects {{reference}}",
+    "correctedBy": "Corrected by {{reference}}",
+    "updated": "Entry {{reference}} was saved.",
+    "editTitle": "Change the category or the note",
+    "editDescription": "Entry {{reference}}.",
+    "editFixed": "The amount, the direction and the date of a recorded entry can never be changed. A wrong figure is cancelled instead, which writes a correction and leaves both entries in the books."
+  },
+  "void": {
+    "action": "Cancel",
+    "title": "Cancel this entry?",
+    "description": "Entry {{reference}}, for {{amount}}.",
+    "consequence": "The entry stays in the books, and a matching correction of the opposite kind is written beside it, so the balance returns to what it was. Nothing is deleted.",
+    "reason": "Why it is being cancelled",
+    "reasonHint": "One line, for example: recorded twice by mistake.",
+    "reasonRequired": "Say why this entry is being cancelled.",
+    "keep": "Keep it recorded",
+    "confirm": "Cancel the entry",
+    "done": "{{reference}} was cancelled. The correction is {{reversal}}."
+  },
+  "entryDialog": {
+    "titleIn": "Record money coming in",
+    "titleOut": "Record money going out",
+    "descriptionIn": "Money the cooperative has received. It is added to the balance as soon as it is recorded.",
+    "descriptionOut": "Money the cooperative has paid out. It is taken off the balance as soon as it is recorded.",
+    "submitIn": "Record the money in",
+    "submitOut": "Record the money out",
+    "noCategoriesIn": "No income category has been set up yet, so money coming in cannot be recorded. Add one on the categories screen first.",
+    "noCategoriesOut": "No expense category has been set up yet, so money going out cannot be recorded. Add one on the categories screen first.",
+    "restateIn": "This records {{amount}} received by the cooperative.",
+    "restateOut": "This records {{amount}} paid out by the cooperative."
+  },
+  "entryFields": {
+    "amount": "Amount in RWF",
+    "amountHint": "Whole francs, for example 5000. Two decimal places at most.",
+    "occurredAt": "Date the money moved",
+    "occurredAtHint": "Today, unless the money moved on another day.",
+    "categoryIn": "Income category",
+    "categoryOut": "Expense category",
+    "category": "Category",
+    "categoryPlaceholder": "Choose a category",
+    "method": "How the money moved",
+    "description": "What the money was for",
+    "descriptionHint": "One line the office will still understand next year, for example: receipt 04521, transport to Kigali.",
+    "member": "Member this concerns",
+    "memberHint": "Leave empty unless the money was paid to, or received from, one member. Naming them puts it on their profile.",
+    "memberPlaceholder": "Search by name, member code or phone number",
+    "memberEmpty": "No member matches that",
+    "memberLoading": "Searching the register",
+    "memberClear": "Remove the member from this entry"
+  },
+  "entryErrors": {
+    "amount": "Write an amount greater than zero, using digits only, with at most two decimal places.",
+    "occurredAt": "Write the date as a real date.",
+    "method": "Say how the money moved.",
+    "categoryId": "Choose the category this money belongs to.",
+    "description": "Say what the money was for."
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "What the cooperative's money is recorded against. A category is never deleted, only put out of service.",
+    "loadFailed": "We could not load the categories. Check your connection and try again.",
+    "showInactive": "Show categories out of service",
+    "showInactiveHint": "A category out of service takes no new entries, and keeps the ones already recorded against it.",
+    "titleIn": "Income categories",
+    "titleOut": "Expense categories",
+    "descriptionIn": "What money the cooperative receives is recorded against.",
+    "descriptionOut": "What money the cooperative pays out is recorded against.",
+    "captionIn": "Income categories, with their Kinyarwanda name, code, how many entries use them and their total.",
+    "captionOut": "Expense categories, with their Kinyarwanda name, code, how many entries use them and their total.",
+    "addIn": "Add an income category",
+    "addOut": "Add an expense category",
+    "emptyTitleIn": "No income category yet",
+    "emptyTitleOut": "No expense category yet",
+    "emptyBody": "Money cannot be recorded until there is a category to record it against.",
+    "columns": {
+      "name": "Name",
+      "nameRw": "In Kinyarwanda",
+      "code": "Code",
+      "entries": "Entries",
+      "total": "Total",
+      "state": "State"
+    },
+    "systemOrigin": "Came with the system",
+    "noNameRw": "Not written",
+    "active": "In service",
+    "inactive": "Out of service",
+    "entriesCount": "{{total}} entries",
+    "deactivate": "Put out of service",
+    "restore": "Put back in service",
+    "deactivateTitle": "Put {{name}} out of service?",
+    "deactivateInUse": "{{entries}} entries are already recorded against it. They keep it as their category and not one of them changes. It simply stops being offered when new money is recorded.",
+    "deactivateUnused": "Nothing is recorded against it yet. It stops being offered when new money is recorded, and it can be put back in service at any time.",
+    "deactivateConfirm": "Yes, put it out of service",
+    "restoreTitle": "Put {{name}} back in service?",
+    "restoreConsequence": "It is offered again when new money is recorded.",
+    "restoreConfirm": "Yes, put it back",
+    "added": "{{name}} was added.",
+    "renamed": "{{name}} was saved.",
+    "deactivated": "{{name}} is out of service.",
+    "restored": "{{name}} is in service again."
+  },
+  "categoryDialog": {
+    "addTitle": "Add a category",
+    "editTitle": "Rename this category",
+    "descriptionIn": "A category for money the cooperative receives.",
+    "descriptionOut": "A category for money the cooperative pays out.",
+    "kindFixedIn": "This is an income category and it stays one. A category's kind can never change: moving it would flip the side of the balance every entry already recorded against it falls on.",
+    "kindFixedOut": "This is an expense category and it stays one. A category's kind can never change: moving it would flip the side of the balance every entry already recorded against it falls on.",
+    "systemOrigin": "This category came with the system. It can be renamed and it can be put out of service, and like every category it is never deleted.",
+    "submitAdd": "Add the category",
+    "submitEdit": "Save the name"
+  },
+  "categoryFields": {
+    "name": "Name",
+    "nameRw": "Name in Kinyarwanda",
+    "nameRwHint": "Shown to anybody reading the system in Kinyarwanda. Leave it empty to use the name above.",
+    "code": "Code",
+    "codeHint": "For a cooperative that already numbers its categories on paper."
+  },
+  "categoryErrors": {
+    "name": "A name is needed.",
+    "nameRw": "That Kinyarwanda name is too long.",
+    "code": "A code is twenty characters at most."
+  },
+  "apiErrors": {
+    "alreadyVoid": "That entry has already been cancelled.",
+    "voidFromSource": "This entry came from a member's record. Cancel it from that member's contributions or shares, so the books and the member's own history stay in step.",
+    "voidedNotEditable": "A cancelled entry cannot be changed. It stays as it is, beside its correction.",
+    "categoryNameTaken": "A category with that name already exists on this side of the books."
+  }
+}

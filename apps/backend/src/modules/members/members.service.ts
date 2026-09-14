@@ -649,6 +649,33 @@ export async function memberTimeline(
     }
   }
 
+  if (ctx.permissions.has('finance:view')) {
+    // Money paid out to this member, which until Phase 5 could not exist: nothing set a member on
+    // a ledger row, so the payments figure on the profile was always nil and this case of the
+    // timeline was declared but never produced. A member asking when they were paid needs it.
+    const payments = await prisma.financeTransaction.findMany({
+      where: {
+        cooperativeId,
+        memberId,
+        kind: 'EXPENSE',
+        status: 'POSTED',
+        reversalOfId: null,
+      },
+      select: { amount: true, occurredAt: true, category: { select: { name: true } } },
+      orderBy: { occurredAt: 'desc' },
+      take: limit,
+    })
+    for (const row of payments) {
+      entries.push({
+        at: row.occurredAt.toISOString(),
+        kind: 'PAYMENT',
+        messageKey: 'timeline.payment',
+        messageParams: { category: row.category.name },
+        amount: toWire(row.amount),
+      })
+    }
+  }
+
   return entries.sort((a, b) => b.at.localeCompare(a.at)).slice(0, limit)
 }
 

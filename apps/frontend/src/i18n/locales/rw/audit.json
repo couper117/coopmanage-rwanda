@@ -41,6 +41,14 @@
   },
   "finance": {
     "posted": "{{amount}} RWF yinjijwe muri {{category}}, inomero {{reference}}",
-    "voided": "Icyanditswe {{reference}} cyahagaritswe kigakosorwa na {{reversal}}"
+    "voided": "Icyanditswe {{reference}} cyahagaritswe kigakosorwa na {{reversal}}",
+    "updated": "Icyanditswe {{reference}} cyahinduriwe icyiciro cyangwa ibisobanuro",
+    "categoryCreated": "Icyiciro {{name}} cy'{{kind}} cyongeweho",
+    "categoryUpdated": "Icyiciro {{name}} cyahinduwe",
+    "exported": "Ibitabo byasohotse nka {{format}}, ibyanditswe {{count}}",
+    "kind": {
+      "INCOME": "amafaranga yinjiye",
+      "EXPENSE": "amafaranga yasohotse"
+    }
   }
 }

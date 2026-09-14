@@ -427,7 +427,7 @@ This is the same reasoning that makes a wrong-tenant record report "not found" r
 | `/`                                                                                  | Dashboard                                            | `dashboard:view`                                          |
 | `/members`, `/members/:id`                                                           | Members (adding and editing are dialogs, see below)  | `members:view`                                            |
 | `/finance`                                                                           | Money in, money out, balance                         | `finance:view`                                            |
-| `/finance/transactions`, `/finance/transactions/new`                                 | Ledger and entry                                     | `finance:view` / `finance:create`                         |
+| `/finance/transactions`                                                              | Ledger; recording is a dialog, as for members        | `finance:view` / `finance:create`                         |
 | `/finance/categories`                                                                | Categories                                           | `finance:view`, editing needs `finance:categories:manage` |
 | `/contributions`                                                                     | Member contributions                                 | `contributions:view`                                      |
 | `/inventory`                                                                         | Stock overview                                       | `inventory:view`                                          |

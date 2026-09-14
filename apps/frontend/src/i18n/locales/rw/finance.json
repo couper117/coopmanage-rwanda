@@ -1,0 +1,281 @@
+{
+  "overview": {
+    "title": "Amafaranga yinjiye n'ayasohotse",
+    "description": "Ibyo koperative yakiriye, ibyo yishyuye, n'ibisigaye.",
+    "toLedger": "Fungura igitabo cy'amafaranga",
+    "loadFailed": "Ntitwashoboye kubona iyi mibare. Reba uko interineti ihagaze hanyuma wongere ugerageze.",
+    "headlineLabel": "Iyi mibare itatu ireba igihe cyose cyatoranyijwe hasi."
+  },
+  "range": {
+    "title": "Igihe",
+    "description": "Imibare yose iri kuri uru rupapuro ireba izi tariki.",
+    "from": "Kuva ku itariki",
+    "to": "Kugeza ku itariki",
+    "preset": {
+      "thisMonth": "Uku kwezi",
+      "lastMonth": "Ukwezi gushize",
+      "thisYear": "Uyu mwaka"
+    }
+  },
+  "groupBy": {
+    "label": "Bitondekanyijwe ku",
+    "hint": "Igihe buri tusoko tubiri tugaragaza.",
+    "day": "Umunsi",
+    "week": "Icyumweru",
+    "month": "Ukwezi"
+  },
+  "headline": {
+    "income": "Amafaranga yinjiye",
+    "expenses": "Amafaranga yasohotse",
+    "balance": "Amafaranga asigaye",
+    "balanceHint": "Harimo {{opening}} yazanywe mu gihe cyabanje."
+  },
+  "movement": {
+    "title": "Uko amafaranga yagenze",
+    "description": "Ku buri gihe hari udusoko tubiri: ayinjiye n'ayasohotse.",
+    "empty": "Nta kintu cyanditswe muri iki gihe.",
+    "bucketLabel": "{{period}}: {{income}} yinjiye, {{expenses}} yasohotse.",
+    "tableCaption": "Iyi mibare nyine, igihe ku gihe.",
+    "columns": {
+      "period": "Igihe",
+      "balance": "Amafaranga asigaye ku iherezo"
+    }
+  },
+  "breakdown": {
+    "titleIn": "Aho amafaranga yavuye",
+    "titleOut": "Aho amafaranga yagiye",
+    "descriptionIn": "Amafaranga yinjiye, icyiciro ku cyiciro, ahereye ku menshi.",
+    "descriptionOut": "Amafaranga yasohotse, icyiciro ku cyiciro, ahereye ku menshi.",
+    "emptyIn": "Nta mafaranga yinjiye muri iki gihe.",
+    "emptyOut": "Nta mafaranga yasohotse muri iki gihe.",
+    "share": "{{share}}% by'igiteranyo"
+  },
+  "recent": {
+    "title": "Ibyanditswe biheruka",
+    "description": "Ibintu bitanu biheruka kwandikwa mu gihe cyatoranyijwe.",
+    "seeAll": "Reba byose",
+    "caption": "Ibyanditswe biheruka mu gihe cyatoranyijwe, hamwe n'itariki, icyo amafaranga yakoreshejwe n'ingano yayo.",
+    "emptyTitle": "Nta kintu cyanditswe muri iki gihe",
+    "emptyBody": "Hitamo igihe kirekire, cyangwa wandike icya mbere mu gitabo cy'amafaranga."
+  },
+  "ledger": {
+    "title": "Igitabo cy'amafaranga",
+    "description": "Amafaranga yose koperative yanditse, aheruka abanza.",
+    "caption": "Ibyanditswe mu bitabo bya koperative, hamwe n'inomero, itariki, icyiciro, ingano y'amafaranga n'uburyo bwanyuzemo.",
+    "recordIn": "Andika amafaranga yinjiye",
+    "recordOut": "Andika amafaranga yasohotse",
+    "recorded": "{{amount}} yanditswe, inomero {{reference}}.",
+    "exportCsv": "Gukuramo CSV",
+    "exportExcel": "Gukuramo Excel",
+    "exportFailed": "Ntitwashoboye kubona idosiye. Reba uko interineti ihagaze hanyuma wongere ugerageze.",
+    "loadFailed": "Ntitwashoboye kubona igitabo cy'amafaranga. Reba uko interineti ihagaze hanyuma wongere ugerageze.",
+    "totalIn": "Igiteranyo cy'ayinjiye",
+    "totalOut": "Igiteranyo cy'ayasohotse",
+    "totalBalance": "Itandukaniro",
+    "totalsCover": "Iyi mibare itatu ireba impapuro zose z'ibyatoranyijwe.",
+    "emptyTitle": "Nta kintu kiri mu bitabo",
+    "emptyBody": "Andika amafaranga ya mbere yinjiye cyangwa yasohotse, hanyuma agaragara hano n'inomero yayo.",
+    "emptyFilteredTitle": "Nta kintu gihuye n'ibyatoranyijwe",
+    "emptyFilteredBody": "Agura igihe cyangwa ingano y'amafaranga, cyangwa ukureho ibyatoranyijwe urebe igitabo cyose."
+  },
+  "search": {
+    "label": "Shakisha mu gitabo",
+    "placeholder": "Inomero, cyangwa icyo amafaranga yakoreshejwe"
+  },
+  "filters": {
+    "show": "Muyunguruzi",
+    "showWithCount": "Muyunguruzi ({{total}})",
+    "kind": "Yinjiye cyangwa yasohotse",
+    "anyKind": "Ayinjiye n'ayasohotse",
+    "category": "Icyiciro",
+    "anyCategory": "Icyiciro icyo ari cyo",
+    "method": "Uburyo amafaranga yanyuzemo",
+    "anyMethod": "Uburyo ubwo ari bwo",
+    "status": "Uko byahagaze",
+    "anyStatus": "Ibyanditswe n'ibyahagaritswe",
+    "from": "Bifite itariki kuva",
+    "to": "Bifite itariki kugeza",
+    "minAmount": "Byibura",
+    "maxAmount": "Ntarengwa",
+    "amountHint": "Imibare gusa, urugero 5000."
+  },
+  "sort": {
+    "label": "Uko bitondekanye",
+    "occurredAt": "Itariki, iya kera ibanza",
+    "-occurredAt": "Itariki, iheruka ibanza",
+    "amount": "Ingano, nto ibanza",
+    "-amount": "Ingano, nini ibanza",
+    "reference": "Inomero, nto ibanza",
+    "-reference": "Inomero, nini ibanza"
+  },
+  "pagination": {
+    "summary": "Hagaragara {{from}} kugeza {{to}} kuri {{total}} byanditswe"
+  },
+  "columns": {
+    "reference": "Inomero y'inyandiko",
+    "occurredAt": "Itariki",
+    "category": "Icyiciro",
+    "description": "Icyo amafaranga yakoreshejwe",
+    "member": "Umunyamuryango",
+    "method": "Uburyo",
+    "amount": "Ingano y'amafaranga",
+    "status": "Uko byahagaze",
+    "actions": "Igikorwa"
+  },
+  "kind": {
+    "INCOME": "Amafaranga yinjiye",
+    "EXPENSE": "Amafaranga yasohotse"
+  },
+  "status": {
+    "POSTED": "Byanditswe",
+    "VOID": "Byahagaritswe"
+  },
+  "method": {
+    "CASH": "Amafaranga mu ntoki",
+    "MOBILE_MONEY": "Kuri Mobile money",
+    "BANK": "Kwohereza kuri banki",
+    "CHEQUE": "Sheki",
+    "OTHER": "Ubundi buryo"
+  },
+  "source": {
+    "MANUAL": "Byanditswe n'intoki",
+    "CONTRIBUTION": "Biva ku musanzu w'umunyamuryango",
+    "SHARE_PURCHASE": "Biva ku kugura imigabane",
+    "SALE": "Biva ku igurisha",
+    "PAYMENT": "Biva ku bwishyu bwahawe umunyamuryango",
+    "OTHER": "Biva mu yindi nyandiko"
+  },
+  "entry": {
+    "noMember": "Nta we wavuzwe",
+    "cancelAtSource": "Ibi bihagarikwa ku rupapuro rw'umunyamuryango",
+    "correctionOf": "Gikosora {{reference}}",
+    "correctedBy": "Cyakosowe na {{reference}}",
+    "updated": "Icyanditswe {{reference}} cyabitswe.",
+    "editTitle": "Hindura icyiciro cyangwa icyitonderwa",
+    "editDescription": "Icyanditswe {{reference}}.",
+    "editFixed": "Ingano y'amafaranga, icyerekezo n'itariki y'ikintu cyanditswe ntibihinduka. Umubare utari wo uhagarikwa, hanyuma handikwe igikosora, kandi byombi bigume mu bitabo."
+  },
+  "void": {
+    "action": "Guhagarika",
+    "title": "Uremeza guhagarika iki cyanditswe?",
+    "description": "Icyanditswe {{reference}}, cy'amafaranga {{amount}}.",
+    "consequence": "Icyanditswe kiguma mu bitabo, kandi iruhande rwacyo handikwe igikosora kingana na cyo ku rundi ruhande, ku buryo amafaranga asigaye asubira uko yari. Nta kintu gisibwa.",
+    "reason": "Impamvu ihagarikirwa",
+    "reasonHint": "Umurongo umwe, urugero: cyanditswe kabiri mu makosa.",
+    "reasonRequired": "Tanga impamvu iki cyanditswe kihagarikirwa.",
+    "keep": "Gikomeze kwandikwa",
+    "confirm": "Emeza guhagarika icyanditswe",
+    "done": "{{reference}} yahagaritswe. Igikosora ni {{reversal}}."
+  },
+  "entryDialog": {
+    "titleIn": "Kwandika amafaranga yinjiye",
+    "titleOut": "Kwandika amafaranga yasohotse",
+    "descriptionIn": "Amafaranga koperative yakiriye. Yiyongera ku mafaranga asigaye ako kanya nyuma y'iyandikwa.",
+    "descriptionOut": "Amafaranga koperative yishyuye. Akurwa ku mafaranga asigaye ako kanya nyuma y'iyandikwa.",
+    "submitIn": "Andika ayinjiye",
+    "submitOut": "Andika ayasohotse",
+    "noCategoriesIn": "Nta cyiciro cy'amafaranga yinjira kiracyashyizweho, bityo amafaranga yinjiye ntashobora kwandikwa. Banza wongere icyiciro ku rupapuro rw'ibyiciro.",
+    "noCategoriesOut": "Nta cyiciro cy'amafaranga asohoka kiracyashyizweho, bityo amafaranga yasohotse ntashobora kwandikwa. Banza wongere icyiciro ku rupapuro rw'ibyiciro.",
+    "restateIn": "Ibi byandika {{amount}} koperative yakiriye.",
+    "restateOut": "Ibi byandika {{amount}} koperative yishyuye."
+  },
+  "entryFields": {
+    "amount": "Ingano y'amafaranga mu RWF",
+    "amountHint": "Amafaranga yuzuye, urugero 5000. Ibice by'ijana ntarenga bibiri.",
+    "occurredAt": "Itariki amafaranga yimukiyeho",
+    "occurredAtHint": "Uyu munsi, keretse amafaranga yimutse ku yindi tariki.",
+    "categoryIn": "Icyiciro cy'amafaranga yinjira",
+    "categoryOut": "Icyiciro cy'amafaranga asohoka",
+    "category": "Icyiciro",
+    "categoryPlaceholder": "Hitamo icyiciro",
+    "method": "Uburyo amafaranga yanyuzemo",
+    "description": "Icyo amafaranga yakoreshejwe",
+    "descriptionHint": "Umurongo umwe ibiro bizumva n'umwaka utaha, urugero: inyemezabwishyu 04521, urugendo rwa Kigali.",
+    "member": "Umunyamuryango bireba",
+    "memberHint": "Usige ubusa keretse amafaranga yishyuwe cyangwa yakiriwe ku munyamuryango umwe. Kumwandika bibishyira ku rupapuro rwe.",
+    "memberPlaceholder": "Shakisha ku izina, inomero y'umunyamuryango cyangwa telefone",
+    "memberEmpty": "Nta munyamuryango uhuye n'ibyo",
+    "memberLoading": "Turashakisha mu rutonde",
+    "memberClear": "Kuraho umunyamuryango kuri iki cyanditswe"
+  },
+  "entryErrors": {
+    "amount": "Andika ingano irenze zeru, ukoresheje imibare gusa, ibice by'ijana ntarenga bibiri.",
+    "occurredAt": "Andika itariki nk'itariki nyayo.",
+    "method": "Vuga uburyo amafaranga yanyuzemo.",
+    "categoryId": "Hitamo icyiciro aya mafaranga abarizwamo.",
+    "description": "Vuga icyo amafaranga yakoreshejwe."
+  },
+  "categories": {
+    "title": "Ibyiciro",
+    "description": "Ibyo amafaranga ya koperative abarizwamo. Icyiciro ntikisibwa, gihagarikwa gusa.",
+    "loadFailed": "Ntitwashoboye kubona ibyiciro. Reba uko interineti ihagaze hanyuma wongere ugerageze.",
+    "showInactive": "Erekana ibyiciro byahagaritswe",
+    "showInactiveHint": "Icyiciro cyahagaritswe ntikibona ibyanditswe bishya, ariko kigumana ibyari bisanzwe bibarizwa muri cyo.",
+    "titleIn": "Ibyiciro by'amafaranga yinjira",
+    "titleOut": "Ibyiciro by'amafaranga asohoka",
+    "descriptionIn": "Ibyo amafaranga koperative yakira abarizwamo.",
+    "descriptionOut": "Ibyo amafaranga koperative yishyura abarizwamo.",
+    "captionIn": "Ibyiciro by'amafaranga yinjira, hamwe n'izina mu Kinyarwanda, kode, umubare w'ibyanditswe bibikoresha n'igiteranyo cyabyo.",
+    "captionOut": "Ibyiciro by'amafaranga asohoka, hamwe n'izina mu Kinyarwanda, kode, umubare w'ibyanditswe bibikoresha n'igiteranyo cyabyo.",
+    "addIn": "Ongeramo icyiciro cy'ayinjira",
+    "addOut": "Ongeramo icyiciro cy'asohoka",
+    "emptyTitleIn": "Nta cyiciro cy'amafaranga yinjira",
+    "emptyTitleOut": "Nta cyiciro cy'amafaranga asohoka",
+    "emptyBody": "Amafaranga ntashobora kwandikwa igihe nta cyiciro abarizwamo.",
+    "columns": {
+      "name": "Izina",
+      "nameRw": "Mu Kinyarwanda",
+      "code": "Kode",
+      "entries": "Ibyanditswe",
+      "total": "Igiteranyo",
+      "state": "Uko kihagaze"
+    },
+    "systemOrigin": "Cyaje na sisitemu",
+    "noNameRw": "Ntiryanditswe",
+    "active": "Gikora",
+    "inactive": "Cyahagaritswe",
+    "entriesCount": "Ibyanditswe {{total}}",
+    "deactivate": "Guhagarika",
+    "restore": "Gusubizaho",
+    "deactivateTitle": "Uremeza guhagarika {{name}}?",
+    "deactivateInUse": "Hari ibyanditswe {{entries}} bisanzwe bibarizwa muri cyo. Bikomeza kugira icyo cyiciro kandi nta na kimwe gihinduka. Gusa ntikizongera kugaragara mu gihe handikwa amafaranga mashya.",
+    "deactivateUnused": "Nta kintu kiracyabarizwa muri cyo. Ntikizongera kugaragara mu gihe handikwa amafaranga mashya, kandi gishobora kongera gusubizwaho igihe icyo ari cyo.",
+    "deactivateConfirm": "Yego, gihagarike",
+    "restoreTitle": "Uremeza kugisubizaho {{name}}?",
+    "restoreConsequence": "Kizongera kugaragara mu gihe handikwa amafaranga mashya.",
+    "restoreConfirm": "Yego, gisubizeho",
+    "added": "{{name}} cyongewemo.",
+    "renamed": "{{name}} cyabitswe.",
+    "deactivated": "{{name}} cyahagaritswe.",
+    "restored": "{{name}} cyongeye gukora."
+  },
+  "categoryDialog": {
+    "addTitle": "Kongeramo icyiciro",
+    "editTitle": "Hindura izina ry'icyiciro",
+    "descriptionIn": "Icyiciro cy'amafaranga koperative yakira.",
+    "descriptionOut": "Icyiciro cy'amafaranga koperative yishyura.",
+    "kindFixedIn": "Iki ni icyiciro cy'amafaranga yinjira, kandi kizaguma ari cyo. Ubwoko bw'icyiciro ntibuhinduka: kubuhindura byahindura uruhande rw'amafaranga asigaye ibyanditswe bimaze kubarizwa muri cyo bibarizwa.",
+    "kindFixedOut": "Iki ni icyiciro cy'amafaranga asohoka, kandi kizaguma ari cyo. Ubwoko bw'icyiciro ntibuhinduka: kubuhindura byahindura uruhande rw'amafaranga asigaye ibyanditswe bimaze kubarizwa muri cyo bibarizwa.",
+    "systemOrigin": "Iki cyiciro cyaje na sisitemu. Izina ryacyo rishobora guhindurwa kandi gishobora guhagarikwa, kandi nka buri cyiciro ntikisibwa.",
+    "submitAdd": "Ongeramo icyiciro",
+    "submitEdit": "Bika izina"
+  },
+  "categoryFields": {
+    "name": "Izina",
+    "nameRw": "Izina mu Kinyarwanda",
+    "nameRwHint": "Rigaragarira abasoma sisitemu mu Kinyarwanda. Rireke ubusa kugira ngo hakoreshwe izina riri haruguru.",
+    "code": "Kode",
+    "codeHint": "Ku koperative isanzwe iha ibyiciro byayo inomero ku rupapuro."
+  },
+  "categoryErrors": {
+    "name": "Izina rirasabwa.",
+    "nameRw": "Iryo zina mu Kinyarwanda rirerure cyane.",
+    "code": "Kode ntirenga inyuguti makumyabiri."
+  },
+  "apiErrors": {
+    "alreadyVoid": "Icyo cyanditswe cyasanzwe cyahagaritswe.",
+    "voidFromSource": "Iki cyanditswe kivuye mu nyandiko y'umunyamuryango. Gihagarike ku misanzu cyangwa ku migabane y'uwo munyamuryango, ku buryo ibitabo n'amateka y'umunyamuryango bihuza.",
+    "voidedNotEditable": "Icyanditswe cyahagaritswe ntigihinduka. Kiguma uko kiri, iruhande rw'igikosora cyacyo.",
+    "categoryNameTaken": "Hari icyiciro gisanzwe gifite iryo zina ku ruhande rumwe rw'ibitabo."
+  }
+}

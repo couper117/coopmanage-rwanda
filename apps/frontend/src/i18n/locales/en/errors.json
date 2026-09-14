@@ -62,6 +62,14 @@
     "alreadyVoid": "That share movement has already been cancelled."
   },
   "finance": {
-    "alreadyVoid": "That entry has already been cancelled."
+    "alreadyVoid": "That entry has already been cancelled.",
+    "voidedNotEditable": "A cancelled entry cannot be changed. It stays as it is, beside its correction.",
+    "voidFromSource": "This entry came from a member's record. Cancel it there, so both views stay in step.",
+    "categoryNameTaken": "A category of that kind already has that name."
+  },
+  "idempotency": {
+    "reused": "That retry key has already been used for a different request. Reload the page and try again.",
+    "expired": "That retry key is no longer held. Check whether the entry was recorded, then try again.",
+    "inProgress": "That request is still being processed. Wait a moment, then check whether it was recorded."
   }
 }

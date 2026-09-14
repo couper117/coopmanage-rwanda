@@ -62,6 +62,14 @@
     "alreadyVoid": "Iyo migabane isanzwe yarahagaritswe."
   },
   "finance": {
-    "alreadyVoid": "Icyo cyanditswe gisanzwe cyarahagaritswe."
+    "alreadyVoid": "Icyo cyanditswe gisanzwe cyarahagaritswe.",
+    "voidedNotEditable": "Icyanditswe cyahagaritswe ntigihindurwa. Kiguma uko kiri, iruhande rw'igikosora cyacyo.",
+    "voidFromSource": "Iki cyanditswe cyaturutse ku nyandiko y'umunyamuryango. Kihagarikire aho, ku buryo impande zombi zihuza.",
+    "categoryNameTaken": "Icyiciro cy'ubwoko nk'ubwo gisanzwe gifite iryo zina."
+  },
+  "idempotency": {
+    "reused": "Urufunguzo rwo kongera kohereza rwamaze gukoreshwa ku kindi cyifuzo. Ongera ufungure urupapuro hanyuma ugerageze.",
+    "expired": "Urufunguzo rwo kongera kohereza ntirukibitswe. Reba niba icyanditswe cyanditswe, hanyuma ugerageze.",
+    "inProgress": "Icyo cyifuzo kiracyatunganywa. Tegereza gato, hanyuma urebe niba cyanditswe."
   }
 }
