@@ -12,11 +12,13 @@ import {
 import argon2 from 'argon2'
 import { randomBytes } from 'node:crypto'
 import { COOPERATIVE_TYPES } from './seed-data/cooperative-types.js'
-import { buildDemoMembers, DEMO_FINANCE_CATEGORIES } from './seed-data/demo-members.js'
+import { buildDemoFinance } from './seed-data/demo-finance.js'
+import { buildDemoMembers } from './seed-data/demo-members.js'
 import { DEMO_COOPERATIVE, DEMO_STAFF } from './seed-data/demo-cooperative.js'
 import { assertDescriptionsComplete, PERMISSION_DESCRIPTIONS } from './seed-data/permissions.js'
 import { ROLE_DESCRIPTIONS } from './seed-data/roles.js'
 import { nextFinanceReference, nextMemberCode } from '../src/lib/references.js'
+import { defaultCategoriesFor } from '../src/modules/finance/finance.categories.js'
 import { SYSTEM_UNITS } from './seed-data/units.js'
 
 /**
@@ -350,8 +352,9 @@ async function seedDemoCooperative(): Promise<void> {
 
   console.log(`  demonstration cooperative: ${DEMO_COOPERATIVE.name} (${DEMO_STAFF.length} staff)`)
 
-  await seedFinanceCategories(cooperative.id)
+  await seedFinanceCategories(cooperative.id, DEMO_COOPERATIVE.typeKey)
   await seedDemoMembers(cooperative.id)
+  await seedDemoFinance(cooperative.id)
 }
 
 /**
@@ -361,10 +364,15 @@ async function seedDemoCooperative(): Promise<void> {
  * cooperative usable rather than a shell. They are marked `isSystem`, which means they can be
  * deactivated but not deleted.
  */
-async function seedFinanceCategories(cooperativeId: string): Promise<void> {
+async function seedFinanceCategories(cooperativeId: string, typeKey: string): Promise<void> {
+  // The same list the application gives a cooperative created through the platform, so the
+  // demonstration cooperative is not a special case and there is one definition of what a
+  // cooperative starts with. Upserted rather than inserted, because the seed has to be safe to
+  // run twice.
+  const defaults = defaultCategoriesFor(typeKey)
   for (const [kind, entries] of [
-    ['INCOME', DEMO_FINANCE_CATEGORIES.income],
-    ['EXPENSE', DEMO_FINANCE_CATEGORIES.expense],
+    ['INCOME', defaults.income],
+    ['EXPENSE', defaults.expense],
   ] as const) {
     for (const entry of entries) {
       await prisma.financeCategory.upsert({
@@ -374,6 +382,72 @@ async function seedFinanceCategories(cooperativeId: string): Promise<void> {
       })
     }
   }
+}
+
+/**
+ * The cooperative's own books: what it spent and what it sold, beyond the money that came from
+ * members.
+ *
+ * Idempotent like the rest of the seed, keyed on the manual entries already present, so running
+ * the seed twice does not double the cooperative's expenses.
+ */
+async function seedDemoFinance(cooperativeId: string): Promise<void> {
+  const existing = await prisma.financeTransaction.count({
+    where: { cooperativeId, sourceType: 'MANUAL' },
+  })
+  if (existing > 0) {
+    console.log(`  demonstration ledger: ${existing} entries already present, left alone`)
+    return
+  }
+
+  const categories = await prisma.financeCategory.findMany({
+    where: { cooperativeId },
+    select: { id: true, kind: true, name: true },
+  })
+  const byName = new Map(categories.map((row) => [`${row.kind}:${row.name}`, row.id]))
+
+  const managerEmail = DEMO_STAFF[0]?.email
+  const manager = managerEmail
+    ? await prisma.user.findUnique({ where: { email: managerEmail }, select: { id: true } })
+    : null
+
+  const entries = buildDemoFinance(new Date().getUTCFullYear())
+  let written = 0
+
+  for (const entry of entries) {
+    const categoryId = byName.get(`${entry.kind}:${entry.category}`)
+    if (!categoryId) continue
+
+    const occurredAt = new Date(Date.UTC(new Date().getUTCFullYear(), entry.month - 1, entry.day))
+
+    // One transaction per entry, through the same reference allocator the application uses, so
+    // the demonstration books are indistinguishable from books a treasurer kept.
+    await prisma.$transaction(async (tx) => {
+      const reference = await nextFinanceReference(
+        tx,
+        cooperativeId,
+        entry.kind === 'INCOME' ? 'IN' : 'EX',
+        occurredAt,
+      )
+      await tx.financeTransaction.create({
+        data: {
+          cooperativeId,
+          reference,
+          kind: entry.kind,
+          categoryId,
+          amount: entry.amount,
+          occurredAt,
+          method: entry.method,
+          description: entry.description,
+          sourceType: 'MANUAL',
+          createdById: manager?.id ?? null,
+        },
+      })
+    })
+    written += 1
+  }
+
+  console.log(`  demonstration ledger: ${written} entries`)
 }
 
 /**

@@ -177,27 +177,3 @@ export function buildDemoMembers(count: number): DemoMemberSeed[] {
 
   return members
 }
-
-/**
- * Income and expense categories for the demonstration cooperative, taken from what an agricultural
- * cooperative in Rwanda actually records.
- */
-export const DEMO_FINANCE_CATEGORIES = {
-  income: [
-    { name: 'Sale of produce', nameRw: 'Kugurisha umusaruro' },
-    { name: 'Membership fees', nameRw: 'Amafaranga yo kwinjira' },
-    { name: 'Share capital', nameRw: 'Imigabane y’igishoro' },
-    { name: 'Savings deposits', nameRw: 'Ubwizigame' },
-    { name: 'Grants and support', nameRw: 'Inkunga' },
-  ],
-  expense: [
-    { name: 'Seeds and seedlings', nameRw: 'Imbuto' },
-    { name: 'Fertiliser', nameRw: 'Ifumbire' },
-    { name: 'Transport', nameRw: 'Ubwikorezi' },
-    { name: 'Packaging', nameRw: 'Ibipfunyika' },
-    { name: 'Labour', nameRw: 'Abakozi b’umunsi' },
-    { name: 'Payments to members', nameRw: 'Kwishyura abanyamuryango' },
-    { name: 'Office and administration', nameRw: 'Ibiro n’ubuyobozi' },
-    { name: 'Bank charges', nameRw: 'Amafaranga ya banki' },
-  ],
-} as const

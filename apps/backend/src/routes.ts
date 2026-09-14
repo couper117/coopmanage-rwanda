@@ -3,6 +3,7 @@ import { adminRouter } from './modules/admin/admin.routes.js'
 import { auditRouter } from './modules/audit/audit.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { cooperativesRouter } from './modules/cooperatives/cooperatives.routes.js'
+import { financeRouter } from './modules/finance/finance.routes.js'
 import { healthRouter } from './modules/health/health.routes.js'
 import { membersRouter } from './modules/members/members.routes.js'
 import { referenceRouter } from './modules/reference/reference.routes.js'
@@ -23,6 +24,7 @@ apiRouter.use('/admin', adminRouter)
 // Mounted at the root because their paths are already fully qualified: /cooperatives/current,
 // /settings/:key, /staff, /roles, /permissions.
 apiRouter.use('/', membersRouter)
+apiRouter.use('/', financeRouter)
 apiRouter.use('/', cooperativesRouter)
 apiRouter.use('/', staffRouter)
 apiRouter.use('/', referenceRouter)

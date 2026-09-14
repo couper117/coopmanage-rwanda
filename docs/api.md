@@ -117,6 +117,27 @@ connection and an anonymous caller must not be able to drive unbounded queries a
 | `POST /assistant/ask`        | 20 per hour per user and 200 per day per cooperative |
 | `POST /sms/send`             | 10 per hour per cooperative                          |
 
+### Safe retries
+
+A treasurer on a slow connection presses "Record", the page hangs, and they press it again. Without
+help from the server the cooperative's books now hold the same 50,000 francs twice and somebody has
+to work out which of two identical entries is real.
+
+The client sends `Idempotency-Key` with a value it holds for the life of one attempt. The first
+request through claims the key and does the work; a repeat of the **same** request gets the first
+one's response back, with the same status, without doing the work again. A **different** request
+reusing the key is a client bug that would otherwise be answered with somebody else's receipt, so it
+is refused with `409 IDEMPOTENCY_KEY_REUSED`. A repeat that arrives while the first is still running
+is `409`, because answering would mean guessing what the first will return. A key is honoured for
+24 hours and is scoped to the cooperative, so two cooperatives cannot collide.
+
+Sending **no** key is not the same as sending one. Without a key a second identical request records
+a second entry, and that is deliberate: two members paying the same amount for the same thing on the
+same day is ordinary, and swallowing the second would lose real money.
+
+Honoured on `POST /finance/transactions` and `POST /finance/transactions/:id/void` from Phase 5, and
+on the stock and sales mutations as those phases land.
+
 ---
 
 ## 2. Endpoint map
@@ -233,12 +254,40 @@ There is no `DELETE /members/:id`. Deactivation is the only exit path.
 | GET    | `/contributions`                 | `contributions:view`                                           |
 | POST   | `/contributions/:id/void`        | `contributions:void`                                           |
 
-`/finance/summary?from=&to=&groupBy=day|week|month` returns income, expense, net and opening and
-closing balance, plus a per-category breakdown. Amount and date range are validated together; a
-range wider than 5 years is rejected.
+`/finance/summary?from=&to=&groupBy=day|week|month` returns income, expenses, net, and the opening
+and closing balance, plus a per-category breakdown. Both ends of the range are required: a summary
+with no range would quietly report a different period than the reader has in mind. A range that
+runs backwards or covers more than five years is rejected, on the list and the export as well.
 
-Once posted, the amount, kind and date of a transaction can never be edited. Corrections go through
-void and re-entry, which leaves both rows in the history.
+Buckets with no entries are returned as zero rather than omitted, because a chart that skips an
+empty month draws a line between two points that are not adjacent. A week begins on Monday.
+`share` in the breakdown is a percentage of that category's own kind, to one decimal place: 40 % of
+what the cooperative spent is a useful sentence, 40 % of everything that moved is not.
+`/finance/trends` returns the same buckets with the balance carried forward.
+
+Once posted, the amount, kind and date of a transaction can never be edited. `PATCH` accepts only
+the category and the description, and only while the entry is `POSTED`. Corrections go through void
+and re-entry, which leaves both rows in the history.
+
+**What counts towards a total.** A voided entry and the reversal written to correct it are two rows
+that cancel each other, so every figure the API reports excludes both: `status = 'POSTED' AND
+reversal_of_id IS NULL`. Taking the reversal while excluding the void applies the correction twice.
+Both rows remain in the listing with their status, which is what makes the correction visible.
+
+An entry whose `sourceType` is `CONTRIBUTION` or `SHARE_PURCHASE` cannot be voided here. It answers
+`409 errors.finance.voidFromSource`, because the ledger row and the member's record are two views
+of the same money and the correction has to be made from the member's record so both stay in step.
+
+`/finance/export?format=csv|xlsx` sends the ledger under the same filters as the list. The CSV
+carries a byte order mark and quotes every value, with a leading `=`, `+`, `-` or `@` prefixed by an
+apostrophe so a spreadsheet treats it as text. The `xlsx` is a real workbook with a frozen header
+and the amount as a formatted number, so the first thing anybody does with it — select the column
+and read the sum — works.
+
+A category is never deleted, only deactivated: entries already posted against it still have to say
+where the money went. Its kind can never change, because that would flip the sign of every entry
+already posted against it. A new cooperative is seeded with categories chosen for its type, each
+with a Kinyarwanda name.
 
 ### Products, units, warehouses, inventory — Phase 6
 

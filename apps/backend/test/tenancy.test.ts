@@ -39,6 +39,8 @@ interface Tenant {
   memberId: string
   contributionId: string
   shareId: string
+  categoryId: string
+  financeTransactionId: string
 }
 
 let a: Tenant
@@ -76,6 +78,19 @@ async function buildTenant(name: string): Promise<Tenant> {
     .send({ type: 'PURCHASE', quantity: 2, unitValue: '10000', categoryId: category })
     .expect(201)
 
+  const entry = await request(app)
+    .post(`${API_PREFIX}/finance/transactions`)
+    .set('Authorization', `Bearer ${manager.accessToken}`)
+    .set(HEADERS.cooperativeId, cooperative.id)
+    .send({
+      kind: 'INCOME',
+      categoryId: category,
+      amount: '25000',
+      method: 'CASH',
+      description: `Sale of produce for ${name}`,
+    })
+    .expect(201)
+
   return {
     cooperative,
     manager,
@@ -83,6 +98,8 @@ async function buildTenant(name: string): Promise<Tenant> {
     memberId: member.body.data.id as string,
     contributionId: contribution.body.data.id as string,
     shareId: share.body.data.id as string,
+    categoryId: category,
+    financeTransactionId: entry.body.data.id as string,
   }
 }
 
@@ -137,6 +154,12 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
       body: { type: 'SAVINGS', amount: '1000', method: 'CASH', categoryId: b.cooperative.id },
     },
     '/contributions/:id/void': { id: b.contributionId, body: {} },
+    '/finance/categories/:id': { id: b.categoryId, body: { name: 'Renamed from the wrong place' } },
+    '/finance/transactions/:id': {
+      id: b.financeTransactionId,
+      body: { description: 'edited from the wrong cooperative' },
+    },
+    '/finance/transactions/:id/void': { id: b.financeTransactionId, body: {} },
   }
 }
 

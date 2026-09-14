@@ -549,7 +549,16 @@ export async function memberSummary(ctx: RequestContext, memberId: string): Prom
   let payments: MemberSummary['payments'] = null
   if (ctx.permissions.has('finance:view')) {
     const aggregate = await prisma.financeTransaction.aggregate({
-      where: { cooperativeId, memberId, kind: 'EXPENSE', status: 'POSTED' },
+      // A reversal is excluded alongside the entry it corrects, for the reason set out on
+      // COUNTS_TOWARDS_TOTALS in the finance module: taking one without the other would apply the
+      // correction twice.
+      where: {
+        cooperativeId,
+        memberId,
+        kind: 'EXPENSE',
+        status: 'POSTED',
+        reversalOfId: null,
+      },
       _sum: { amount: true },
     })
     payments = { total: toWire(aggregate._sum.amount ?? ZERO) }

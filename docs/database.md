@@ -269,7 +269,15 @@ charges).
 
 ### FinanceTransaction
 
-The single money ledger. Balance is always `Σ INCOME − Σ EXPENSE` over `status = POSTED`.
+The single money ledger. Balance is always `Σ INCOME − Σ EXPENSE` over
+`status = POSTED AND reversal_of_id IS NULL`.
+
+The second half of that condition matters and was missing from the first implementation. A voided
+entry and the reversal written to correct it are two rows that cancel each other, so a total has to
+take both or neither; excluding the void while counting the reversal applies the correction twice.
+Excluding the pair is the clearer of the two, because it is also the honest answer for a period
+report: a receipt that was cancelled is not money the cooperative received that month. Both rows
+stay in the ledger with their status, which is what makes the correction visible.
 
 | Column                               | Type                                                                             | Notes                                                       |
 | ------------------------------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -591,8 +599,11 @@ draft of this document:
   notification, and its de-duplication depends on the `(cooperative_id, dedupe_key)` unique
   constraint. Phase 12 delivers the notification centre, not the table.
 
-There is no M5. Phase 5 adds indexes and seeded categories but creates no new table, which is the
-expected shape when a phase builds a module on tables an earlier phase had to create.
+There is no M5. Phase 5 adds seeded categories but creates no new table, which is the expected
+shape when a phase builds a module on tables an earlier phase had to create. It added no index
+either: the four indexes M4 created on `finance_transactions` — by date, by kind and date, by
+category and date, and by status and date — turned out to be exactly what the ledger, the summary
+and the category breakdown ask for, and adding one nothing queries would only slow every write.
 
 **M4 as applied** (`20260914145445_m4_members_and_money`). Beyond what Prisma generates, the
 migration hand-appends the check constraints that keep a monetary row honest — a positive amount, a

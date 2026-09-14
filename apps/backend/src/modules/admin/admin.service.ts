@@ -10,6 +10,7 @@ import { isUniqueViolation } from '../../lib/dbErrors.js'
 import { AppError } from '../../lib/errors.js'
 import { hashPassword } from '../../lib/password.js'
 import { prisma } from '../../lib/prisma.js'
+import { seedFinanceCategories } from '../finance/finance.categories.js'
 import { issuePasswordSetupLink } from '../auth/passwordSetup.js'
 import { checkDatabase } from '../../lib/prisma.js'
 import { SYSTEM_SETTING_VALIDATORS } from './admin.schemas.js'
@@ -226,6 +227,12 @@ export async function createCooperative(
         joinedAt: existingUser ? new Date() : null,
       },
     })
+
+    // The categories the cooperative starts with, chosen for what it does. A treasurer opening
+    // the finance screen on the first morning should be able to record what came in, not stop to
+    // invent a filing system; and a contribution cannot be posted at all until at least one
+    // income category exists.
+    await seedFinanceCategories(tx, cooperative.id, input.typeKey)
 
     return { cooperativeId: cooperative.id, userId, accountCreated: !existingUser }
   })

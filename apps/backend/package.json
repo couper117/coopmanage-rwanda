@@ -35,6 +35,7 @@
     "pg": "^8.23.0",
     "pino": "^10.0.0",
     "pino-http": "^11.0.0",
+    "write-excel-file": "^4.1.1",
     "zod": "^4.6.0"
   },
   "devDependencies": {

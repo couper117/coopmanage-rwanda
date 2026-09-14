@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 4 complete.** Phase 5 is next.
+Status: **Phase 5 in progress.** The finance backend is complete; the screens are in review.
 
 ---
 
@@ -315,16 +315,35 @@ listed against Phase 16.
 
 ---
 
-### Phase 5 — Finance
+### Phase 5 — Finance ✅ (backend; screens in review)
 
 - Categories, transactions, void and reversal, idempotency, all on the M4 tables
 - Summaries by day, week, month and custom range; category breakdown; trends
 - CSV and Excel export
 - Finance overview screen: money in, money out, balance; the ledger table; the record dialogs
+- Categories seeded per cooperative type when a cooperative is created, each with its Kinyarwanda
+  name, so a treasurer can record the first morning's takings without inventing a filing system
+- Demonstration ledger entries, because an overview with no expenses reads as broken rather than
+  as empty
 
 **Exit:** a property test over a thousand random transactions shows the reported balance equals the
 independently computed decimal sum; a voided transaction and its reversal both appear in history and
 the balance returns to its prior value; a repeated `Idempotency-Key` creates exactly one row.
+
+All three are met and were checked against the running system as well as in tests. The property
+test sums a thousand entries with awkward centimes in integer centimes, deliberately not with the
+same decimal library the implementation uses, and compares that against the summary endpoint, the
+twelve monthly buckets and the ledger footer. Live: one retry key sent twice returned
+`EX-2026-000037` both times and left one row; voiding 99,999.99 francs took the balance from
+1,582,999.75 to 1,482,999.76 and back to 1,582,999.75 exactly.
+
+**A void was applied twice, and the tests caught it before anything else did.** The balance excluded
+a voided row _and_ counted the reversal written to correct it, so cancelling one receipt of 1,000
+francs took 2,000 francs off the books. Every figure the module reports now excludes the pair —
+`status = 'POSTED' AND reversal_of_id IS NULL` — which is also the honest answer for a period
+report, because a receipt that was cancelled is not money the cooperative received that month. One
+constant, `COUNTS_TOWARDS_TOTALS`, with the reasoning beside it, and the member profile's payments
+figure was carrying the same defect.
 
 ---
 
