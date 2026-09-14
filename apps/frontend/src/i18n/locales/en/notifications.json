@@ -1,0 +1,6 @@
+{
+  "lowStock": {
+    "low": "{{product}} is down to {{quantity}} {{unit}}, below the {{minimum}} you asked to be warned about",
+    "empty": "{{product}} has run out. The store holds none at all, against a minimum of {{minimum}} {{unit}}"
+  }
+}

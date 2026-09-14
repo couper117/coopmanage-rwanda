@@ -11,8 +11,10 @@ import enCommon from './locales/en/common.json'
 import enDashboard from './locales/en/dashboard.json'
 import enErrors from './locales/en/errors.json'
 import enFinance from './locales/en/finance.json'
+import enInventory from './locales/en/inventory.json'
 import enMembers from './locales/en/members.json'
 import enModules from './locales/en/modules.json'
+import enNotifications from './locales/en/notifications.json'
 import enNav from './locales/en/nav.json'
 import enProfile from './locales/en/profile.json'
 import enSettings from './locales/en/settings.json'
@@ -25,8 +27,10 @@ import rwCommon from './locales/rw/common.json'
 import rwDashboard from './locales/rw/dashboard.json'
 import rwErrors from './locales/rw/errors.json'
 import rwFinance from './locales/rw/finance.json'
+import rwInventory from './locales/rw/inventory.json'
 import rwMembers from './locales/rw/members.json'
 import rwModules from './locales/rw/modules.json'
+import rwNotifications from './locales/rw/notifications.json'
 import rwNav from './locales/rw/nav.json'
 import rwProfile from './locales/rw/profile.json'
 import rwSettings from './locales/rw/settings.json'
@@ -53,10 +57,12 @@ export const resources = {
     staff: enStaff,
     members: enMembers,
     finance: enFinance,
+    inventory: enInventory,
     admin: enAdmin,
     audit: enAudit,
     dashboard: enDashboard,
     errors: enErrors,
+    notifications: enNotifications,
     validation: enValidation,
     modules: enModules,
   },
@@ -69,10 +75,12 @@ export const resources = {
     staff: rwStaff,
     members: rwMembers,
     finance: rwFinance,
+    inventory: rwInventory,
     admin: rwAdmin,
     audit: rwAudit,
     dashboard: rwDashboard,
     errors: rwErrors,
+    notifications: rwNotifications,
     validation: rwValidation,
     modules: rwModules,
   },

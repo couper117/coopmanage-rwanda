@@ -67,6 +67,31 @@ describe('parameters that are themselves keys', () => {
     expect(resolved.name).toBe('Fuel')
   })
 
+  it('renders a low-stock warning in both languages, before any screen shows one', async () => {
+    const params = {
+      product: 'Fertiliser, NPK 17-17-17',
+      sku: 'FERTILISER-NPK',
+      quantity: '8.000',
+      minimum: '40.000',
+      unit: 'sack',
+    }
+
+    // The notification centre is Phase 12, but Phase 6 already writes these rows. A stored key
+    // with no translation behind it is a screen that will read as broken the day it is built, so
+    // the wording exists now and this is what proves it.
+    const english = i18n.t(toI18nKey('notifications.lowStock.low'), params)
+    expect(english).toContain('Fertiliser')
+    expect(english).toContain('8.000')
+    expect(english).not.toContain('notifications')
+
+    await changeLanguage('rw')
+    const kinyarwanda = i18n.t(toI18nKey('notifications.lowStock.empty'), params)
+    expect(kinyarwanda).toContain('40.000')
+    expect(kinyarwanda).not.toContain('notifications')
+    expect(kinyarwanda).not.toBe(english)
+    await changeLanguage('en')
+  })
+
   it('survives an entry with no parameters at all', () => {
     expect(translateParams(null, (key) => key)).toEqual({})
     expect(translateParams(undefined, (key) => key)).toEqual({})

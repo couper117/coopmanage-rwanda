@@ -71,5 +71,26 @@
     "reused": "Urufunguzo rwo kongera kohereza rwamaze gukoreshwa ku kindi cyifuzo. Ongera ufungure urupapuro hanyuma ugerageze.",
     "expired": "Urufunguzo rwo kongera kohereza ntirukibitswe. Reba niba icyanditswe cyanditswe, hanyuma ugerageze.",
     "inProgress": "Icyo cyifuzo kiracyatunganywa. Tegereza gato, hanyuma urebe niba cyanditswe."
+  },
+  "inventory": {
+    "insufficientStock": "Ntabwo bihagije mu bubiko. Reba ibiriho ubu hanyuma ugerageze ingano nto.",
+    "productRetired": "Icyo gicuruzwa cyavanywe mu mikoreshwa. Kigarure mbere yo kwandika ububiko bwacyo.",
+    "productNotCounted": "Icyo gicuruzwa ntikibarwa mu bubiko, nta bwo buhari bwo kwimura.",
+    "warehouseClosed": "Ubwo bubiko bwafunzwe. Imura ububiko ujye mu bufunguye, cyangwa ubwongere bufungure.",
+    "countAgrees": "Uko wabaze bihuye n'ibyanditswe, nta cyo gukosora.",
+    "alreadyReversed": "Icyo kinyuranyo cyamaze gukosorwa.",
+    "isAReversal": "Icyo kinyuranyo ni igikosora ubwacyo. Andika ikindi kinyuranyo aho kugikosora."
+  },
+  "catalogue": {
+    "skuTaken": "Ikindi gicuruzwa gisanzwe gifite iyo nomero.",
+    "unitKeyTaken": "Igipimo gifite urwo rufunguzo gisanzwe rihari.",
+    "systemUnit": "Icyo gipimo ni cya urubuga kandi gisangiwe na koperative zose. Shyiramo icyawe.",
+    "unitFrozen": "Iki gicuruzwa gisanzwe gifite ibinyuranyo byanditswe, igipimo cyacyo ntigihinduka. Shyiramo ikindi gicuruzwa ku gipimo gishya.",
+    "countingFrozen": "Iki gicuruzwa gisanzwe gifite ibinyuranyo byanditswe, kuba kibarwa ntibihinduka.",
+    "categoryNameTaken": "Icyiciro cy'ubwoko nk'ubwo gisanzwe gifite iryo zina.",
+    "categoryTooDeep": "Icyiciro gishobora kuba munsi y'ikindi kimwe, ntikibe munsi y'icyiciro gisanzwe gifite icyo kiri munsi yacyo.",
+    "warehouseCodeTaken": "Ubundi bubiko busanzwe bufite iyo nomero.",
+    "warehouseHoldsStock": "Ubwo bubiko buracyafite ibintu. Byimure ujye mu bundi mbere yo kubufunga.",
+    "warehouseIsDefault": "Koperative iba ifite ububiko bukuru bumwe. Hitamo ubundi bubiko nk'ubukuru."
   }
 }

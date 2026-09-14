@@ -63,14 +63,14 @@ describe('application shell', () => {
   })
 
   it('tells the truth about a module that is not built yet', () => {
-    // Inventory arrives in Phase 6. A module reached before its phase says so and names the
-    // phase, rather than showing an empty screen that reads as a fault. Once a module is built
-    // its placeholder disappears on its own, because the route set is derived from the real
-    // routes — which is why this names a module still ahead rather than the members register.
-    renderApp('/inventory')
-    expect(screen.getByRole('heading', { level: 1, name: 'Inventory' })).toBeInTheDocument()
-    expect(screen.getByText('Inventory is not available yet')).toBeInTheDocument()
-    expect(screen.getByText(/arrives in phase 6/i)).toBeInTheDocument()
+    // A module reached before its phase says so and names the phase, rather than showing an
+    // empty screen that reads as a fault. Once a module is built its placeholder disappears on
+    // its own, because the pending route set is derived from the real routes — so this names a
+    // module still well ahead, and moves on when that phase lands.
+    renderApp('/announcements')
+    expect(screen.getByRole('heading', { level: 1, name: 'Announcements' })).toBeInTheDocument()
+    expect(screen.getByText('Announcements is not available yet')).toBeInTheDocument()
+    expect(screen.getByText(/arrives in phase 12/i)).toBeInTheDocument()
   })
 
   it('shows a real not-found page for an unknown route', () => {

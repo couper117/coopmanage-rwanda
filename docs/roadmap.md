@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 6 in progress.** The stock backend is complete; the screens are in review.
+Status: **Phase 6 complete.** Phase 7 is next.
 
 ---
 
@@ -379,7 +379,7 @@ figure was carrying the same defect.
 
 ---
 
-### Phase 6 — Products and inventory ✅ (backend; screens in review)
+### Phase 6 — Products and inventory ✅
 
 - Products, categories, units, warehouses
 - Receive, issue, adjust, transfer; reversal; movement history
@@ -398,7 +398,13 @@ exactly, proved both on a test database full of movements and against the seeded
 store, where `npm run inventory:rebuild` reports ten levels all agreeing with their history. A
 level tampered with directly in the table is found and, with `--apply`, put back.
 
-Four things are worth recording.
+Five things are worth recording.
+
+**The refusal deliberately says nothing about what is there.** When an issue is refused the server
+does not report the level, because the figure the caller read a moment ago may already be stale and
+quoting it back would invite a retry with exactly that number. The screen that receives the refusal
+therefore re-reads the level and reports what is there now, which is the one place in the interface
+where a refusal triggers a fetch rather than a message.
 
 **The overview and the warnings gave two different answers to the same question.** The stock screen
 marked a row low by comparing one store's quantity against the product's minimum, while the

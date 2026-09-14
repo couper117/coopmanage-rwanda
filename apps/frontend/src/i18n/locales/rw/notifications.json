@@ -1,0 +1,6 @@
+{
+  "lowStock": {
+    "low": "{{product}} yagabanutse igera kuri {{quantity}} {{unit}}, munsi ya {{minimum}} wasabye kumenyeshwa",
+    "empty": "{{product}} yashize burundu. Ububiko ntacyo bufite, ku gipimo ntarengwa cya {{minimum}} {{unit}}"
+  }
+}

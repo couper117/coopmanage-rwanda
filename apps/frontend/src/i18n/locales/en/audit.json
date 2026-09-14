@@ -50,5 +50,23 @@
       "INCOME": "money in",
       "EXPENSE": "money out"
     }
+  },
+  "inventory": {
+    "received": "{{quantity}} of {{product}} was received, reference {{reference}}",
+    "issued": "{{quantity}} of {{product}} went out, reference {{reference}}",
+    "adjusted": "{{product}} was corrected from {{from}} to {{to}}, reference {{reference}}",
+    "transferred": "{{quantity}} of {{product}} moved from {{from}} to {{to}}",
+    "reversed": "Movement {{reference}} of {{product}} was corrected by an opposite movement",
+    "valued": "The stock was valued at {{total}} RWF across {{products}} products"
+  },
+  "catalogue": {
+    "productCreated": "The product {{product}} was added as {{sku}}",
+    "productUpdated": "The product {{product}} ({{sku}}) was changed",
+    "categoryCreated": "The product category {{category}} was added",
+    "categoryUpdated": "The product category {{category}} was changed",
+    "unitCreated": "The unit {{unit}} was added as {{key}}",
+    "unitUpdated": "The unit {{unit}} was changed",
+    "warehouseCreated": "The store {{warehouse}} was added as {{code}}",
+    "warehouseUpdated": "The store {{warehouse}} was changed"
   }
 }

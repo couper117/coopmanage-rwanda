@@ -50,5 +50,23 @@
       "INCOME": "amafaranga yinjiye",
       "EXPENSE": "amafaranga yasohotse"
     }
+  },
+  "inventory": {
+    "received": "{{quantity}} bya {{product}} byakiriwe, inomero {{reference}}",
+    "issued": "{{quantity}} bya {{product}} byasohotse, inomero {{reference}}",
+    "adjusted": "{{product}} yakosowe ivuye kuri {{from}} ijya kuri {{to}}, inomero {{reference}}",
+    "transferred": "{{quantity}} bya {{product}} byimuwe bivuye {{from}} bijya {{to}}",
+    "reversed": "Ikinyuranyo {{reference}} cya {{product}} cyakosowe n'ikindi kinyuranye na cyo",
+    "valued": "Ububiko bwahawe agaciro ka {{total}} RWF ku bicuruzwa {{products}}"
+  },
+  "catalogue": {
+    "productCreated": "Igicuruzwa {{product}} cyongeweho nka {{sku}}",
+    "productUpdated": "Igicuruzwa {{product}} ({{sku}}) cyahinduwe",
+    "categoryCreated": "Icyiciro cy'ibicuruzwa {{category}} cyongeweho",
+    "categoryUpdated": "Icyiciro cy'ibicuruzwa {{category}} cyahinduwe",
+    "unitCreated": "Igipimo {{unit}} cyongeweho nka {{key}}",
+    "unitUpdated": "Igipimo {{unit}} cyahinduwe",
+    "warehouseCreated": "Ububiko {{warehouse}} bwongeweho nka {{code}}",
+    "warehouseUpdated": "Ububiko {{warehouse}} bwahinduwe"
   }
 }

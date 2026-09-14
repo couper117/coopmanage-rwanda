@@ -71,5 +71,26 @@
     "reused": "That retry key has already been used for a different request. Reload the page and try again.",
     "expired": "That retry key is no longer held. Check whether the entry was recorded, then try again.",
     "inProgress": "That request is still being processed. Wait a moment, then check whether it was recorded."
+  },
+  "inventory": {
+    "insufficientStock": "There is not enough of that in the store. Check what is there now and try a smaller quantity.",
+    "productRetired": "That product has been retired. Bring it back into use before recording stock against it.",
+    "productNotCounted": "That product is not counted in the store, so there is no stock to move.",
+    "warehouseClosed": "That store is closed. Move the stock to an open one, or reopen it first.",
+    "countAgrees": "That count matches the record, so there is nothing to correct.",
+    "alreadyReversed": "That movement has already been corrected.",
+    "isAReversal": "That movement is itself a correction. Record a new movement rather than correcting it."
+  },
+  "catalogue": {
+    "skuTaken": "Another product already has that code.",
+    "unitKeyTaken": "A unit with that key already exists.",
+    "systemUnit": "That unit belongs to the platform and is shared by every cooperative. Add your own instead.",
+    "unitFrozen": "This product already has movements recorded, so its unit cannot change. Add a new product for the new unit.",
+    "countingFrozen": "This product already has movements recorded, so whether it is counted cannot change.",
+    "categoryNameTaken": "A category of that kind already has that name.",
+    "categoryTooDeep": "A category can sit under one other, not under a category that already has a parent.",
+    "warehouseCodeTaken": "Another store already has that code.",
+    "warehouseHoldsStock": "That store still holds stock. Move it to another store before closing this one.",
+    "warehouseIsDefault": "A cooperative always has one main store. Make another store the main one instead."
   }
 }

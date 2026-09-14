@@ -352,6 +352,18 @@ all: every amount on screen is rendered from the original string, and the table 
 carries the same numbers. An empty bucket keeps a two-pixel sliver rather than vanishing, because a
 gap in a row of bars reads as missing data rather than as nothing having happened.
 
+### Quantities
+
+Every quantity on screen goes through `Quantity`, never `Money`: three decimal places rather than
+two, the unit's own symbol beside it, and the same rule about never passing through a float. A
+cooperative weighs to the gram and sells by the sack, and a store record that drifts by a gram a
+movement is a store record nobody trusts by harvest.
+
+Two figures sit together on a stock row, and the distinction matters. The quantity is what is in
+that store; the cooperative-wide total is what the product's minimum is compared against. A store
+down to its last ton of potatoes while the collection point holds eight is not a cooperative short
+of potatoes, and a screen that said otherwise would teach the storekeeper to ignore the warnings.
+
 ### The searchable picker
 
 A native `<select>` is the right control almost everywhere here and is used everywhere it fits. It
