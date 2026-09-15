@@ -17,6 +17,7 @@ import enModules from './locales/en/modules.json'
 import enNotifications from './locales/en/notifications.json'
 import enNav from './locales/en/nav.json'
 import enProfile from './locales/en/profile.json'
+import enReports from './locales/en/reports.json'
 import enSales from './locales/en/sales.json'
 import enSettings from './locales/en/settings.json'
 import enStaff from './locales/en/staff.json'
@@ -34,6 +35,7 @@ import rwModules from './locales/rw/modules.json'
 import rwNotifications from './locales/rw/notifications.json'
 import rwNav from './locales/rw/nav.json'
 import rwProfile from './locales/rw/profile.json'
+import rwReports from './locales/rw/reports.json'
 import rwSales from './locales/rw/sales.json'
 import rwSettings from './locales/rw/settings.json'
 import rwStaff from './locales/rw/staff.json'
@@ -60,6 +62,7 @@ export const resources = {
     members: enMembers,
     finance: enFinance,
     inventory: enInventory,
+    reports: enReports,
     sales: enSales,
     admin: enAdmin,
     audit: enAudit,
@@ -79,6 +82,7 @@ export const resources = {
     members: rwMembers,
     finance: rwFinance,
     inventory: rwInventory,
+    reports: rwReports,
     sales: rwSales,
     admin: rwAdmin,
     audit: rwAudit,

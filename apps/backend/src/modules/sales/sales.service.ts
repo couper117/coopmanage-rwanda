@@ -1228,7 +1228,15 @@ export interface SalesSummary {
   saleCount: number
   buckets: { start: string; sold: string; saleCount: number }[]
   topBuyers: { buyerId: string; name: string; sold: string; saleCount: number }[]
-  topProducts: { productId: string; name: string; sku: string; quantity: string; sold: string }[]
+  topProducts: {
+    productId: string
+    name: string
+    /** The cooperative's own Kinyarwanda name for the product, where it gave one. */
+    nameRw: string | null
+    sku: string
+    quantity: string
+    sold: string
+  }[]
 }
 
 /**
@@ -1279,9 +1287,16 @@ export async function salesSummary(
       take: 10,
     }),
     prisma.$queryRaw<
-      { product_id: string; name: string; sku: string; quantity: unknown; sold: unknown }[]
+      {
+        product_id: string
+        name: string
+        name_rw: string | null
+        sku: string
+        quantity: unknown
+        sold: unknown
+      }[]
     >`
-      SELECT i.product_id, p.name, p.sku,
+      SELECT i.product_id, p.name, p.name_rw, p.sku,
              sum(i.quantity) AS quantity,
              sum(i.line_total) AS sold
         FROM sale_items i
@@ -1291,7 +1306,7 @@ export async function salesSummary(
          AND s.status = 'CONFIRMED'
          AND s.sale_date >= ${from}
          AND s.sale_date <= ${to}
-       GROUP BY i.product_id, p.name, p.sku
+       GROUP BY i.product_id, p.name, p.name_rw, p.sku
        ORDER BY sold DESC
        LIMIT 10
     `,
@@ -1341,6 +1356,10 @@ export async function salesSummary(
     topProducts: byProduct.map((row) => ({
       productId: row.product_id,
       name: row.name,
+      // Carried so a Kinyarwanda report prints the name the cooperative gave the product rather
+      // than the English one. The monthly report had "Irish potatoes" sitting in the middle of a
+      // Kinyarwanda page until this was added.
+      nameRw: row.name_rw,
       sku: row.sku,
       quantity: toWire(fromDatabase(row.quantity), 3),
       sold: toWire(fromDatabase(row.sold)),

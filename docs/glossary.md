@@ -94,24 +94,28 @@ this table, it is added here first and then used.
 
 ## 5. Governance and records
 
-| English                    | Kinyarwanda                                    | Notes                                            |
-| -------------------------- | ---------------------------------------------- | ------------------------------------------------ |
-| Meeting                    | Inama                                          |                                                  |
-| General assembly           | Inteko rusange                                 |                                                  |
-| Board meeting              | Inama y'ubuyobozi                              |                                                  |
-| Agenda                     | Ingingo z'inama                                |                                                  |
-| Attendance                 | Abitabiriye                                    |                                                  |
-| Present / Absent / Excused | Yitabiriye / Ntiyitabiriye / Yasabye uruhushya |                                                  |
-| Decision                   | Icyemezo                                       | Plural: _Ibyemezo_                               |
-| Resolution                 | Umwanzuro                                      |                                                  |
-| Minutes                    | Inyandikomvugo                                 |                                                  |
-| Document                   | Inyandiko                                      |                                                  |
-| Certificate                | Icyemezo                                       | Disambiguated in context as _Icyemezo cyanditse_ |
-| Contract                   | Amasezerano                                    |                                                  |
-| Registration               | Iyandikwa                                      |                                                  |
-| Announcement               | Itangazo                                       | Plural: _Amatangazo_                             |
-| Report                     | Raporo                                         |                                                  |
-| Audit log                  | Urutonde rw'ibikorwa                           |                                                  |
+| English                    | Kinyarwanda                                    | Notes                                                 |
+| -------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
+| Meeting                    | Inama                                          |                                                       |
+| General assembly           | Inteko rusange                                 |                                                       |
+| Board meeting              | Inama y'ubuyobozi                              |                                                       |
+| Agenda                     | Ingingo z'inama                                |                                                       |
+| Attendance                 | Abitabiriye                                    |                                                       |
+| Present / Absent / Excused | Yitabiriye / Ntiyitabiriye / Yasabye uruhushya |                                                       |
+| Decision                   | Icyemezo                                       | Plural: _Ibyemezo_                                    |
+| Resolution                 | Umwanzuro                                      |                                                       |
+| Minutes                    | Inyandikomvugo                                 |                                                       |
+| Document                   | Inyandiko                                      |                                                       |
+| Certificate                | Icyemezo                                       | Disambiguated in context as _Icyemezo cyanditse_      |
+| Contract                   | Amasezerano                                    |                                                       |
+| Registration               | Iyandikwa                                      |                                                       |
+| Announcement               | Itangazo                                       | Plural: _Amatangazo_                                  |
+| Report                     | Raporo                                         |                                                       |
+| Monthly cooperative report | Raporo y'ukwezi ya koperative                  | The one read out at a general assembly                |
+| Period, from…to            | Kuva… kugeza…                                  | A report heading: _Kuva 1 Nzeri kugeza 30 Nzeri 2026_ |
+| Page _n_                   | Urupapuro _n_                                  | Printed in every report footer                        |
+| Produced by / on           | Yakozwe na / Yakozwe ku                        |                                                       |
+| Audit log                  | Urutonde rw'ibikorwa                           |                                                       |
 
 ## 6. Interface and system
 
@@ -174,6 +178,16 @@ this table, it is added here first and then used.
   because _Kureka_ and _Guhagarika_ are different words.
 - Do not translate **RWF**, **SMS**, **PDF**, **CSV** or **Mobile money**. Rwandan office staff use
   these terms in English and a translation would be less clear, not more.
+- **The months are tabulated, not taken from the runtime.** Mutarama, Gashyantare, Werurwe, Mata,
+  Gicurasi, Kamena, Nyakanga, Kanama, Nzeri, Ukwakira, Ugushyingo, Ukuboza. A report is rendered on
+  the server, where Kinyarwanda locale data may not exist, and it has to read exactly like the screen
+  it was produced from.
+- **Two columns of a printed table must not share a heading.** _Umubare_ is a count and was also
+  used for a money amount, so the category breakdown printed "Umubare" twice — one a number of
+  entries, one a sum in francs. An amount column is _Amafaranga_.
+- **A product keeps the name the cooperative gave it.** Where a product has a `nameRw`, a
+  Kinyarwanda report prints that, not the English name. An English name in the middle of a
+  Kinyarwanda page is a report somebody has to have translated for them.
 - Prefer the everyday word over the formal or academic one. The reader is a cooperative secretary in
   a rural district office, not a ministry economist.
 - Kinyarwanda strings run 20–40 % longer than English. Every layout is checked in Kinyarwanda before

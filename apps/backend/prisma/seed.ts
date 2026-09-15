@@ -381,6 +381,7 @@ async function seedDemoCooperative(): Promise<void> {
   await seedDemoFinance(cooperative.id)
   await seedDemoInventory(cooperative.id)
   await seedDemoSales(cooperative.id)
+  await seedDemoReportRun(cooperative.id)
 }
 
 /**
@@ -1032,6 +1033,78 @@ async function seedDemoMemberPayments(
  * the same allocator the application uses, so the demonstration data is indistinguishable from
  * data a secretary entered.
  */
+/**
+ * One report already produced, so the demonstration cooperative's reports screen shows a history
+ * rather than an empty panel on the first visit.
+ *
+ * The run is written directly rather than by calling the export: producing a PDF during the seed
+ * would slow it for no gain, and a download reproduces the report from `params` anyway, so this row
+ * behaves exactly like one a real export wrote. The notification goes with it, because a run that
+ * raised none would misrepresent what the module does.
+ */
+async function seedDemoReportRun(cooperativeId: string): Promise<void> {
+  const manager = await prisma.cooperativeStaff.findFirst({
+    where: { cooperativeId, role: { key: 'MANAGER' } },
+    select: { userId: true },
+  })
+  if (!manager) return
+
+  // Last month, which is the period a committee meets about.
+  const today = new Date()
+  const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1))
+  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 0))
+  const params = {
+    from: start.toISOString().slice(0, 10),
+    to: end.toISOString().slice(0, 10),
+    locale: 'RW' as const,
+  }
+
+  const existing = await prisma.reportRun.findFirst({
+    where: { cooperativeId, type: 'monthly-cooperative' },
+    select: { id: true },
+  })
+  if (existing) return
+
+  const completedAt = new Date(end.getTime() + 9 * 60 * 60 * 1000)
+  const run = await prisma.reportRun.create({
+    data: {
+      cooperativeId,
+      type: 'monthly-cooperative',
+      params,
+      format: 'PDF',
+      status: 'READY',
+      rowCount: 6,
+      generatedById: manager.userId,
+      createdAt: completedAt,
+      completedAt,
+    },
+    select: { id: true },
+  })
+
+  await prisma.notification.upsert({
+    where: { cooperativeId_dedupeKey: { cooperativeId, dedupeKey: `report:${run.id}` } },
+    update: {},
+    create: {
+      cooperativeId,
+      userId: manager.userId,
+      type: 'REPORT_READY',
+      severity: 'INFO',
+      messageKey: 'notifications.report.ready',
+      messageParams: {
+        report: 'report.monthly-cooperative',
+        period: `${params.from} → ${params.to}`,
+      },
+      entityType: 'ReportRun',
+      entityId: run.id,
+      actionUrl: `/reports/runs/${run.id}`,
+      dedupeKey: `report:${run.id}`,
+      createdAt: completedAt,
+    },
+  })
+
+  console.log('  one monthly report run recorded')
+}
+
 async function seedDemoMembers(cooperativeId: string): Promise<void> {
   const existing = await prisma.member.count({ where: { cooperativeId } })
   if (existing > 0) {

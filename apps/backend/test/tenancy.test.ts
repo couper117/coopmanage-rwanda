@@ -48,6 +48,7 @@ interface Tenant {
   movementId: string
   buyerId: string
   saleId: string
+  reportRunId: string
 }
 
 let a: Tenant
@@ -154,6 +155,12 @@ async function buildTenant(name: string): Promise<Tenant> {
     })
     .expect(201)
 
+  // A report run of this cooperative's own, produced through the API so the row is exactly what a
+  // real export writes. The sweep then tries to download it as the other cooperative.
+  const run = await call('post', '/reports/financial/export')
+    .send({ from: '2026-09-01', to: '2026-09-30', format: 'csv' })
+    .expect(200)
+
   return {
     cooperative,
     manager,
@@ -170,6 +177,7 @@ async function buildTenant(name: string): Promise<Tenant> {
     movementId: movement.body.data.id as string,
     buyerId: buyer.body.data.id as string,
     saleId: sale.body.data.id as string,
+    reportRunId: run.headers['x-report-run-id'] as string,
   }
 }
 
@@ -252,6 +260,7 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
       },
     },
     '/sales/:id/receipt': { id: b.saleId },
+    '/reports/runs/:id/download': { id: b.reportRunId },
   }
 }
 
@@ -273,6 +282,12 @@ const NOT_AN_IDENTIFIER: readonly string[] = [
   // The parameter is a key from the settings catalogue, not a row. Tenancy for this route is
   // carried entirely by the resolved cooperative, which the header tests above cover.
   '/settings/:key',
+  // The parameter is the name of a report — `financial`, `monthly-cooperative` — and is the same
+  // name at every cooperative. There is nothing belonging to another cooperative to substitute:
+  // what the report reads is scoped by the resolved cooperative, which the header tests cover, and
+  // the figures themselves are proved to be scoped by `reports.test.ts`.
+  '/reports/:type/preview',
+  '/reports/:type/export',
 ]
 
 function isPlatformRoute(route: RegisteredRoute): boolean {

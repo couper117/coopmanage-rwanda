@@ -391,6 +391,32 @@ repeats table headers across pages, and prints a footer with the cooperative nam
 the period, the generation timestamp, the generating user and a page number. Generated PDFs use the
 same layout so the screen preview matches the paper exactly.
 
+### How that is actually held true (Phase 8)
+
+A report is one structure rendered four ways — the screen, A4, a CSV and a spreadsheet — and every
+renderer formats its values through the same `formatReportValue`. The screen does not decide what a
+report contains or in what order; it walks the sections the server built. That is what makes the page
+and the paper the same document rather than two attempts at it. `docs/reports.md` is the reference.
+
+The A4 renderer is pdfkit rather than a headless browser, which would have let this stylesheet do the
+work but also means shipping Chromium — a few hundred megabytes and a quarter of a gigabyte of memory
+per render, on hosting a cooperative pays for monthly.
+
+Three rules of the printed page that the stylesheet states and the PDF renderer has to implement by
+hand:
+
+- **A row never straddles a page break.** Rows are measured and placed, not left to text flow.
+- **Column headings repeat on every page a table continues onto** — the renderer's equivalent of
+  `thead { display: table-header-group }`.
+- **No column is ever narrower than its longest word** while the page has room for every column's.
+  Widths are measured from the content, not assigned from a ratio; `docs/reports.md` §6 records the
+  two ways an assigned ratio broke real documents.
+
+A report's table on screen is deliberately **not** `DataTable`. That component is built for a list a
+user works with — sticky header, hover, click-through, a mobile card shape — and a report's table is
+a printed grid with no rows to click. What the two share is what matters: a real `<caption>`,
+`<th scope="col">`, right-aligned figures, and a header that repeats across printed pages.
+
 ---
 
 ## 12. Language and content

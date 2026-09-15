@@ -60,6 +60,22 @@ stripped, so a typo in a filter cannot silently widen a result set. Decimal fiel
 decimals and rejected when the scale exceeds the column. Sort fields, include relations and filter
 names are allow-listed. Request bodies are capped at 1 MB, uploads handled separately.
 
+### Files the application produces
+
+A CSV or a spreadsheet this application writes is a file somebody opens on their own machine, so
+every cell is quoted and any cell beginning `=`, `+`, `-`, `@`, a tab or a carriage return is
+prefixed with an apostrophe. Without it a description typed by a member of staff — and descriptions
+are free text, because that is where a paper receipt number goes — would execute as a formula the
+moment the file is opened. The rule is applied in one place per exporter: `csvCell` in the finance
+service and `cell` in `render.csv.ts`, both covered by a test that asserts the guard rather than
+just the absence of a crash. The spreadsheet exporters write typed cells rather than text, so a
+formula cannot be introduced there at all.
+
+Reports are produced from parameters, never from a client-supplied template or filename. The
+attachment name is built from the cooperative's own code, the report type and the period, with
+anything outside `[a-z0-9-]` replaced, so a cooperative name cannot put a path separator or a
+control character into a `Content-Disposition` header.
+
 ## 5. File uploads
 
 Extension allow-list, declared MIME check, and magic-byte sniffing of the actual content, all three
@@ -121,6 +137,10 @@ or is still the example value.
 `npm audit` and a lockfile-diff review in CI. Pinned major versions, no automatic upgrades on
 deploy. Dependencies are added deliberately; a dependency that saves twenty lines is not worth its
 supply-chain surface.
+
+`pdfkit` was added in Phase 8 for the server-rendered PDF, chosen over a headless browser — which
+would have meant shipping Chromium into a Rwandan cooperative's hosting budget — and over `pdf-lib`,
+unmaintained since 2022. `npm audit` reports no new advisory from it.
 
 Two advisories are currently accepted rather than fixed, both inside the Prisma command-line tool,
 which is a development dependency and is not part of any deployed artefact: `deepmerge-ts` reached

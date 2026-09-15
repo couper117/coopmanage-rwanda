@@ -1,7 +1,10 @@
-import { HEADERS, type PageMeta } from '@coopmanage/shared'
-import { currentLanguage } from '@/i18n'
-import { API_BASE_URL, ApiError, apiRequest, apiRequestCollection } from '@/lib/apiClient'
-import { authState } from '@/stores/authStore'
+import { type PageMeta } from '@coopmanage/shared'
+import {
+  apiRequest,
+  apiRequestCollection,
+  apiRequestFile,
+  type DownloadedFile,
+} from '@/lib/apiClient'
 
 /**
  * The cooperative's books, as the interface sees them.
@@ -366,74 +369,35 @@ export function fetchTrends(range: DateRange, groupBy: GroupBy): Promise<Finance
 export const EXPORT_FORMATS = ['csv', 'xlsx'] as const
 export type ExportFormat = (typeof EXPORT_FORMATS)[number]
 
-export interface DownloadedFile {
-  blob: Blob
-  filename: string
-}
+// `DownloadedFile` now comes from the API client, so every download in the application describes
+// itself the same way.
+export type { DownloadedFile }
 
 /**
  * The ledger as a file, under exactly the filters currently on screen.
  *
- * This is the one call in the feature that does not go through `apiRequest`: the response is a
- * file rather than a JSON envelope, so the envelope unwrapping would throw on it. The headers are
- * assembled the same way, and a failure is reported as the same `ApiError` every other call
- * produces, so the screen has one kind of error to handle.
+ * `apiRequestFile` carries the language, the token, the cooperative header and — the reason this
+ * no longer assembles its own request — one silent refresh and replay on an expired token. An
+ * access token lasts fifteen minutes and this screen is often read for longer than that before
+ * anybody asks for the file; the earlier version of this call reported "the export could not be
+ * produced" in exactly that case.
  */
 export async function fetchFinanceExport(input: {
   filters: LedgerFilters
   format: ExportFormat
 }): Promise<DownloadedFile> {
-  const params = new URLSearchParams()
+  const query: Record<string, string> = { format: input.format }
   for (const [key, value] of Object.entries(ledgerQuery(input.filters))) {
     // Paging does not apply to a file: the export always covers the whole filtered set.
     if (key === 'page' || key === 'pageSize') continue
-    if (value !== '' && value !== undefined) params.set(key, String(value))
-  }
-  params.set('format', input.format)
-
-  const headers: Record<string, string> = {
-    Accept: input.format === 'csv' ? 'text/csv' : 'application/octet-stream',
-    'Accept-Language': currentLanguage(),
-  }
-  const token = authState.accessToken()
-  if (token) headers.Authorization = `Bearer ${token}`
-  const cooperativeId = authState.cooperativeId()
-  if (cooperativeId) headers[HEADERS.cooperativeId] = cooperativeId
-
-  let response: Response
-  try {
-    response = await fetch(`${API_BASE_URL}/finance/export?${params.toString()}`, {
-      headers,
-      credentials: 'include',
-    })
-  } catch {
-    throw ApiError.network()
+    if (value !== '' && value !== undefined) query[key] = String(value)
   }
 
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      error?: { code?: string; messageKey?: string; message?: string; requestId?: string }
-    } | null
-    const body = payload?.error
-    throw new ApiError({
-      status: response.status,
-      code: 'INTERNAL_ERROR',
-      messageKey: body?.messageKey ?? 'errors.internal',
-      message: body?.message ?? 'The export could not be produced.',
-      ...(body?.requestId ? { requestId: body.requestId } : {}),
-    })
-  }
-
-  return {
-    blob: await response.blob(),
-    filename: filenameFrom(response.headers.get('Content-Disposition'), input.format),
-  }
-}
-
-/** The server names the file with the cooperative code and the period, which is worth keeping. */
-function filenameFrom(disposition: string | null, format: ExportFormat): string {
-  const match = disposition ? /filename="?([^";]+)"?/.exec(disposition) : null
-  return match?.[1] ?? `finance.${format}`
+  return apiRequestFile('/finance/export', {
+    query,
+    accept: input.format === 'csv' ? 'text/csv' : 'application/octet-stream',
+    fallbackFilename: `finance.${input.format}`,
+  })
 }
 
 export interface CategoryRow {

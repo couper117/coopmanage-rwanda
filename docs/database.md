@@ -509,10 +509,25 @@ with a different hash is a `409 IDEMPOTENCY_KEY_REUSED`.
 
 ### ReportRun (M8)
 
-`id`, `cooperative_id`, `type`, `params` jsonb, `format` enum(PDF, CSV, XLSX),
+`id`, `cooperative_id` CASCADE, `type` text (a catalogue key from `packages/shared/src/reports.ts`),
+`params` jsonb (the range and filters exactly as validated), `format` enum(PDF, CSV, XLSX),
 `status` enum(PENDING, READY, FAILED), `storage_key` null, `error_message` null,
-`generated_by_id`, `created_at`, `completed_at`. Lets a finished report raise a notification and be
-downloaded again without regenerating it.
+`row_count` int null, `generated_by_id` RESTRICT, `created_at`, `completed_at`.
+Indexes: (cooperative_id, created_at desc), (cooperative_id, type, created_at desc).
+
+The row is inserted **before** the report is produced, so a run that failed leaves a record of the
+attempt with the reason on it; inserting on success would lose exactly the runs somebody needs to ask
+about. Three check constraints keep the states honest, added in
+`20260915120800_m8_report_run_constraints`:
+
+- `report_runs_failed_has_reason` — a FAILED run has a non-blank `error_message`
+- `report_runs_ready_has_time` — a READY run has a `completed_at`
+- `report_runs_row_count_not_negative` — a count is a count
+
+`storage_key` stays null until Phase 9 brings file storage. Until then a download **produces the
+report again from `params`** rather than serving a kept copy, which means a correction posted since
+the run appears in the reproduced file. That is a deliberate deviation, recorded in
+`docs/reports.md` §5 rather than left for somebody to discover.
 
 ### AssistantConversation / AssistantMessage (M11)
 

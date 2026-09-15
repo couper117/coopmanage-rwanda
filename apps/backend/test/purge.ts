@@ -101,6 +101,15 @@ export async function purgeTestData(): Promise<PurgeReport> {
     await prisma.productCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     await prisma.warehouse.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    // Report runs name the user who produced them with RESTRICT, so they go before the accounts
+    // do. The cooperative cascade would take them too, but only for a cooperative that is being
+    // deleted — a run belonging to a cooperative that survives would otherwise pin its author's
+    // account and fail the purge with a foreign-key error rather than a legible message.
+    await prisma.reportRun.deleteMany({
+      where: {
+        OR: [{ cooperativeId: { in: cooperativeIds } }, { generatedById: { in: userIds } }],
+      },
+    })
 
     // Members and money, child before parent. Every reference in these tables is RESTRICT,
     // because in production none of these rows is ever deleted: a member who leaves is marked as

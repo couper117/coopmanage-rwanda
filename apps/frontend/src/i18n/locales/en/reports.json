@@ -1,0 +1,67 @@
+{
+  "title": "Reports",
+  "description": "Produce the cooperative's reports for a period, read them on screen and print or export them.",
+  "notPermitted": "Your role does not cover this report.",
+  "notYetAvailable": "This report needs data that arrives in phase {{phase}}.",
+  "withheldWarning": "This report will be produced without these sections, because your role does not cover them: {{sections}}.",
+  "emptyPeriod": "Nothing was recorded in this period, so the report is empty. Check the dates.",
+  "type": {
+    "monthly-cooperative": "Monthly cooperative report",
+    "financial": "Financial report",
+    "member": "Membership report",
+    "inventory": "Stock report",
+    "sales": "Sales report",
+    "activity": "Activity report",
+    "meeting": "Meeting minutes report"
+  },
+  "format": {
+    "pdf": "PDF, for printing",
+    "csv": "CSV, for a spreadsheet",
+    "xlsx": "Excel workbook"
+  },
+  "chooser": {
+    "title": "What to produce",
+    "description": "The period is the month just gone, which is what a committee meets about.",
+    "report": "Report",
+    "from": "From",
+    "to": "To",
+    "format": "File",
+    "backwards": "The second date is before the first one."
+  },
+  "actions": {
+    "print": "Print",
+    "export": "Produce the file",
+    "producing": "Producing…"
+  },
+  "export": {
+    "done": "{{filename}} was produced and saved."
+  },
+  "view": {
+    "withheldSummary": "Not shown, because your role does not cover it: {{sections}}.",
+    "producedBy": "Produced by {{name}}",
+    "producedAt": "Produced on {{when}}",
+    "truncated": "Showing the first {{shown}} of {{total}} rows. Produce the file for all of them."
+  },
+  "runs": {
+    "title": "Reports produced before",
+    "description": "Every report that was produced, and what it covered. A report can be produced again from here.",
+    "caption": "Reports produced before, newest first",
+    "download": "Produce again",
+    "page": "Page {{page}} of {{total}}",
+    "emptyTitle": "No report has been produced yet",
+    "emptyBody": "Choose a report and a period above, then produce the file. It will be recorded here.",
+    "columns": {
+      "report": "Report",
+      "format": "File",
+      "status": "State",
+      "rows": "Rows",
+      "who": "Produced by",
+      "again": "Action"
+    },
+    "status": {
+      "PENDING": "Being produced",
+      "READY": "Ready",
+      "FAILED": "Did not work"
+    }
+  }
+}

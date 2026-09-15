@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { useApiError, type DisplayableError } from '@/hooks/useApiErrorMessage'
 import { ApiError } from '@/lib/apiClient'
+import { saveFile } from '@/lib/saveFile'
 import { useAuthStore } from '@/stores/authStore'
 import {
   createCategory,
@@ -486,29 +487,12 @@ export function useUpdateCategory() {
   )
 }
 
-/**
- * Downloads the filtered ledger as a file.
- *
- * The browser's sandbox has no way to hand a file to the user other than a click on an anchor, so
- * one is made, clicked and removed. The object URL is revoked afterwards, because it pins the
- * whole file in memory until the tab closes otherwise.
- */
+/** Downloads the filtered ledger as a file. `saveFile` does the handing over. */
 export function useExportFinance() {
   return useMutation({
     mutationFn: (input: { filters: LedgerFilters; format: ExportFormat }) =>
       fetchFinanceExport(input),
-    onSuccess: ({ blob, filename }) => {
-      if (typeof URL.createObjectURL !== 'function') return
-      const href = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = href
-      link.download = filename
-      link.rel = 'noopener'
-      document.body.append(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(href)
-    },
+    onSuccess: saveFile,
   })
 }
 

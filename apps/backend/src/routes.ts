@@ -9,6 +9,7 @@ import { healthRouter } from './modules/health/health.routes.js'
 import { inventoryRouter } from './modules/inventory/inventory.routes.js'
 import { membersRouter } from './modules/members/members.routes.js'
 import { referenceRouter } from './modules/reference/reference.routes.js'
+import { reportsRouter } from './modules/reports/reports.routes.js'
 import { salesRouter } from './modules/sales/sales.routes.js'
 import { staffRouter } from './modules/staff/staff.routes.js'
 
@@ -23,6 +24,7 @@ export const apiRouter: Router = Router()
 apiRouter.use('/health', healthRouter)
 apiRouter.use('/auth', authRouter)
 apiRouter.use('/audit', auditRouter)
+apiRouter.use('/reports', reportsRouter)
 apiRouter.use('/admin', adminRouter)
 // Mounted at the root because their paths are already fully qualified: /cooperatives/current,
 // /settings/:key, /staff, /roles, /permissions.

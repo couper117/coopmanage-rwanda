@@ -169,6 +169,7 @@ model User {
   productsCreated      Product[]                 @relation("ProductCreatedBy")
   buyersCreated        Buyer[]                   @relation("BuyerCreatedBy")
   salesCreated         Sale[]                    @relation("SaleCreatedBy")
+  reportsGenerated     ReportRun[]               @relation("ReportGeneratedBy")
   inventoryCreated     InventoryTransaction[]    @relation("InventoryCreatedBy")
   notifications        Notification[]
 
@@ -265,6 +266,7 @@ model Cooperative {
   notifications       Notification[]
   buyers              Buyer[]
   sales               Sale[]
+  reportRuns          ReportRun[]
 
   @@index([status])
   @@map("cooperatives")
@@ -1091,4 +1093,57 @@ model SaleItem {
   @@index([saleId])
   @@index([productId])
   @@map("sale_items")
+}
+
+// ---------------------------------------------------------------------------
+// M8 — report runs
+// ---------------------------------------------------------------------------
+
+enum ReportFormat {
+  PDF
+  CSV
+  XLSX
+
+  @@map("report_format")
+}
+
+enum ReportStatus {
+  PENDING
+  READY
+  FAILED
+
+  @@map("report_status")
+}
+
+/// A record that a report was produced: which one, over what period, by whom, and when.
+///
+/// Its purpose is accountability rather than caching. A cooperative that took a figure to a lender
+/// in March has to be able to say what it asked for and when, and a report handed round a general
+/// assembly needs a record of who produced it. The parameters are kept so the same request can be
+/// made again without anybody having to remember what they typed.
+model ReportRun {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String       @map("cooperative_id") @db.Uuid
+  /// One of the catalogue keys in `packages/shared/src/reports.ts`.
+  type          String
+  /// The range and any filters, exactly as they were validated.
+  params        Json
+  format        ReportFormat
+  status        ReportStatus @default(PENDING)
+  /// Where the produced file lives, once there is file storage. Null until then: a download
+  /// re-runs the report from `params` rather than serving a stored copy.
+  storageKey    String?      @map("storage_key")
+  errorMessage  String?      @map("error_message")
+  /// How many rows the report covered, so a run is legible in a list without being re-run.
+  rowCount      Int?         @map("row_count")
+  generatedById String?      @map("generated_by_id") @db.Uuid
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  completedAt   DateTime?    @map("completed_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  generatedBy User?       @relation("ReportGeneratedBy", fields: [generatedById], references: [id], onDelete: Restrict)
+
+  @@index([cooperativeId, createdAt(sort: Desc)])
+  @@index([cooperativeId, type, createdAt(sort: Desc)])
+  @@map("report_runs")
 }

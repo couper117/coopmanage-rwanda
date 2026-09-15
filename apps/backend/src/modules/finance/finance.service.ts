@@ -62,7 +62,7 @@ function requireCooperativeId(ctx: RequestContext): string {
  * Both rows stay in the ledger listing with their status, which is what makes the correction
  * visible. This only governs arithmetic.
  */
-const COUNTS_TOWARDS_TOTALS = {
+export const COUNTS_TOWARDS_TOTALS = {
   status: 'POSTED',
   reversalOfId: null,
 } as const satisfies Prisma.FinanceTransactionWhereInput

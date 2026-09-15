@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 7 complete.** Phase 8 is next.
+Status: **Phase 8 complete.** Phase 9 is next.
 
 ---
 
@@ -481,7 +481,7 @@ list where everything is confirmed hides three badges and the cancel reason enti
 
 ---
 
-### Phase 8 — Reports
+### Phase 8 — Reports ✅
 
 - Seven report types with date filters and permission-composed sections
 - Server-rendered PDF matching the print stylesheet; CSV and Excel export
@@ -489,6 +489,20 @@ list where everything is confirmed hides three badges and the cancel reason enti
 
 **Exit:** the monthly cooperative report for the demonstration cooperative is generated, printed to
 A4 and read on paper without a layout defect, in both languages.
+
+**Met.** The demonstration cooperative's September report was produced through the real code path in
+both languages and read as a page image at print resolution, along with the financial, membership,
+stock, sales and activity reports. Four layout defects were found that way and fixed: a reference and
+a date broken mid-value by a width assigned purely by weight; a Kinyarwanda heading broken mid-word
+by a column starved of width; a footer written past the bottom margin, which turned a two-page report
+into six; and page numbers reading "1 of 1" on every page because the pages were not buffered. Two
+content defects were found the same way: two columns sharing the heading "Umubare", and English
+product names inside a Kinyarwanda page. `docs/reports.md` §6 records all of them.
+
+One report is deliberately unfinished: the minutes report has no data until Phase 9 and refuses with
+the phase that brings it rather than being hidden from a cooperative looking for it. One deviation is
+recorded rather than hidden: a download produces the report again from its stored parameters, because
+there is no file storage until Phase 9 — `docs/reports.md` §5.
 
 ---
 

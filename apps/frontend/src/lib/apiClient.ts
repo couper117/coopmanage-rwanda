@@ -189,42 +189,52 @@ async function send(
   }
 }
 
-async function request<TData, TMeta = unknown>(
+/**
+ * The headers every request carries: the language, the bearer token and the cooperative being
+ * worked in. Built fresh for each attempt, because a replay after a silent refresh has to pick up
+ * the new token rather than resend the expired one.
+ */
+function buildHeaders(options: RequestOptions, accept: string): Record<string, string> {
+  const { body, cooperativeId, idempotencyKey, anonymous = false } = options
+  const headers: Record<string, string> = {
+    Accept: accept,
+    'Accept-Language': currentLanguage(),
+  }
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (idempotencyKey) headers[HEADERS.idempotencyKey] = idempotencyKey
+  if (anonymous) return headers
+
+  const token = authState.accessToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+  const tenant = cooperativeId ?? authState.cooperativeId()
+  if (tenant) headers[HEADERS.cooperativeId] = tenant
+  return headers
+}
+
+/**
+ * Sends a request, and on the one status that means "the token has expired but the session is
+ * still good", refreshes once and replays it.
+ *
+ * Shared by the JSON path and the file path. An access token lasts fifteen minutes, and a
+ * cooperative producing a report after reading the screen for twenty of them must not be told the
+ * export failed.
+ */
+async function sendWithRefresh(
   path: string,
   options: RequestOptions,
-): Promise<{ data: TData; meta: TMeta | undefined }> {
-  const { body, cooperativeId, idempotencyKey, anonymous = false } = options
+  accept: string,
+): Promise<Response> {
+  const { anonymous = false } = options
+  let response = await send(path, options, buildHeaders(options, accept))
 
-  function buildHeaders(): Record<string, string> {
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-      'Accept-Language': currentLanguage(),
-    }
-    if (body !== undefined) headers['Content-Type'] = 'application/json'
-    if (idempotencyKey) headers[HEADERS.idempotencyKey] = idempotencyKey
-    if (anonymous) return headers
-
-    const token = authState.accessToken()
-    if (token) headers.Authorization = `Bearer ${token}`
-    const tenant = cooperativeId ?? authState.cooperativeId()
-    if (tenant) headers[HEADERS.cooperativeId] = tenant
-    return headers
-  }
-
-  let response = await send(path, options, buildHeaders())
-
-  // An access token lasts fifteen minutes and the user does not need to know that. On the one
-  // status that means "expired, but the session is still good", refresh once and replay.
   if (response.status === 401 && !anonymous) {
     const payload = (await response
       .clone()
       .json()
-      .catch(() => null)) as {
-      error?: { code?: string }
-    } | null
+      .catch(() => null)) as { error?: { code?: string } } | null
     if (payload?.error?.code === 'TOKEN_EXPIRED') {
       if (await refreshAccessToken()) {
-        response = await send(path, options, buildHeaders())
+        response = await send(path, options, buildHeaders(options, accept))
       } else {
         authState.signedOut()
       }
@@ -234,6 +244,15 @@ async function request<TData, TMeta = unknown>(
       authState.signedOut()
     }
   }
+
+  return response
+}
+
+async function request<TData, TMeta = unknown>(
+  path: string,
+  options: RequestOptions,
+): Promise<{ data: TData; meta: TMeta | undefined }> {
+  const response = await sendWithRefresh(path, options, 'application/json')
 
   if (response.status === 204) {
     return { data: undefined as TData, meta: undefined }
@@ -288,4 +307,49 @@ export async function apiRequestCursor<TItem>(
 ): Promise<{ items: TItem[]; meta: CursorMeta | undefined }> {
   const { data, meta } = await request<TItem[], CursorMeta>(path, options)
   return { items: data, meta }
+}
+
+export interface DownloadedFile {
+  blob: Blob
+  /** The name the server gave the file, which carries the cooperative code and the period. */
+  filename: string
+}
+
+/**
+ * Reads an endpoint that answers with a file rather than a JSON envelope.
+ *
+ * Everything the JSON path does is done here too — the language header, the bearer token, the
+ * cooperative header, one silent refresh and replay on an expired token, and a failure reported as
+ * the same `ApiError` every other call produces — because a download is not a lesser kind of
+ * request. An error response is still JSON, so a refusal is read out of the body and given to the
+ * screen in the form it already knows how to show.
+ */
+export async function apiRequestFile(
+  path: string,
+  options: RequestOptions & { accept?: string; fallbackFilename: string },
+): Promise<DownloadedFile> {
+  const response = await sendWithRefresh(
+    path,
+    options,
+    options.accept ?? 'application/octet-stream',
+  )
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as unknown
+    throw toApiError(response.status, payload)
+  }
+
+  return {
+    blob: await response.blob(),
+    filename: filenameFromDisposition(
+      response.headers.get('Content-Disposition'),
+      options.fallbackFilename,
+    ),
+  }
+}
+
+/** The server names the file with the cooperative code and the period, which is worth keeping. */
+export function filenameFromDisposition(disposition: string | null, fallback: string): string {
+  const match = disposition ? /filename="?([^";]+)"?/.exec(disposition) : null
+  return match?.[1] ?? fallback
 }

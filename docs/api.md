@@ -429,6 +429,22 @@ arrive at a different total from the one in the books.
 Types: `monthly-cooperative`, `financial`, `member`, `inventory`, `sales`, `activity`, `meeting`.
 Formats: `pdf`, `csv`, `xlsx`.
 
+A preview is a `POST` although it reads nothing: the parameters are a body (`from`, `to`, and
+optionally `locale`, `memberId`, `warehouseId`, `categoryId`) rather than a query string, which keeps
+a member's identifier out of server logs and browser history. `from` and `to` are required — a report
+whose dates were guessed is a report somebody reads the wrong month out of — and a period the wrong
+way round is a `422`, not an empty report.
+
+A preview answers with a `ReportDocument`: the header, an ordered list of sections, and the footer.
+An export answers with the file as an attachment named `<code>-<report>-<from>-to-<to>.<ext>`, and
+carries the run in `X-Report-Run-Id` so a client that has just downloaded a file can link to the run
+it came from without asking again.
+
+`reports:export` is separate from `reports:view` because reading a report and producing a document
+that leaves the cooperative are different acts. Each report additionally requires the permission
+covering its own data, and a section the reader may not see is named on the page rather than dropped
+from it. `docs/reports.md` is the reference.
+
 ### Documents and meetings — Phase 9
 
 | Method | Path                                  | Permission                                      |

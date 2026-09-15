@@ -9,6 +9,7 @@ import { ProfilePage } from '@/pages/ProfilePage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
 import { inventoryRoutes } from '@/features/inventory/inventoryRoutes'
+import { reportRoutes } from '@/features/reports/reportRoutes'
 import { buyerRoutes, salesRoutes } from '@/features/sales/salesRoutes'
 import { contributionRoutes, memberRoutes } from '@/features/members/memberRoutes'
 import { CooperativeSettingsPage } from '@/pages/settings/CooperativeSettingsPage'
@@ -44,6 +45,7 @@ const BUILT_PATHS = new Set(
     ...inventoryRoutes,
     ...salesRoutes,
     ...buyerRoutes,
+    ...reportRoutes,
   ]
     .map((route) => route.path)
     .filter((path): path is string => path !== undefined)
@@ -101,6 +103,7 @@ export const routes: RouteObject[] = [
       ...inventoryRoutes,
       ...salesRoutes,
       ...buyerRoutes,
+      ...reportRoutes,
       ...adminRoutes,
       {
         path: 'settings/audit',
