@@ -188,6 +188,17 @@ this table, it is added here first and then used.
 - **A product keeps the name the cooperative gave it.** Where a product has a `nameRw`, a
   Kinyarwanda report prints that, not the English name. An English name in the middle of a
   Kinyarwanda page is a report somebody has to have translated for them.
+- **"Quorum met" and "no quorum set" are different sentences, and so are their Kinyarwanda.**
+  _Umubare wa ngombwa wujujwe_ says the quorum was reached; _Iyi nama ntifite umubare wa ngombwa
+  washyizweho_ says the cooperative's own rules set none. Showing the first's negation for the
+  second would tell a committee its meeting was invalid.
+- **Archiving is not deleting, and the words must not be interchangeable.** _Kubika mu bubiko_ puts
+  a document away and keeps it; _gusiba_ means to erase and appears nowhere in this product, because
+  nothing is erased.
+- **A PDF written by hand needs `/WinAnsiEncoding`.** The demonstration seed writes a one-page PDF,
+  and its first version printed `Icyemezo cy iyandikwa` — the apostrophe in _cy'iyandikwa_ silently
+  dropped, because the UTF-8 bytes of `'` mean nothing to a standard-encoded Helvetica. Kinyarwanda
+  punctuation is not decoration; it changes the word.
 - Prefer the everyday word over the formal or academic one. The reader is a cooperative secretary in
   a rural district office, not a ministry economist.
 - Kinyarwanda strings run 20–40 % longer than English. Every layout is checked in Kinyarwanda before

@@ -1200,21 +1200,169 @@ async function activityReport(build: Build): Promise<Section[]> {
 }
 
 /**
- * The minutes report has no data until meetings arrive in Phase 9.
+ * The minutes report: what the cooperative met about, decided, and still owes itself.
  *
- * It says so on the page rather than being hidden from the catalogue, and it says which phase
- * brings it. A cooperative that expects a minutes report should be told when it comes rather than
- * left to wonder whether they are looking in the wrong place. This is the same pattern the member
- * profile uses for the parts of a member's history that are not built yet.
+ * Built around the two questions a general assembly is asked about its own meetings. Could each
+ * meeting decide what it decided — which is quorum, counted from attendance against the register
+ * rather than asserted — and were the minutes actually filed. A meeting with no minutes is the gap
+ * an auditor finds, so the table says so in a column of its own rather than leaving it to be
+ * inferred from a missing document.
+ *
+ * The decisions table carries every action still open across the whole period, because an action
+ * recorded in March and forgotten by June is the failure this report exists to prevent.
  */
-function meetingReport(build: Build): Section[] {
-  return [
-    {
-      kind: 'note',
-      key: 'unavailable',
-      title: t(build, 'section.activity'),
-      text: t(build, 'report.unavailable', { phase: REPORTS.meeting.availableFromPhase }),
+async function meetingReport(build: Build): Promise<Section[]> {
+  const period = { gte: startOfDay(build.params.from), lte: endOfDay(build.params.to) }
+
+  const meetings = await prisma.meeting.findMany({
+    where: { cooperativeId: build.cooperativeId, scheduledFor: period },
+    orderBy: { scheduledFor: 'asc' },
+    take: MAX_TABLE_ROWS,
+    select: {
+      id: true,
+      reference: true,
+      title: true,
+      type: true,
+      status: true,
+      scheduledFor: true,
+      location: true,
+      quorumRequired: true,
+      minutesDocumentId: true,
+      _count: { select: { decisions: true } },
+      // Members only. A quorum is a number of members, so a guest or a member of staff in the
+      // room does not count towards it — the same rule the meetings service applies.
+      attendees: { where: { status: 'PRESENT', memberId: { not: null } }, select: { id: true } },
     },
+  })
+
+  const decisions = await prisma.meetingDecision.findMany({
+    where: { meeting: { cooperativeId: build.cooperativeId, scheduledFor: period } },
+    orderBy: [{ createdAt: 'asc' }],
+    take: MAX_TABLE_ROWS,
+    select: {
+      title: true,
+      decisionType: true,
+      status: true,
+      votesFor: true,
+      votesAgainst: true,
+      abstentions: true,
+      dueOn: true,
+      meeting: { select: { reference: true } },
+      responsible: { select: { user: { select: { fullName: true } } } },
+    },
+  })
+
+  const held = meetings.filter((row) => row.status === 'COMPLETED').length
+  const cancelled = meetings.filter((row) => row.status === 'CANCELLED').length
+  const openActions = decisions.filter(
+    (row) => row.decisionType === 'ACTION' && row.status === 'OPEN',
+  ).length
+
+  // Averaged over the meetings that actually happened. Including a cancelled meeting's zero
+  // attendance would drag the figure down for a meeting nobody was expected at.
+  const attended = meetings.filter((row) => row.status !== 'CANCELLED')
+  const averageAttendance =
+    attended.length === 0
+      ? 0
+      : Math.round(
+          attended.reduce((running, row) => running + row.attendees.length, 0) / attended.length,
+        )
+
+  const quorumLabel = (present: number, required: number | null): string => {
+    if (required === null) return t(build, 'report.quorumNone')
+    return present >= required ? t(build, 'report.quorumMet') : t(build, 'report.quorumNotMet')
+  }
+
+  const votesOf = (row: (typeof decisions)[number]): string | null => {
+    if (row.votesFor === null && row.votesAgainst === null && row.abstentions === null) return null
+    return `${row.votesFor ?? 0} / ${row.votesAgainst ?? 0} / ${row.abstentions ?? 0}`
+  }
+
+  return [
+    figures(build, 'meetings', 'meetings', [
+      {
+        key: 'held',
+        label: t(build, 'figure.meetings.held'),
+        type: 'number',
+        value: count(held),
+      },
+      {
+        key: 'cancelled',
+        label: t(build, 'figure.meetings.cancelled'),
+        type: 'number',
+        value: count(cancelled),
+      },
+      {
+        key: 'attendance',
+        label: t(build, 'figure.meetings.attendance'),
+        type: 'number',
+        value: count(averageAttendance),
+      },
+      {
+        key: 'decisions',
+        label: t(build, 'figure.meetings.decisions'),
+        type: 'number',
+        value: count(decisions.length),
+      },
+      {
+        key: 'actionsOpen',
+        label: t(build, 'figure.meetings.actionsOpen'),
+        type: 'number',
+        value: count(openActions),
+      },
+    ]),
+    table(
+      build,
+      'meetings',
+      'meetings',
+      [
+        { key: 'date', label: t(build, 'column.date'), type: 'date', weight: 1.6 },
+        { key: 'reference', label: t(build, 'column.reference'), type: 'text', weight: 1.8 },
+        { key: 'meeting', label: t(build, 'column.meeting'), type: 'text', weight: 3 },
+        { key: 'kind', label: t(build, 'column.kind'), type: 'text', weight: 2 },
+        { key: 'status', label: t(build, 'column.status'), type: 'text', weight: 1.6 },
+        { key: 'present', label: t(build, 'column.attendees'), type: 'number', weight: 1.2 },
+        { key: 'quorum', label: t(build, 'column.quorum'), type: 'text', weight: 1.6 },
+        { key: 'minutes', label: t(build, 'column.minutes'), type: 'text', weight: 1.6 },
+      ],
+      meetings.map((row) => ({
+        date: row.scheduledFor.toISOString().slice(0, 10),
+        reference: row.reference,
+        meeting: row.title,
+        kind: enumLabel(build.locale, 'meetingType', row.type),
+        status: enumLabel(build.locale, 'meetingStatus', row.status),
+        present: count(row.attendees.length),
+        quorum: quorumLabel(row.attendees.length, row.quorumRequired),
+        // Stated rather than left to be inferred from an absent document: a meeting whose minutes
+        // were never filed is exactly what an audit looks for.
+        minutes: row.minutesDocumentId
+          ? t(build, 'report.minutesFiled')
+          : t(build, 'report.minutesMissing'),
+      })),
+    ),
+    table(
+      build,
+      'decisions',
+      'decisions',
+      [
+        { key: 'reference', label: t(build, 'column.reference'), type: 'text', weight: 1.8 },
+        { key: 'kind', label: t(build, 'column.kind'), type: 'text', weight: 1.4 },
+        { key: 'decision', label: t(build, 'column.decision'), type: 'text', weight: 3.4 },
+        { key: 'votes', label: t(build, 'column.votes'), type: 'text', weight: 1.8 },
+        { key: 'responsible', label: t(build, 'column.responsible'), type: 'text', weight: 2 },
+        { key: 'due', label: t(build, 'column.due'), type: 'date', weight: 1.6 },
+        { key: 'status', label: t(build, 'column.status'), type: 'text', weight: 1.4 },
+      ],
+      decisions.map((row) => ({
+        reference: row.meeting.reference,
+        kind: enumLabel(build.locale, 'decisionType', row.decisionType),
+        decision: row.title,
+        votes: votesOf(row),
+        responsible: row.responsible?.user.fullName ?? null,
+        due: row.dueOn?.toISOString().slice(0, 10) ?? null,
+        status: enumLabel(build.locale, 'decisionStatus', row.status),
+      })),
+    ),
   ]
 }
 
@@ -1282,7 +1430,7 @@ export async function buildReport(
       sections = await activityReport(build)
       break
     case 'meeting':
-      sections = meetingReport(build)
+      sections = await meetingReport(build)
       break
   }
 

@@ -1,0 +1,211 @@
+{
+  "title": "Meetings",
+  "description": "The cooperative's assemblies and committee meetings, with their agendas, attendance, decisions and minutes.",
+  "type": {
+    "GENERAL_ASSEMBLY": "General assembly",
+    "BOARD": "Board meeting",
+    "COMMITTEE": "Committee meeting",
+    "EXTRAORDINARY": "Extraordinary meeting",
+    "OTHER": "Other meeting"
+  },
+  "status": {
+    "SCHEDULED": "Scheduled",
+    "IN_PROGRESS": "Under way",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled"
+  },
+  "statusMeaning": {
+    "SCHEDULED": "Called, and not yet begun.",
+    "IN_PROGRESS": "Under way. The agenda, attendance and decisions can still be recorded.",
+    "COMPLETED": "Closed. The record stands; only the follow-up on actions can still change.",
+    "CANCELLED": "Called off. The reason is part of the record."
+  },
+  "attendance": {
+    "PRESENT": "Present",
+    "ABSENT": "Absent",
+    "EXCUSED": "Excused"
+  },
+  "decisionType": {
+    "RESOLUTION": "Resolution",
+    "ACTION": "Action",
+    "NOTE": "Note"
+  },
+  "decisionStatus": {
+    "OPEN": "Open",
+    "DONE": "Done",
+    "CANCELLED": "Cancelled"
+  },
+  "list": {
+    "caption": "Meetings, most recent first",
+    "emptyTitle": "No meeting has been recorded yet",
+    "emptyBody": "Schedule the next assembly and its agenda, then take attendance against the register on the day.",
+    "columns": {
+      "reference": "Number",
+      "title": "Meeting",
+      "when": "When",
+      "type": "Kind",
+      "status": "State",
+      "present": "Present",
+      "decisions": "Decisions"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Number, title or place",
+      "type": "Kind",
+      "status": "State",
+      "from": "From",
+      "to": "To",
+      "allTypes": "Every kind",
+      "allStatuses": "Every state",
+      "clear": "Clear filters"
+    }
+  },
+  "actions": {
+    "schedule": "Schedule a meeting",
+    "edit": "Change the details",
+    "agenda": "Set the agenda",
+    "attendance": "Take attendance",
+    "decision": "Record a decision",
+    "begin": "Begin the meeting",
+    "complete": "Close the meeting",
+    "cancel": "Call it off",
+    "backToMeetings": "Back to meetings",
+    "attachMinutes": "Attach the minutes",
+    "detachMinutes": "Detach the minutes",
+    "print": "Print"
+  },
+  "form": {
+    "scheduleTitle": "Schedule a meeting",
+    "editTitle": "Change the meeting",
+    "titleLabel": "What the meeting is called",
+    "titlePlaceholder": "Annual general assembly 2026",
+    "type": "Kind of meeting",
+    "scheduledFor": "Date and time",
+    "endsAt": "Expected to end",
+    "location": "Where",
+    "locationPlaceholder": "Cooperative hall, Muhoza",
+    "quorumRequired": "Members needed for a quorum",
+    "quorumHint": "Leave this empty if the cooperative's own rules set no quorum.",
+    "notes": "Notes",
+    "save": "Save the meeting",
+    "saving": "Saving…"
+  },
+  "detail": {
+    "loadFailed": "This meeting could not be loaded.",
+    "whenAndWhere": "When and where",
+    "quorum": "Quorum",
+    "quorumOf": "{{present}} of {{required}} members present",
+    "quorumMet": "Quorum met",
+    "quorumNotMet": "Quorum not met",
+    "quorumNone": "No quorum is set for this meeting",
+    "quorumWarning": "Fewer members are present than the quorum this meeting needs, so it cannot decide anything. Record it as it stands.",
+    "createdBy": "Called by {{name}}",
+    "cancelledBecause": "Called off: {{reason}}",
+    "closedNotice": "This meeting is closed. Its agenda, attendance and decisions are now the record and cannot be changed; an action can still be marked done.",
+    "agendaTitle": "Agenda",
+    "agendaEmpty": "No agenda has been set.",
+    "attendanceTitle": "Attendance",
+    "attendanceEmpty": "No attendance has been taken.",
+    "attendanceCaption": "Who was at the meeting",
+    "decisionsTitle": "Decisions and actions",
+    "decisionsEmpty": "No decision has been recorded.",
+    "decisionsCaption": "What the meeting decided",
+    "documentsTitle": "Papers",
+    "documentsEmpty": "No paper has been filed against this meeting.",
+    "minutes": "Minutes",
+    "minutesNone": "The minutes have not been filed yet.",
+    "votes": "{{for}} for, {{against}} against, {{abstentions}} abstained",
+    "noVotes": "No vote was taken",
+    "due": "Due {{date}}",
+    "responsible": "Responsible: {{name}}",
+    "presenter": "Presented by {{name}}"
+  },
+  "agendaForm": {
+    "title": "Set the agenda",
+    "description": "The order here is the order the meeting will take. Items are numbered when you save.",
+    "itemTitle": "Item",
+    "itemDescription": "Notes",
+    "presenter": "Presented by",
+    "noPresenter": "Nobody in particular",
+    "add": "Add an item",
+    "remove": "Remove",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "empty": "No items yet. Add the first one.",
+    "save": "Save the agenda",
+    "saving": "Saving…"
+  },
+  "attendanceForm": {
+    "title": "Take attendance",
+    "description": "Attendance is taken against the register, which is what makes the quorum provable.",
+    "search": "Find a member",
+    "searchPlaceholder": "Name or member number",
+    "markAllPresent": "Mark everybody present",
+    "markAllAbsent": "Mark everybody absent",
+    "guests": "Guests",
+    "addGuest": "Add a guest",
+    "guestName": "Guest's name",
+    "removeGuest": "Remove",
+    "presentCount": "{{present}} present of {{total}} members",
+    "save": "Save the attendance",
+    "saving": "Saving…",
+    "guestsPresent": "plus {{count}} guests"
+  },
+  "decisionForm": {
+    "title": "Record a decision",
+    "description": "What a meeting resolved and how it voted cannot be edited afterwards, so check it before saving.",
+    "titleLabel": "The decision",
+    "titlePlaceholder": "Buy a second maize dryer before the next harvest",
+    "descriptionLabel": "What was said",
+    "kind": "Kind",
+    "agendaItem": "Taken under",
+    "noAgendaItem": "No agenda item",
+    "votesFor": "For",
+    "votesAgainst": "Against",
+    "abstentions": "Abstained",
+    "votesHint": "Leave these empty if no vote was taken.",
+    "dueOn": "To be done by",
+    "responsible": "Responsible",
+    "noResponsible": "Nobody yet",
+    "save": "Record it",
+    "saving": "Recording…"
+  },
+  "cancelDialog": {
+    "title": "Call off this meeting?",
+    "body": "The meeting stays in the record with the reason you give, because a cooperative's minute book has no missing numbers.",
+    "reason": "Why it was called off",
+    "reasonPlaceholder": "Postponed: the district officer could not attend",
+    "confirm": "Call it off",
+    "keep": "Keep it scheduled"
+  },
+  "completeDialog": {
+    "title": "Close this meeting?",
+    "body": "Once closed, the agenda, the attendance and the decisions are the record and cannot be changed. An action can still be marked done afterwards.",
+    "confirm": "Close the meeting",
+    "keep": "Leave it open"
+  },
+  "minutesDialog": {
+    "title": "Attach the minutes",
+    "body": "Choose a document already filed for this cooperative. Upload it first if it is not there yet.",
+    "document": "Document",
+    "noDocuments": "No document is available to attach.",
+    "confirm": "Attach it",
+    "detachTitle": "Detach the minutes?",
+    "detachBody": "The document stays in the cooperative's files; only the link to this meeting is removed.",
+    "detachConfirm": "Detach it"
+  },
+  "notice": {
+    "scheduled": "{{reference}} was scheduled.",
+    "updated": "The meeting was changed.",
+    "agendaSaved": "The agenda was saved.",
+    "attendanceSaved": "The attendance was saved.",
+    "decisionRecorded": "The decision was recorded.",
+    "decisionUpdated": "The decision was updated.",
+    "statusChanged": "The meeting is now {{status}}.",
+    "minutesAttached": "The minutes were attached.",
+    "minutesDetached": "The minutes were detached."
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}}"
+  }
+}

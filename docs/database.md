@@ -430,31 +430,69 @@ sale writes compensating `SALE_RETURN` movements rather than deleting anything.
 
 ## 9. Meetings (M9)
 
-- **Meeting**: `id`, `cooperative_id`, `title`, `type` enum(GENERAL_ASSEMBLY, BOARD, COMMITTEE,
-  EXTRAORDINARY, OTHER), `scheduled_for` timestamptz, `ends_at` null, `location`, `status`
+- **Meeting**: `id`, `cooperative_id` RESTRICT, `reference` (`MTG-<year>-<six digits>`, unique per
+  cooperative), `title`, `type` enum(GENERAL_ASSEMBLY, BOARD, COMMITTEE, EXTRAORDINARY, OTHER),
+  `scheduled_for` timestamptz, `ends_at` null, `location`, `status`
   enum(SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED), `quorum_required` int null, `notes`,
-  `minutes_document_id` null, `created_by_id`, timestamps.
-  Index (cooperative_id, scheduled_for), (cooperative_id, status).
+  `minutes_document_id` null unique RESTRICT, `cancel_reason` null, `created_by_id`, timestamps.
+  Index (cooperative_id, scheduled_for desc), (cooperative_id, status).
 - **MeetingAgendaItem**: `id`, `meeting_id` CASCADE, `position` int, `title`, `description`,
-  `presenter_staff_id` null. Unique (meeting_id, position).
-- **MeetingAttendee**: `id`, `meeting_id` CASCADE, `member_id` null RESTRICT, `staff_id` null,
-  `guest_name` null, `status` enum(PRESENT, ABSENT, EXCUSED), `checked_in_at`, `note`.
-  Unique (meeting_id, member_id). A check constraint requires exactly one of member/staff/guest.
-- **MeetingDecision**: `id`, `meeting_id` CASCADE, `agenda_item_id` null, `title`, `description`,
-  `decision_type` enum(RESOLUTION, ACTION, NOTE), `votes_for`/`votes_against`/`abstentions` int null,
-  `due_on` date null, `responsible_staff_id` null, `status` enum(OPEN, DONE, CANCELLED).
+  `presenter_staff_id` null RESTRICT. Unique (meeting_id, position).
+- **MeetingAttendee**: `id`, `meeting_id` CASCADE, `member_id` null RESTRICT, `staff_id` null
+  RESTRICT, `guest_name` null, `status` enum(PRESENT, ABSENT, EXCUSED), `checked_in_at`, `note`.
+  Unique (meeting_id, member_id).
+- **MeetingDecision**: `id`, `meeting_id` CASCADE, `agenda_item_id` null SET NULL, `title`,
+  `description`, `decision_type` enum(RESOLUTION, ACTION, NOTE),
+  `votes_for`/`votes_against`/`abstentions` int null, `due_on` date null,
+  `responsible_staff_id` null RESTRICT, `status` enum(OPEN, DONE, CANCELLED), timestamps.
+  Index (meeting_id), (responsible_staff_id, status).
+
+`agenda_item_id` is `SET NULL` rather than `RESTRICT` on purpose: the agenda is replaced whole when
+it is edited, and what a meeting decided does not stop being true because the agenda was
+rearranged. The decision keeps its record and loses only the pointer.
+
+Check constraints, in `20260915192340_m9_documents_and_meetings`:
+
+- `meeting_attendees_exactly_one_subject` — a row names exactly one of a member, a staff member or a
+  guest. Two would make the quorum count ambiguous and none would make the row meaningless.
+- `meeting_attendees_guest_name_not_blank` — a guest is a name, not an empty string standing in for one
+- `meetings_ends_after_start`, `meetings_quorum_positive`
+- `meetings_cancelled_has_reason` — "cancelled" with no reason is a question at the next assembly
+- `meeting_agenda_items_position_positive`
+- `meeting_decisions_votes_not_negative`
+
+**Quorum is never stored.** The number required is on the meeting; the number present is counted
+from the attendance rows, and only the rows naming a **member** count towards it — a guest or a
+member of staff is in the room and is not a member.
 
 ---
 
 ## 10. Documents (M9)
 
-**Document**: `id`, `cooperative_id`, `title`, `category` enum(REGISTRATION, FINANCIAL, MEMBER,
-CONTRACT, CERTIFICATE, MEETING_MINUTES, REPORT, OTHER), `file_name`, `storage_key` unique,
+**Document**: `id`, `cooperative_id` RESTRICT, `title`, `category` enum(REGISTRATION, FINANCIAL,
+MEMBER, CONTRACT, CERTIFICATE, MEETING_MINUTES, REPORT, OTHER), `file_name`, `storage_key` unique,
 `mime_type`, `size_bytes` bigint, `checksum_sha256`, `visibility` enum(COOPERATIVE, RESTRICTED),
-`member_id` null, `meeting_id` null, `description`, `tags` text[], `uploaded_by_id` RESTRICT,
-`is_archived` boolean default false, `archived_at`/`archived_by_id`, timestamps.
-Indexes (cooperative_id, category), (cooperative_id, created_at), GIN on tags.
-`storage_key` is random and never derived from the filename, so it cannot be guessed.
+`member_id` null RESTRICT, `meeting_id` null RESTRICT, `description`, `tags` text[],
+`uploaded_by_id` RESTRICT, `is_archived` boolean default false,
+`archived_at`/`archived_by_id`/`archive_reason`, timestamps.
+Indexes (cooperative_id, category), (cooperative_id, created_at desc), (cooperative_id, is_archived),
+(cooperative_id, member_id), (cooperative_id, meeting_id).
+
+Check constraints:
+
+- `documents_storage_key_shape` — `^[0-9]{4}/[0-9]{2}/[0-9a-f]{48}$`. The application generates the
+  key from 24 cryptographically random bytes; pinning the shape here stops a key derived from a
+  filename ever reaching the column, which is what would make a document guessable.
+- `documents_checksum_is_sha256` — 64 hex characters. A checksum of the wrong shape cannot be
+  compared against anything, which defeats the only reason it is stored.
+- `documents_size_bytes_positive`
+- `documents_archived_has_actor` — an archived document says when and by whom. An archive nobody can
+  account for is the same problem as a deletion, which is what archiving exists to avoid.
+
+`size_bytes` is a `bigint`, so it crosses the API as a **string**: JSON has no such number, and
+rounding a file size through a double for the sake of a smaller type would be the wrong trade.
+
+Neither table has a delete path in the application. A document is archived; a meeting is cancelled.
 
 ---
 

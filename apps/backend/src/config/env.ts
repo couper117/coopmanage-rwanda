@@ -52,12 +52,33 @@ const envSchema = z
     /** Where the browser application is served. Password reset links are built against it. */
     APP_BASE_URL: z.string().url().default('http://localhost:5175'),
 
+    /**
+     * Where uploaded documents are kept. `local` writes to `STORAGE_LOCAL_PATH`; `s3` is the
+     * Supabase Storage driver, which lands in Phase 18 with the bucket it needs. The value is
+     * refused rather than accepted-and-ignored, because silently falling back to the local disk in
+     * production would mean a cooperative's documents were written to a container that is replaced
+     * on the next deployment.
+     */
+    STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+    STORAGE_LOCAL_PATH: z.string().min(1).default('./storage'),
+    /** The cap on one uploaded file. 10 MB covers a scanned certificate and a long PDF. */
+    MAX_UPLOAD_MB: z.coerce.number().int().min(1).max(100).default(10),
+
     SEED_DEMO: booleanFromString.default(false),
     // Defaults to on outside production and off in production. Setting it explicitly wins,
     // which is what docs/api.md section 4 promises.
     ENABLE_API_DOCS: booleanFromString.optional(),
   })
   .superRefine((value, ctx) => {
+    if (value.STORAGE_DRIVER === 's3') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['STORAGE_DRIVER'],
+        message:
+          'the S3-compatible driver arrives in Phase 18 with the Supabase bucket; use local until then',
+      })
+    }
+
     if (value.NODE_ENV !== 'production') return
 
     // Production must never fall back to a development default or to a value copied out of

@@ -1,0 +1,129 @@
+{
+  "title": "Documents",
+  "description": "The cooperative's papers: registrations, contracts, certificates, minutes and scanned receipts.",
+  "category": {
+    "REGISTRATION": "Registration",
+    "FINANCIAL": "Financial",
+    "MEMBER": "Member",
+    "CONTRACT": "Contract",
+    "CERTIFICATE": "Certificate",
+    "MEETING_MINUTES": "Meeting minutes",
+    "REPORT": "Report",
+    "OTHER": "Other"
+  },
+  "visibility": {
+    "COOPERATIVE": "Everybody who may see documents",
+    "RESTRICTED": "Only me and the document keepers"
+  },
+  "visibilityShort": {
+    "COOPERATIVE": "Cooperative",
+    "RESTRICTED": "Restricted"
+  },
+  "list": {
+    "caption": "Documents, most recent first",
+    "emptyTitle": "No document has been filed yet",
+    "emptyBody": "Upload the cooperative's registration certificate, a contract or a scanned receipt to begin.",
+    "emptyArchived": "Nothing has been archived.",
+    "columns": {
+      "title": "Document",
+      "category": "Kind",
+      "size": "Size",
+      "uploadedBy": "Filed by",
+      "when": "Filed",
+      "actions": "Action"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Title, filename or tag",
+      "category": "Kind",
+      "allCategories": "Every kind",
+      "archived": "Archived",
+      "archivedExclude": "Not archived",
+      "archivedOnly": "Archived only",
+      "archivedInclude": "Both",
+      "sort": "Order",
+      "sortNewest": "Newest first",
+      "sortOldest": "Oldest first",
+      "sortTitle": "By title",
+      "sortSize": "Largest first",
+      "clear": "Clear filters"
+    }
+  },
+  "actions": {
+    "upload": "Add a document",
+    "download": "Download",
+    "preview": "Open",
+    "edit": "Change the details",
+    "archive": "Archive",
+    "restore": "Restore",
+    "close": "Close"
+  },
+  "upload": {
+    "title": "Add a document",
+    "description": "The file is checked before it is stored: its name, the kind it says it is, and its actual content all have to agree.",
+    "file": "File",
+    "fileHint": "Up to {{maxMb}} MB. Accepted: {{extensions}}.",
+    "chooseFile": "Choose a file",
+    "titleLabel": "What this document is",
+    "titlePlaceholder": "Certificate of registration, 2019",
+    "categoryLabel": "Kind",
+    "descriptionLabel": "Notes",
+    "visibilityLabel": "Who may see it",
+    "visibilityHint": "Restricted documents are visible only to you and to whoever keeps the cooperative's files.",
+    "memberLabel": "About a member",
+    "noMember": "Not about a member",
+    "meetingLabel": "About a meeting",
+    "noMeeting": "Not about a meeting",
+    "tagsLabel": "Tags",
+    "tagsHint": "Separate them with commas. Up to ten.",
+    "tagsPlaceholder": "land, title, 2026",
+    "save": "Add it",
+    "saving": "Adding…"
+  },
+  "edit": {
+    "title": "Change the document's details",
+    "description": "The file itself never changes. A corrected version is a new upload, and this one is archived.",
+    "save": "Save the changes",
+    "saving": "Saving…"
+  },
+  "archiveDialog": {
+    "title": "Archive this document?",
+    "body": "It leaves the working list and stays in the cooperative's records with the reason you give. Nothing is deleted.",
+    "reason": "Why it is being archived",
+    "reasonPlaceholder": "Replaced by the 2026 certificate",
+    "confirm": "Archive it",
+    "keep": "Keep it in the list"
+  },
+  "detail": {
+    "loadFailed": "This document could not be loaded.",
+    "fileName": "File",
+    "size": "Size",
+    "type": "Kind of file",
+    "checksum": "Checksum",
+    "checksumHint": "The SHA-256 of the file as it was uploaded, so a copy can be checked against it.",
+    "uploadedBy": "Filed by",
+    "uploadedAt": "Filed on",
+    "member": "Member",
+    "meeting": "Meeting",
+    "tags": "Tags",
+    "notes": "Notes",
+    "archived": "Archived on {{when}}",
+    "archivedBecause": "Archived: {{reason}}",
+    "nothingRecorded": "Nothing recorded",
+    "previewUnavailable": "This kind of file cannot be shown here. Download it to read it."
+  },
+  "notice": {
+    "uploaded": "{{title}} was added.",
+    "updated": "The document was changed.",
+    "archived": "{{title}} was archived.",
+    "restored": "{{title}} was restored."
+  },
+  "sizes": {
+    "bytes": "{{size}} B",
+    "kilobytes": "{{size}} KB",
+    "megabytes": "{{size}} MB"
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}}"
+  }
+}

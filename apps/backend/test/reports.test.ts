@@ -228,11 +228,11 @@ describe('the catalogue', () => {
     expect(rows.map((row) => row.type)).toEqual([...REPORT_TYPES])
     expect(rows.every((row) => row.permitted)).toBe(true)
 
-    // The minutes report is listed and marked as not yet available rather than hidden: a
-    // cooperative expecting one should be told when it arrives, not left looking for the menu.
-    const meeting = rows.find((row) => row.type === 'meeting')
-    expect(meeting?.available).toBe(false)
-    expect(meeting?.availableFromPhase).toBe(9)
+    // Every report is now available: the minutes report arrived with the meetings module in
+    // Phase 9. Until then it was listed and marked unavailable rather than hidden, so a
+    // cooperative expecting one was told when it would come.
+    expect(rows.every((row) => row.available)).toBe(true)
+    expect(rows.find((row) => row.type === 'meeting')?.availableFromPhase).toBe(9)
   })
 
   it('tells a secretary which reports they may not produce and which parts they will not see', async () => {
@@ -505,9 +505,60 @@ describe('the other six reports', () => {
     }
   })
 
-  it('refuses the minutes report with the phase that brings it', async () => {
-    const response = await preview(manager, 'meeting').expect(409)
-    expect(response.body.error.messageKey).toBe('errors.reports.notYetAvailable')
+  it('prints the minutes report, counting quorum and naming unfiled minutes', async () => {
+    // A meeting inside the period, with a quorum it did not meet and no minutes filed — which is
+    // exactly the pair of gaps this report exists to surface at the next assembly.
+    const meeting = await as(manager, 'post', '/meetings')
+      .send({
+        title: 'September general assembly',
+        scheduledFor: '2026-09-18T08:00:00.000Z',
+        quorumRequired: 5,
+      })
+      .expect(201)
+    const meetingId = meeting.body.data.id as string
+
+    await as(manager, 'put', `/meetings/${meetingId}/attendance`)
+      .send({ entries: [{ memberId, status: 'PRESENT' }] })
+      .expect(200)
+    await as(manager, 'post', `/meetings/${meetingId}/decisions`)
+      .send({ title: 'Repair the store roof', decisionType: 'ACTION', votesFor: 12 })
+      .expect(201)
+
+    const doc = (await preview(manager, 'meeting').expect(200)).body.data as Doc
+    expect(doc.sections.map((section) => section.key)).toEqual([
+      'meetings',
+      'meetings',
+      'decisions',
+    ])
+
+    const table = doc.sections.find(
+      (section) => section.kind === 'table' && section.key === 'meetings',
+    )
+    const row = table?.rows?.find(
+      (candidate) => candidate.reference === meeting.body.data.reference,
+    )
+    expect(row?.present).toBe('1')
+    // One member present against a quorum of five.
+    expect(row?.quorum).toBe(REPORT_LABELS.EN['report.quorumNotMet'])
+    // Stated, not left to be inferred from a document that is not there.
+    expect(row?.minutes).toBe(REPORT_LABELS.EN['report.minutesMissing'])
+
+    const decisions = doc.sections.find((section) => section.key === 'decisions')
+    expect(decisions?.rows?.[0]?.decision).toBe('Repair the store roof')
+    expect(decisions?.rows?.[0]?.votes).toBe('12 / 0 / 0')
+
+    // And the action it left open is counted in the headline figures.
+    expect(figureOf(doc, 'meetings', 'actionsOpen')).toBe('1')
+  })
+
+  it('refuses the minutes report to a reader without meetings:view', async () => {
+    await as(manager, 'put', `/staff/${viewer.staffId}/overrides`)
+      .send({ overrides: [{ permission: 'meetings:view', effect: 'DENY' }] })
+      .expect(200)
+    await preview(viewer, 'meeting').expect(403)
+    await as(manager, 'put', `/staff/${viewer.staffId}/overrides`)
+      .send({ overrides: [] })
+      .expect(200)
   })
 })
 

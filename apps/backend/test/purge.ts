@@ -39,7 +39,29 @@ export async function purgeTestData(): Promise<PurgeReport> {
 
   // Staff rows go first, so that a cooperative a test created through the platform API — which
   // comes with its own manager — is left staffless and therefore recognised as a leftover below.
+  //
+  // Meetings and documents come before even that: an agenda item names its presenter, an
+  // attendance row may name a member of staff, and a decision names who is responsible, all three
+  // with RESTRICT. A meeting and its minutes also point at each other, so that link goes first of
+  // all. Getting this order wrong leaves the cooperative behind, and an abandoned cooperative then
+  // fails an unrelated test in the next run on a unique value it is still holding.
   if (userIds.length > 0) {
+    const staffCooperatives = (
+      await prisma.cooperativeStaff.findMany({
+        where: { userId: { in: userIds } },
+        select: { cooperativeId: true },
+      })
+    ).map((row) => row.cooperativeId)
+
+    if (staffCooperatives.length > 0) {
+      await prisma.meeting.updateMany({
+        where: { cooperativeId: { in: staffCooperatives } },
+        data: { minutesDocumentId: null },
+      })
+      await prisma.document.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
+      await prisma.meeting.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
+    }
+
     await prisma.staffPermissionOverride.deleteMany({
       where: { staff: { userId: { in: userIds } } },
     })
@@ -100,6 +122,20 @@ export async function purgeTestData(): Promise<PurgeReport> {
     await prisma.product.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     await prisma.productCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     await prisma.warehouse.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+    // Meetings and documents point at each other — a meeting names its minutes, a document names
+    // its meeting — so the link is broken first and then both go. Documents also reference members
+    // and users with RESTRICT, which is why they precede both.
+    await prisma.meeting.updateMany({
+      where: { cooperativeId: { in: cooperativeIds } },
+      data: { minutesDocumentId: null },
+    })
+    await prisma.document.deleteMany({
+      where: {
+        OR: [{ cooperativeId: { in: cooperativeIds } }, { uploadedById: { in: userIds } }],
+      },
+    })
+    await prisma.meeting.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
     await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     // Report runs name the user who produced them with RESTRICT, so they go before the accounts
     // do. The cooperative cascade would take them too, but only for a cooperative that is being

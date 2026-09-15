@@ -170,6 +170,9 @@ model User {
   buyersCreated        Buyer[]                   @relation("BuyerCreatedBy")
   salesCreated         Sale[]                    @relation("SaleCreatedBy")
   reportsGenerated     ReportRun[]               @relation("ReportGeneratedBy")
+  documentsUploaded    Document[]                @relation("DocumentUploadedBy")
+  documentsArchived    Document[]                @relation("DocumentArchivedBy")
+  meetingsCreated      Meeting[]                 @relation("MeetingCreatedBy")
   inventoryCreated     InventoryTransaction[]    @relation("InventoryCreatedBy")
   notifications        Notification[]
 
@@ -247,7 +250,7 @@ model Cooperative {
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  type                CooperativeType      @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  type                CooperativeType        @relation(fields: [typeId], references: [id], onDelete: Restrict)
   staff               CooperativeStaff[]
   units               UnitOfMeasure[]
   auditLog            AuditLog[]
@@ -267,6 +270,8 @@ model Cooperative {
   buyers              Buyer[]
   sales               Sale[]
   reportRuns          ReportRun[]
+  documents           Document[]
+  meetings            Meeting[]
 
   @@index([status])
   @@map("cooperatives")
@@ -288,11 +293,14 @@ model CooperativeStaff {
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  cooperative Cooperative               @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
-  user        User                      @relation("StaffUser", fields: [userId], references: [id], onDelete: Restrict)
-  role        Role                      @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  invitedBy   User?                     @relation("StaffInviter", fields: [invitedById], references: [id], onDelete: Restrict)
-  overrides   StaffPermissionOverride[]
+  cooperative          Cooperative               @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  user                 User                      @relation("StaffUser", fields: [userId], references: [id], onDelete: Restrict)
+  role                 Role                      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  invitedBy            User?                     @relation("StaffInviter", fields: [invitedById], references: [id], onDelete: Restrict)
+  overrides            StaffPermissionOverride[]
+  agendaItems          MeetingAgendaItem[]       @relation("AgendaPresenter")
+  meetingAttendance    MeetingAttendee[]         @relation("AttendeeStaff")
+  decisionsResponsible MeetingDecision[]         @relation("DecisionResponsible")
 
   @@unique([cooperativeId, userId])
   @@index([userId, status])
@@ -533,11 +541,13 @@ model Member {
   cooperative         Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
   deliveries          InventoryTransaction[]
   createdBy           User?                  @relation("MemberCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  updatedBy           User?                @relation("MemberUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
-  shares              MemberShare[]        @relation("ShareHolder")
-  shareCounterparties MemberShare[]        @relation("ShareCounterparty")
+  updatedBy           User?                  @relation("MemberUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  shares              MemberShare[]          @relation("ShareHolder")
+  shareCounterparties MemberShare[]          @relation("ShareCounterparty")
   contributions       Contribution[]
   financeTransactions FinanceTransaction[]
+  documents           Document[]
+  meetingAttendance   MeetingAttendee[]
 
   @@unique([cooperativeId, memberCode])
   @@index([cooperativeId, status])
@@ -666,15 +676,15 @@ model FinanceTransaction {
   createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  cooperative  Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
-  category     FinanceCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  member       Member?             @relation(fields: [memberId], references: [id], onDelete: Restrict)
-  buyer        Buyer?              @relation(fields: [buyerId], references: [id], onDelete: Restrict)
-  sale         Sale?               @relation(fields: [saleId], references: [id], onDelete: Restrict)
-  reversalOf   FinanceTransaction? @relation("Reversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
-  reversedBy   FinanceTransaction? @relation("Reversal")
-  createdBy    User?               @relation("FinanceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  voidedBy     User?               @relation("FinanceVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
+  cooperative  Cooperative           @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  category     FinanceCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  member       Member?               @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  buyer        Buyer?                @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  sale         Sale?                 @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  reversalOf   FinanceTransaction?   @relation("Reversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversedBy   FinanceTransaction?   @relation("Reversal")
+  createdBy    User?                 @relation("FinanceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  voidedBy     User?                 @relation("FinanceVoidedBy", fields: [voidedById], references: [id], onDelete: Restrict)
   contribution Contribution?
   memberShare  MemberShare?
   movement     InventoryTransaction?
@@ -814,13 +824,13 @@ model Product {
   createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  cooperative  Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
-  category     ProductCategory?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  unit         UnitOfMeasure          @relation(fields: [unitId], references: [id], onDelete: Restrict)
-  createdBy    User?                  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  stockLevels  StockLevel[]
-  movements    InventoryTransaction[]
-  saleItems    SaleItem[]
+  cooperative Cooperative            @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  category    ProductCategory?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  unit        UnitOfMeasure          @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  createdBy   User?                  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  stockLevels StockLevel[]
+  movements   InventoryTransaction[]
+  saleItems   SaleItem[]
 
   @@unique([cooperativeId, sku])
   @@index([cooperativeId, isActive])
@@ -1146,4 +1156,242 @@ model ReportRun {
   @@index([cooperativeId, createdAt(sort: Desc)])
   @@index([cooperativeId, type, createdAt(sort: Desc)])
   @@map("report_runs")
+}
+
+// ---------------------------------------------------------------------------
+// M9 — documents and meetings
+// ---------------------------------------------------------------------------
+
+enum DocumentCategory {
+  REGISTRATION
+  FINANCIAL
+  MEMBER
+  CONTRACT
+  CERTIFICATE
+  MEETING_MINUTES
+  REPORT
+  OTHER
+
+  @@map("document_category")
+}
+
+/// Who may see a document. `COOPERATIVE` is everybody with `documents:view`; `RESTRICTED` narrows
+/// it to the person who uploaded it and to staff who hold `documents:archive`, which is the
+/// custodian permission. A cooperative's land title and a member's medical letter are not the same
+/// kind of paper, and one visibility for both would mean either over-sharing or a locked cabinet.
+enum DocumentVisibility {
+  COOPERATIVE
+  RESTRICTED
+
+  @@map("document_visibility")
+}
+
+/// A file the cooperative keeps.
+///
+/// The row is the record and the bytes live in object storage under `storageKey`, which is random
+/// and never derived from the filename, so a key cannot be guessed from anything a user has seen.
+/// Nothing is ever publicly readable: a download goes through an endpoint that authenticates,
+/// resolves the tenant, checks the permission and then streams.
+///
+/// A document is archived, never deleted. A cooperative's registration certificate, a member's
+/// contract and a set of minutes are the records an auditor asks for years later, and a row that
+/// could be removed is a record that can be made to have never existed.
+model Document {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId  String             @map("cooperative_id") @db.Uuid
+  title          String
+  category       DocumentCategory   @default(OTHER)
+  /// The name the file arrived with, kept only so a download can offer it again. Never used to
+  /// build a path, and escaped wherever it is shown.
+  fileName       String             @map("file_name")
+  /// Unguessable, random, and unique across the whole installation.
+  storageKey     String             @unique @map("storage_key")
+  mimeType       String             @map("mime_type")
+  sizeBytes      BigInt             @map("size_bytes")
+  /// Lets a cooperative prove the file it downloads is the file it uploaded.
+  checksumSha256 String             @map("checksum_sha256")
+  visibility     DocumentVisibility @default(COOPERATIVE)
+  /// The member this paper belongs to, where it belongs to one.
+  memberId       String?            @map("member_id") @db.Uuid
+  /// The meeting this paper belongs to, where it belongs to one.
+  meetingId      String?            @map("meeting_id") @db.Uuid
+  description    String?
+  tags           String[]           @default([])
+  uploadedById   String?            @map("uploaded_by_id") @db.Uuid
+  isArchived     Boolean            @default(false) @map("is_archived")
+  archivedAt     DateTime?          @map("archived_at") @db.Timestamptz(3)
+  archivedById   String?            @map("archived_by_id") @db.Uuid
+  archiveReason  String?            @map("archive_reason")
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  member      Member?     @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  meeting     Meeting?    @relation("MeetingDocuments", fields: [meetingId], references: [id], onDelete: Restrict)
+  uploadedBy  User?       @relation("DocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  archivedBy  User?       @relation("DocumentArchivedBy", fields: [archivedById], references: [id], onDelete: Restrict)
+  minutesOf   Meeting?    @relation("MeetingMinutes")
+
+  @@index([cooperativeId, category])
+  @@index([cooperativeId, createdAt(sort: Desc)])
+  @@index([cooperativeId, isArchived])
+  @@index([cooperativeId, memberId])
+  @@index([cooperativeId, meetingId])
+  @@map("documents")
+}
+
+enum MeetingType {
+  GENERAL_ASSEMBLY
+  BOARD
+  COMMITTEE
+  EXTRAORDINARY
+  OTHER
+
+  @@map("meeting_type")
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("meeting_status")
+}
+
+/// A meeting of the cooperative.
+///
+/// This is the governance record a Rwandan cooperative is required to keep: an assembly is called,
+/// an agenda is circulated, attendance is taken against the register, decisions are recorded with
+/// their votes, and the minutes are filed. Quorum matters legally, so the number required is stored
+/// on the meeting and the attendance is counted against it rather than being asserted in prose.
+model Meeting {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId     String        @map("cooperative_id") @db.Uuid
+  reference         String
+  title             String
+  type              MeetingType   @default(GENERAL_ASSEMBLY)
+  scheduledFor      DateTime      @map("scheduled_for") @db.Timestamptz(3)
+  endsAt            DateTime?     @map("ends_at") @db.Timestamptz(3)
+  location          String?
+  status            MeetingStatus @default(SCHEDULED)
+  /// How many members must attend for the meeting to decide anything. Null where the cooperative's
+  /// own rules do not set one.
+  quorumRequired    Int?          @map("quorum_required")
+  notes             String?
+  minutesDocumentId String?       @unique @map("minutes_document_id") @db.Uuid
+  cancelReason      String?       @map("cancel_reason")
+  createdById       String?       @map("created_by_id") @db.Uuid
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative     Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Restrict)
+  minutesDocument Document?           @relation("MeetingMinutes", fields: [minutesDocumentId], references: [id], onDelete: Restrict)
+  createdBy       User?               @relation("MeetingCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  agenda          MeetingAgendaItem[]
+  attendees       MeetingAttendee[]
+  decisions       MeetingDecision[]
+  documents       Document[]          @relation("MeetingDocuments")
+
+  @@unique([cooperativeId, reference])
+  @@index([cooperativeId, scheduledFor(sort: Desc)])
+  @@index([cooperativeId, status])
+  @@map("meetings")
+}
+
+/// One item on the agenda, in the order it will be taken.
+model MeetingAgendaItem {
+  id               String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  meetingId        String  @map("meeting_id") @db.Uuid
+  position         Int
+  title            String
+  description      String?
+  presenterStaffId String? @map("presenter_staff_id") @db.Uuid
+
+  meeting   Meeting           @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  presenter CooperativeStaff? @relation("AgendaPresenter", fields: [presenterStaffId], references: [id], onDelete: Restrict)
+  decisions MeetingDecision[] @relation("DecisionAgendaItem")
+
+  @@unique([meetingId, position])
+  @@index([meetingId])
+  @@map("meeting_agenda_items")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+
+  @@map("attendance_status")
+}
+
+/// Who was at the meeting.
+///
+/// A row names exactly one of a member, a member of staff, or a guest, which a check constraint
+/// enforces. Attendance taken against the register is what makes quorum provable; a free-text list
+/// of names would not be.
+model MeetingAttendee {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  meetingId   String           @map("meeting_id") @db.Uuid
+  memberId    String?          @map("member_id") @db.Uuid
+  staffId     String?          @map("staff_id") @db.Uuid
+  guestName   String?          @map("guest_name")
+  status      AttendanceStatus @default(PRESENT)
+  checkedInAt DateTime?        @map("checked_in_at") @db.Timestamptz(3)
+  note        String?
+
+  meeting Meeting           @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  member  Member?           @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  staff   CooperativeStaff? @relation("AttendeeStaff", fields: [staffId], references: [id], onDelete: Restrict)
+
+  @@unique([meetingId, memberId])
+  @@index([meetingId])
+  @@index([memberId])
+  @@map("meeting_attendees")
+}
+
+enum DecisionType {
+  RESOLUTION
+  ACTION
+  NOTE
+
+  @@map("decision_type")
+}
+
+enum DecisionStatus {
+  OPEN
+  DONE
+  CANCELLED
+
+  @@map("decision_status")
+}
+
+/// What the meeting decided.
+///
+/// The votes are stored as three counts rather than as a verdict, because a cooperative's minutes
+/// have to show how a decision was carried and not merely that it was. An action carries who is
+/// responsible and by when, so the next meeting can ask.
+model MeetingDecision {
+  id                 String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  meetingId          String         @map("meeting_id") @db.Uuid
+  agendaItemId       String?        @map("agenda_item_id") @db.Uuid
+  title              String
+  description        String?
+  decisionType       DecisionType   @default(RESOLUTION) @map("decision_type")
+  votesFor           Int?           @map("votes_for")
+  votesAgainst       Int?           @map("votes_against")
+  abstentions        Int?
+  dueOn              DateTime?      @map("due_on") @db.Date
+  responsibleStaffId String?        @map("responsible_staff_id") @db.Uuid
+  status             DecisionStatus @default(OPEN)
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  meeting     Meeting            @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  agendaItem  MeetingAgendaItem? @relation("DecisionAgendaItem", fields: [agendaItemId], references: [id], onDelete: SetNull)
+  responsible CooperativeStaff?  @relation("DecisionResponsible", fields: [responsibleStaffId], references: [id], onDelete: Restrict)
+
+  @@index([meetingId])
+  @@index([responsibleStaffId, status])
+  @@map("meeting_decisions")
 }

@@ -1,12 +1,16 @@
 import { REPORT_LABELS, REPORT_TYPES, enumLabel } from '@coopmanage/shared'
 import { describe, expect, it } from 'vitest'
+import enDocuments from '../src/i18n/locales/en/documents.json'
 import enFinance from '../src/i18n/locales/en/finance.json'
 import enInventory from '../src/i18n/locales/en/inventory.json'
+import enMeetings from '../src/i18n/locales/en/meetings.json'
 import enMembers from '../src/i18n/locales/en/members.json'
 import enReports from '../src/i18n/locales/en/reports.json'
 import enSales from '../src/i18n/locales/en/sales.json'
+import rwDocuments from '../src/i18n/locales/rw/documents.json'
 import rwFinance from '../src/i18n/locales/rw/finance.json'
 import rwInventory from '../src/i18n/locales/rw/inventory.json'
+import rwMeetings from '../src/i18n/locales/rw/meetings.json'
 import rwMembers from '../src/i18n/locales/rw/members.json'
 import rwReports from '../src/i18n/locales/rw/reports.json'
 import rwSales from '../src/i18n/locales/rw/sales.json'
@@ -45,6 +49,13 @@ const MIRRORED: readonly { group: string; en: Bundle; rw: Bundle; path: string }
   { group: 'financeKind', en: enFinance, rw: rwFinance, path: 'kind' },
   { group: 'postingStatus', en: enFinance, rw: rwFinance, path: 'status' },
   { group: 'inventoryType', en: enInventory, rw: rwInventory, path: 'movementType' },
+  { group: 'meetingType', en: enMeetings, rw: rwMeetings, path: 'type' },
+  { group: 'meetingStatus', en: enMeetings, rw: rwMeetings, path: 'status' },
+  { group: 'attendanceStatus', en: enMeetings, rw: rwMeetings, path: 'attendance' },
+  { group: 'decisionType', en: enMeetings, rw: rwMeetings, path: 'decisionType' },
+  { group: 'decisionStatus', en: enMeetings, rw: rwMeetings, path: 'decisionStatus' },
+  { group: 'documentCategory', en: enDocuments, rw: rwDocuments, path: 'category' },
+  { group: 'documentVisibility', en: enDocuments, rw: rwDocuments, path: 'visibilityShort' },
 ]
 
 describe('the report catalogue’s enum labels', () => {

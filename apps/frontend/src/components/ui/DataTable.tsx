@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { cn } from '@/lib/cn'
@@ -50,6 +50,23 @@ export interface DataTableProps<TRow> {
  * `<caption>` and `<th scope="col">` so it is navigable with a screen reader, and an explicit
  * mobile shape rather than a shrunken desktop one.
  */
+/**
+ * A row click, unless the click was really on something inside the row.
+ *
+ * A table that both opens a detail view on the row and carries per-row buttons — download, archive,
+ * restore — would otherwise do both at once: the click on the button bubbles to the row. That was
+ * exactly what the documents screen did on its first run, opening the detail dialog underneath the
+ * archive dialog.
+ *
+ * `closest` is used rather than comparing the target, because the click usually lands on an icon or
+ * a span inside the button rather than on the button itself.
+ */
+function handleRowClick(event: MouseEvent<HTMLElement>, act: () => void): void {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('button, a, input, select, textarea, label, [role="button"]')) return
+  act()
+}
+
 export function DataTable<TRow>({
   rows,
   columns,
@@ -118,7 +135,9 @@ export function DataTable<TRow>({
               {rows.map((row) => (
                 <tr
                   key={rowKey(row)}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onClick={
+                    onRowClick ? (event) => handleRowClick(event, () => onRowClick(row)) : undefined
+                  }
                   className={cn(
                     rowHeight,
                     'border-b border-line last:border-b-0',

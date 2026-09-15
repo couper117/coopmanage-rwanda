@@ -1,7 +1,7 @@
 # CoopManage Rwanda — Reports
 
-Status: **Phase 8 complete.** Seven report types, previewed on screen and produced as PDF, CSV or a
-spreadsheet. The minutes report waits for Phase 9.
+Status: **Phase 8 complete**, with the minutes report added in Phase 9 alongside the meetings it
+reads. Seven report types, previewed on screen and produced as PDF, CSV or a spreadsheet.
 
 ---
 

@@ -183,6 +183,21 @@ export async function cleanupFixtures(): Promise<void> {
   const userIds = [...createdUserIds]
   if (cooperativeIds.length === 0 && userIds.length === 0) return
 
+  // Meetings and documents go first, and before the staff rows in particular: an agenda item
+  // names its presenter, an attendance row may name a member of staff, and a decision names who
+  // is responsible — all three with RESTRICT. Deleting staff first violated those, which left the
+  // cooperative behind, and the abandoned row then failed an unrelated test in the next run on a
+  // unique registration number it was still holding.
+  //
+  // A meeting and its minutes point at each other, so that link is broken before either goes.
+  await prisma.meeting.updateMany({
+    where: { cooperativeId: { in: cooperativeIds } },
+    data: { minutesDocumentId: null },
+  })
+  await prisma.document.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.meeting.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.reportRun.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+
   await prisma.staffPermissionOverride.deleteMany({
     where: { staff: { cooperativeId: { in: cooperativeIds } } },
   })

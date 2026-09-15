@@ -119,3 +119,30 @@ export async function nextSaleReference(
   const used = Number(rows[0]?.used ?? 0)
   return `SL-${year}-${String(used + 1).padStart(6, '0')}`
 }
+
+/**
+ * Allocates the next meeting reference, for example `MTG-2026-000007`.
+ *
+ * Counted within the year the meeting is scheduled for, which is how a cooperative's own minute
+ * book is numbered: the seventh meeting of 2026, not the seventh since the system was installed.
+ * The row lock on the cooperative is what makes two secretaries scheduling at the same moment
+ * safe; the same pattern as stock and sales.
+ */
+export async function nextMeetingReference(
+  db: Db,
+  cooperativeId: string,
+  scheduledFor: Date,
+): Promise<string> {
+  const year = scheduledFor.getUTCFullYear()
+
+  await db.$executeRaw`SELECT id FROM cooperatives WHERE id = ${cooperativeId}::uuid FOR UPDATE`
+
+  const rows = await db.$queryRaw<{ used: bigint }[]>`
+    SELECT count(*) AS used
+      FROM meetings
+     WHERE cooperative_id = ${cooperativeId}::uuid
+       AND reference LIKE ${`MTG-${year}-%`}
+  `
+  const used = Number(rows[0]?.used ?? 0)
+  return `MTG-${year}-${String(used + 1).padStart(6, '0')}`
+}

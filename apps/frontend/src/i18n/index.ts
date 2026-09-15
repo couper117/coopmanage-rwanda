@@ -11,7 +11,9 @@ import enCommon from './locales/en/common.json'
 import enDashboard from './locales/en/dashboard.json'
 import enErrors from './locales/en/errors.json'
 import enFinance from './locales/en/finance.json'
+import enDocuments from './locales/en/documents.json'
 import enInventory from './locales/en/inventory.json'
+import enMeetings from './locales/en/meetings.json'
 import enMembers from './locales/en/members.json'
 import enModules from './locales/en/modules.json'
 import enNotifications from './locales/en/notifications.json'
@@ -29,7 +31,9 @@ import rwCommon from './locales/rw/common.json'
 import rwDashboard from './locales/rw/dashboard.json'
 import rwErrors from './locales/rw/errors.json'
 import rwFinance from './locales/rw/finance.json'
+import rwDocuments from './locales/rw/documents.json'
 import rwInventory from './locales/rw/inventory.json'
+import rwMeetings from './locales/rw/meetings.json'
 import rwMembers from './locales/rw/members.json'
 import rwModules from './locales/rw/modules.json'
 import rwNotifications from './locales/rw/notifications.json'
@@ -61,7 +65,9 @@ export const resources = {
     staff: enStaff,
     members: enMembers,
     finance: enFinance,
+    documents: enDocuments,
     inventory: enInventory,
+    meetings: enMeetings,
     reports: enReports,
     sales: enSales,
     admin: enAdmin,
@@ -81,7 +87,9 @@ export const resources = {
     staff: rwStaff,
     members: rwMembers,
     finance: rwFinance,
+    documents: rwDocuments,
     inventory: rwInventory,
+    meetings: rwMeetings,
     reports: rwReports,
     sales: rwSales,
     admin: rwAdmin,

@@ -136,6 +136,41 @@ export class AppError extends Error {
     })
   }
 
+  /**
+   * The file is larger than this installation accepts.
+   *
+   * Its own status and code rather than a validation failure, because the request never finished
+   * arriving: the client needs to know the limit, not which field was wrong. The limit is in the
+   * message parameters so the interface can say "10 MB" without knowing the configuration.
+   */
+  static fileTooLarge(maxMb: number): AppError {
+    return new AppError({
+      status: 413,
+      code: 'FILE_TOO_LARGE',
+      messageKey: 'errors.files.tooLarge',
+      messageParams: { maxMb },
+      message: `That file is larger than the ${maxMb} MB limit.`,
+    })
+  }
+
+  /**
+   * The file is not a kind this application accepts, or its content does not match its name.
+   *
+   * One code for both, with the key naming which it was, because the distinction matters to the
+   * person uploading — "we do not accept that kind of file" and "that file is not what it says it
+   * is" are different problems with different fixes — while the machine-readable outcome is the
+   * same refusal.
+   */
+  static unsupportedFile(messageKey: string, message: string, params?: MessageParams): AppError {
+    return new AppError({
+      status: 415,
+      code: 'UNSUPPORTED_FILE_TYPE',
+      messageKey,
+      ...(params ? { messageParams: params } : {}),
+      message,
+    })
+  }
+
   static rateLimited(): AppError {
     return new AppError({
       status: 429,

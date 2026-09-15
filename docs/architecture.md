@@ -283,6 +283,13 @@ Uploads go through a storage abstraction with two drivers: a local filesystem dr
 development and an S3-compatible driver (Supabase Storage) for production. Nothing in a module
 imports a storage SDK directly.
 
+As of Phase 9 the local driver is built and the S3-compatible one is not: it lands in Phase 18 with
+the bucket it needs, because a signing implementation written against no real endpoint is a driver
+nobody has run. Until then `STORAGE_DRIVER=s3` refuses at startup rather than falling back to the
+local disk, which in production would mean a cooperative's documents were written to a container
+that is replaced on the next deployment. The interface has deliberately no `url()` method:
+`docs/documents-and-meetings.md` §3.
+
 Documents are **never** publicly readable. Files are stored under an unguessable key and served
 through `GET /api/v1/documents/:id/download`, which authenticates, checks tenant, checks
 `documents:view`, and streams the object. Uploads validate the extension, the declared MIME type and

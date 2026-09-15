@@ -79,8 +79,11 @@ const CATALOGUE = REPORT_TYPES.map((type) => ({
   title: REPORT_LABELS.EN[`report.${type}`],
   permitted: type !== 'financial',
   permission: type === 'financial' ? 'finance:view' : 'reports:view',
+  // Every report is available now that meetings have arrived. The unavailable case is still worth
+  // covering, because a later phase will add a report before its data exists, so one row here is
+  // stubbed as unavailable to exercise the branch the screen keeps for it.
   available: type !== 'meeting',
-  availableFromPhase: type === 'meeting' ? 9 : 8,
+  availableFromPhase: type === 'meeting' ? 99 : 9,
   withheld: type === 'monthly-cooperative' ? ['Money'] : [],
 }))
 
@@ -408,14 +411,14 @@ describe('choosing a report', () => {
     expect(calls.filter((call) => call.url.includes('/preview'))).toEqual([])
   })
 
-  it('says which phase brings a report that has no data yet', async () => {
+  it('says which phase brings a report the server reports as not yet available', async () => {
     renderReports()
     await reportOnPage()
 
     fireEvent.change(screen.getByLabelText('Report'), { target: { value: 'meeting' } })
 
     await waitFor(() =>
-      expect(screen.getByText('This report needs data that arrives in phase 9.')).toBeTruthy(),
+      expect(screen.getByText('This report needs data that arrives in phase 99.')).toBeTruthy(),
     )
     // And it does not ask the server for a report that cannot exist yet.
     expect(lastCallTo('/reports/meeting/preview')).toBeUndefined()

@@ -8,7 +8,9 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
+import { documentRoutes } from '@/features/documents/documentRoutes'
 import { inventoryRoutes } from '@/features/inventory/inventoryRoutes'
+import { meetingRoutes } from '@/features/meetings/meetingRoutes'
 import { reportRoutes } from '@/features/reports/reportRoutes'
 import { buyerRoutes, salesRoutes } from '@/features/sales/salesRoutes'
 import { contributionRoutes, memberRoutes } from '@/features/members/memberRoutes'
@@ -46,6 +48,8 @@ const BUILT_PATHS = new Set(
     ...salesRoutes,
     ...buyerRoutes,
     ...reportRoutes,
+    ...documentRoutes,
+    ...meetingRoutes,
   ]
     .map((route) => route.path)
     .filter((path): path is string => path !== undefined)
@@ -104,6 +108,8 @@ export const routes: RouteObject[] = [
       ...salesRoutes,
       ...buyerRoutes,
       ...reportRoutes,
+      ...documentRoutes,
+      ...meetingRoutes,
       ...adminRoutes,
       {
         path: 'settings/audit',

@@ -1,0 +1,211 @@
+{
+  "title": "Inama",
+  "description": "Inteko rusange n'inama za komite za koperative, hamwe n'ingingo z'inama, abitabiriye, ibyemezo n'inyandikomvugo.",
+  "type": {
+    "GENERAL_ASSEMBLY": "Inteko rusange",
+    "BOARD": "Inama y'ubuyobozi",
+    "COMMITTEE": "Inama ya komite",
+    "EXTRAORDINARY": "Inama idasanzwe",
+    "OTHER": "Indi nama"
+  },
+  "status": {
+    "SCHEDULED": "Yateganyijwe",
+    "IN_PROGRESS": "Iragenda",
+    "COMPLETED": "Yarangiye",
+    "CANCELLED": "Yahagaritswe"
+  },
+  "statusMeaning": {
+    "SCHEDULED": "Yatumijwe, ntiratangira.",
+    "IN_PROGRESS": "Iragenda. Ingingo, abitabiriye n'ibyemezo birashobora gushyirwamo.",
+    "COMPLETED": "Yasojwe. Inyandiko ihagaze; gusa ibikorwa bisigaye birashobora kuvugururwa.",
+    "CANCELLED": "Yahagaritswe. Impamvu iri mu nyandiko."
+  },
+  "attendance": {
+    "PRESENT": "Yitabiriye",
+    "ABSENT": "Ntiyitabiriye",
+    "EXCUSED": "Yasabye uruhushya"
+  },
+  "decisionType": {
+    "RESOLUTION": "Umwanzuro",
+    "ACTION": "Igikorwa",
+    "NOTE": "Icyitonderwa"
+  },
+  "decisionStatus": {
+    "OPEN": "Kirakomeje",
+    "DONE": "Cyakozwe",
+    "CANCELLED": "Cyahagaritswe"
+  },
+  "list": {
+    "caption": "Inama, iya vuba iri imbere",
+    "emptyTitle": "Nta nama yanditswe",
+    "emptyBody": "Teganya inteko ikurikira n'ingingo zayo, hanyuma ku munsi w'inama wandike abitabiriye ukurikije urutonde rw'abanyamuryango.",
+    "columns": {
+      "reference": "Inomero",
+      "title": "Inama",
+      "when": "Igihe",
+      "type": "Ubwoko",
+      "status": "Uko ihagaze",
+      "present": "Abitabiriye",
+      "decisions": "Ibyemezo"
+    },
+    "filters": {
+      "search": "Shakisha",
+      "searchPlaceholder": "Inomero, izina cyangwa ahantu",
+      "type": "Ubwoko",
+      "status": "Uko ihagaze",
+      "from": "Kuva",
+      "to": "Kugeza",
+      "allTypes": "Ubwoko bwose",
+      "allStatuses": "Uko ihagaze kose",
+      "clear": "Kuraho amahitamo"
+    }
+  },
+  "actions": {
+    "schedule": "Teganya inama",
+    "edit": "Hindura amakuru",
+    "agenda": "Shyiraho ingingo",
+    "attendance": "Andika abitabiriye",
+    "decision": "Andika icyemezo",
+    "begin": "Tangira inama",
+    "complete": "Soza inama",
+    "cancel": "Hagarika inama",
+    "backToMeetings": "Subira ku nama",
+    "attachMinutes": "Shyiraho inyandikomvugo",
+    "detachMinutes": "Kuraho inyandikomvugo",
+    "print": "Capa"
+  },
+  "form": {
+    "scheduleTitle": "Teganya inama",
+    "editTitle": "Hindura inama",
+    "titleLabel": "Izina ry'inama",
+    "titlePlaceholder": "Inteko rusange y'umwaka wa 2026",
+    "type": "Ubwoko bw'inama",
+    "scheduledFor": "Itariki n'isaha",
+    "endsAt": "Iteganyijwe kurangira",
+    "location": "Ahantu",
+    "locationPlaceholder": "Inzu ya koperative, Muhoza",
+    "quorumRequired": "Abanyamuryango bakenewe ngo inama ifate ibyemezo",
+    "quorumHint": "Siga ubusa niba amategeko ya koperative ntavuga umubare ngombwa.",
+    "notes": "Ibyandikwa",
+    "save": "Bika inama",
+    "saving": "Kubika…"
+  },
+  "detail": {
+    "loadFailed": "Iyi nama ntiyashoboye kuboneka.",
+    "whenAndWhere": "Igihe n'ahantu",
+    "quorum": "Umubare wa ngombwa",
+    "quorumOf": "Abanyamuryango {{present}} kuri {{required}} bitabiriye",
+    "quorumMet": "Umubare wa ngombwa wujujwe",
+    "quorumNotMet": "Umubare wa ngombwa ntiwujujwe",
+    "quorumNone": "Iyi nama ntifite umubare wa ngombwa washyizweho",
+    "quorumWarning": "Abitabiriye ni bake kuri umubare wa ngombwa, bityo inama ntishobora gufata icyemezo. Andika uko bihagaze.",
+    "createdBy": "Yatumijwe na {{name}}",
+    "cancelledBecause": "Yahagaritswe: {{reason}}",
+    "closedNotice": "Iyi nama yasojwe. Ingingo, abitabiriye n'ibyemezo ubu ni inyandiko ntagishobora guhindurwa; igikorwa gishobora gushyirwa nk'icyakozwe.",
+    "agendaTitle": "Ingingo z'inama",
+    "agendaEmpty": "Nta ngingo zashyizweho.",
+    "attendanceTitle": "Abitabiriye",
+    "attendanceEmpty": "Nta bitabiriye banditswe.",
+    "attendanceCaption": "Abari mu nama",
+    "decisionsTitle": "Ibyemezo n'ibikorwa",
+    "decisionsEmpty": "Nta cyemezo cyanditswe.",
+    "decisionsCaption": "Ibyo inama yemeje",
+    "documentsTitle": "Inyandiko",
+    "documentsEmpty": "Nta nyandiko yashyinguwe kuri iyi nama.",
+    "minutes": "Inyandikomvugo",
+    "minutesNone": "Inyandikomvugo ntiyashyinguwe.",
+    "votes": "{{for}} bemeje, {{against}} banze, {{abstentions}} birengagije",
+    "noVotes": "Nta matora yabaye",
+    "due": "Bigomba kurangira {{date}}",
+    "responsible": "Ushinzwe: {{name}}",
+    "presenter": "Bitangwa na {{name}}"
+  },
+  "agendaForm": {
+    "title": "Shyiraho ingingo z'inama",
+    "description": "Uko ziri hano ni uko inama izazifata. Zishyirwaho nomero mu gihe ubitse.",
+    "itemTitle": "Ingingo",
+    "itemDescription": "Ibyandikwa",
+    "presenter": "Bitangwa na",
+    "noPresenter": "Nta we runaka",
+    "add": "Ongeraho ingingo",
+    "remove": "Kuraho",
+    "moveUp": "Kuzamura",
+    "moveDown": "Kumanura",
+    "empty": "Nta ngingo iraba. Ongeraho iya mbere.",
+    "save": "Bika ingingo",
+    "saving": "Kubika…"
+  },
+  "attendanceForm": {
+    "title": "Andika abitabiriye",
+    "description": "Abitabiriye bandikwa hakurikijwe urutonde rw'abanyamuryango, ari nako umubare wa ngombwa ugaragazwa.",
+    "search": "Shakisha umunyamuryango",
+    "searchPlaceholder": "Izina cyangwa inomero y'umunyamuryango",
+    "markAllPresent": "Shyira bose nk'abitabiriye",
+    "markAllAbsent": "Shyira bose nk'abatitabiriye",
+    "guests": "Abashyitsi",
+    "addGuest": "Ongeraho umushyitsi",
+    "guestName": "Izina ry'umushyitsi",
+    "removeGuest": "Kuraho",
+    "presentCount": "Abitabiriye {{present}} kuri {{total}} b'abanyamuryango",
+    "save": "Bika abitabiriye",
+    "saving": "Kubika…",
+    "guestsPresent": "hiyongereyeho abashyitsi {{count}}"
+  },
+  "decisionForm": {
+    "title": "Andika icyemezo",
+    "description": "Ibyo inama yemeje n'uko yatoye ntibishobora guhindurwa nyuma, bityo genzura mbere yo kubika.",
+    "titleLabel": "Icyemezo",
+    "titlePlaceholder": "Kugura umwuma wa kabiri w'ibigori mbere y'isarura ritaha",
+    "descriptionLabel": "Ibyavuzwe",
+    "kind": "Ubwoko",
+    "agendaItem": "Cyafashwe ku ngingo",
+    "noAgendaItem": "Nta ngingo",
+    "votesFor": "Bemeje",
+    "votesAgainst": "Banze",
+    "abstentions": "Birengagije",
+    "votesHint": "Siga ubusa niba nta matora yabaye.",
+    "dueOn": "Bigomba kurangira",
+    "responsible": "Ushinzwe",
+    "noResponsible": "Ntawe uracyashyirwaho",
+    "save": "Andika",
+    "saving": "Kwandika…"
+  },
+  "cancelDialog": {
+    "title": "Guhagarika iyi nama?",
+    "body": "Inama iguma mu nyandiko n'impamvu utanze, kuko igitabo cy'inyandikomvugo za koperative ntagira nomero zibura.",
+    "reason": "Impamvu yo guhagarika",
+    "reasonPlaceholder": "Yasubitswe: umukozi w'akarere ntiyashoboye kwitabira",
+    "confirm": "Hagarika inama",
+    "keep": "Reka igume yateganyijwe"
+  },
+  "completeDialog": {
+    "title": "Gusoza iyi nama?",
+    "body": "Iyo isojwe, ingingo, abitabiriye n'ibyemezo biba inyandiko ntibishobora guhindurwa. Igikorwa gishobora gushyirwa nk'icyakozwe nyuma.",
+    "confirm": "Soza inama",
+    "keep": "Reka ikomeze"
+  },
+  "minutesDialog": {
+    "title": "Shyiraho inyandikomvugo",
+    "body": "Hitamo inyandiko isanzwe ibitse kuri iyi koperative. Niba itariho, banza uyishyiremo.",
+    "document": "Inyandiko",
+    "noDocuments": "Nta nyandiko ihari yo gushyiraho.",
+    "confirm": "Shyiraho",
+    "detachTitle": "Kuraho inyandikomvugo?",
+    "detachBody": "Inyandiko iguma mu bubiko bwa koperative; gusa isano n'iyi nama irakurwaho.",
+    "detachConfirm": "Kuraho"
+  },
+  "notice": {
+    "scheduled": "{{reference}} yateganyijwe.",
+    "updated": "Inama yahinduwe.",
+    "agendaSaved": "Ingingo z'inama zabitswe.",
+    "attendanceSaved": "Abitabiriye banditswe.",
+    "decisionRecorded": "Icyemezo cyanditswe.",
+    "decisionUpdated": "Icyemezo cyavuguruwe.",
+    "statusChanged": "Inama ubu iri: {{status}}.",
+    "minutesAttached": "Inyandikomvugo yashyizweho.",
+    "minutesDetached": "Inyandikomvugo yakuweho."
+  },
+  "pagination": {
+    "summary": "Hagaragara {{from}} kugeza {{to}} kuri {{total}}"
+  }
+}

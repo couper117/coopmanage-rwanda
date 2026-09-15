@@ -54,13 +54,19 @@ export function ReportsPage() {
   const [notice, setNotice] = useState<string | null>(null)
 
   const row = catalogue.data?.find((entry) => entry.type === type)
+  // The server's catalogue is authoritative about what it can produce; the shared definition is
+  // the fallback while the catalogue is still loading. Reading only the shared constant would mean
+  // a screen that disagreed with the server the moment a report's data arrived on one and not the
+  // other.
   const definition = REPORTS[type]
+  const available = row?.available ?? definition.available
+  const availableFromPhase = row?.availableFromPhase ?? definition.availableFromPhase
   const params = useMemo<ReportParams>(() => ({ from: range.from, to: range.to }), [range])
 
   // A period the wrong way round is a mistake the screen can answer at once, rather than a request
   // the server refuses a moment later.
   const rangeBackwards = range.from > range.to
-  const canPreview = Boolean(row?.permitted) && definition.available && !rangeBackwards
+  const canPreview = Boolean(row?.permitted) && available && !rangeBackwards
 
   const preview = useReportPreview(type, params, canPreview)
   const exporting = useExportReport()
@@ -174,9 +180,9 @@ export function ReportsPage() {
 
       {/* A report whose data has not arrived yet says which phase brings it, rather than being
           hidden from a cooperative that is looking for it. */}
-      {definition.available ? null : (
+      {available ? null : (
         <Alert tone="info" className="print:hidden">
-          {t('reports:notYetAvailable', { phase: definition.availableFromPhase })}
+          {t('reports:notYetAvailable', { phase: availableFromPhase })}
         </Alert>
       )}
 
@@ -239,7 +245,7 @@ export function ReportsPage() {
         <ReportRunsPanel />
       </div>
 
-      {!canPreview && !catalogue.isPending && definition.available && row?.permitted === false ? (
+      {!canPreview && !catalogue.isPending && available && row?.permitted === false ? (
         <Panel className="print:hidden">
           <p className="flex items-center gap-2 text-sm text-ink-muted">
             <FileText aria-hidden="true" className="size-4" />

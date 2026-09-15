@@ -450,19 +450,49 @@ from it. `docs/reports.md` is the reference.
 | Method | Path                                  | Permission                                      |
 | ------ | ------------------------------------- | ----------------------------------------------- |
 | GET    | `/documents`                          | `documents:view`                                |
+| GET    | `/documents/options`                  | `documents:upload`                              |
 | POST   | `/documents`                          | `documents:upload` (multipart)                  |
 | GET    | `/documents/:id`                      | `documents:view`                                |
 | GET    | `/documents/:id/download`             | `documents:view` (streamed, never a public URL) |
 | PATCH  | `/documents/:id`                      | `documents:upload`                              |
 | POST   | `/documents/:id/archive`              | `documents:archive`                             |
+| POST   | `/documents/:id/restore`              | `documents:archive`                             |
 | GET    | `/meetings`                           | `meetings:view`                                 |
+| GET    | `/meetings/options`                   | `meetings:manage`                               |
 | POST   | `/meetings`                           | `meetings:manage`                               |
 | GET    | `/meetings/:id`                       | `meetings:view`                                 |
 | PATCH  | `/meetings/:id`                       | `meetings:manage`                               |
+| POST   | `/meetings/:id/status`                | `meetings:manage`                               |
 | PUT    | `/meetings/:id/agenda`                | `meetings:manage`                               |
 | PUT    | `/meetings/:id/attendance`            | `meetings:manage`                               |
 | POST   | `/meetings/:id/decisions`             | `meetings:manage`                               |
 | PATCH  | `/meetings/:id/decisions/:decisionId` | `meetings:manage`                               |
+
+There is no `DELETE` in either module. A document is archived with a reason; a meeting is cancelled
+with one. Both stay in the record.
+
+**The upload** is `multipart/form-data` with the file on the field `file` and the metadata as text
+fields beside it. The parser runs after authentication, the tenant and the permission, so an
+anonymous request cannot make the server read ten megabytes before being refused. A file larger than
+the cap is `413 FILE_TOO_LARGE` with the limit in the message parameters; a file whose name, declared
+type and content do not all agree is `415 UNSUPPORTED_FILE_TYPE`, with the key saying which of the
+three failed.
+
+**The download** streams, with `Content-Disposition: attachment` unless `?disposition=inline` is
+asked for _and_ the type is one this application will render (PDF and images only). It always sends
+`X-Content-Type-Options: nosniff`, `Content-Security-Policy: sandbox` and
+`Cache-Control: private, no-store`. There is no other URL that serves a file, and the storage key
+appears in no response.
+
+**The agenda and the attendance are `PUT`**: the body is the list as it should now read, and
+positions are assigned by the server from the array order. Each attendance entry names exactly one
+of a member, a member of staff or a guest.
+
+**Quorum** comes back as three fields: `quorumRequired`, `presentCount` (everybody in the room) and
+`memberPresentCount` (members only, which is what `quorumMet` is computed from). `quorumMet` is
+`null` where no quorum is set — "not required" is not "not met".
+
+`docs/documents-and-meetings.md` is the reference.
 
 ### Dashboard, search, notifications — Phases 10 and 12
 

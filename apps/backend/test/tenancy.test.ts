@@ -49,6 +49,9 @@ interface Tenant {
   buyerId: string
   saleId: string
   reportRunId: string
+  documentId: string
+  meetingId: string
+  decisionId: string
 }
 
 let a: Tenant
@@ -155,6 +158,26 @@ async function buildTenant(name: string): Promise<Tenant> {
     })
     .expect(201)
 
+  // A meeting of this cooperative's own, with a decision on it, and one document filed against it.
+  // All three are created through the API, so the rows are exactly what real use writes and the
+  // sweep is trying identifiers that genuinely exist somewhere.
+  const meeting = await call('post', '/meetings')
+    .send({ title: `Assembly of ${name}`, scheduledFor: '2026-10-14T08:00:00.000Z' })
+    .expect(201)
+
+  const decision = await call('post', `/meetings/${meeting.body.data.id}/decisions`)
+    .send({ title: 'Something resolved', decisionType: 'NOTE' })
+    .expect(201)
+
+  const pdf = Buffer.concat([Buffer.from('%PDF-1.7\n'), Buffer.from('trailer\n%%EOF\n')])
+  const document = await request(app)
+    .post(`${API_PREFIX}/documents`)
+    .set('Authorization', `Bearer ${manager.accessToken}`)
+    .set(HEADERS.cooperativeId, cooperative.id)
+    .attach('file', pdf, { filename: 'registration.pdf', contentType: 'application/pdf' })
+    .field('title', `Registration of ${name}`)
+    .expect(201)
+
   // A report run of this cooperative's own, produced through the API so the row is exactly what a
   // real export writes. The sweep then tries to download it as the other cooperative.
   const run = await call('post', '/reports/financial/export')
@@ -178,6 +201,9 @@ async function buildTenant(name: string): Promise<Tenant> {
     buyerId: buyer.body.data.id as string,
     saleId: sale.body.data.id as string,
     reportRunId: run.headers['x-report-run-id'] as string,
+    documentId: document.body.data.id as string,
+    meetingId: meeting.body.data.id as string,
+    decisionId: (decision.body.data.decisions as { id: string }[])[0]?.id as string,
   }
 }
 
@@ -261,6 +287,15 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
     },
     '/sales/:id/receipt': { id: b.saleId },
     '/reports/runs/:id/download': { id: b.reportRunId },
+    '/documents/:id': { id: b.documentId, body: { title: 'Renamed from the wrong cooperative' } },
+    '/documents/:id/download': { id: b.documentId },
+    '/documents/:id/archive': { id: b.documentId, body: { reason: 'archived from away' } },
+    '/documents/:id/restore': { id: b.documentId, body: {} },
+    '/meetings/:id': { id: b.meetingId, body: { title: 'Renamed from away' } },
+    '/meetings/:id/status': { id: b.meetingId, body: { status: 'IN_PROGRESS' } },
+    '/meetings/:id/agenda': { id: b.meetingId, body: { items: [{ title: 'Added from away' }] } },
+    '/meetings/:id/attendance': { id: b.meetingId, body: { entries: [] } },
+    '/meetings/:id/decisions': { id: b.meetingId, body: { title: 'Decided from away' } },
   }
 }
 
@@ -274,6 +309,10 @@ function foreignPairs(): Record<string, { values: Record<string, string>; body?:
     '/members/:id/shares/:shareId/void': {
       values: { id: b.memberId, shareId: b.shareId },
       body: {},
+    },
+    '/meetings/:id/decisions/:decisionId': {
+      values: { id: b.meetingId, decisionId: b.decisionId },
+      body: { status: 'DONE' },
     },
   }
 }

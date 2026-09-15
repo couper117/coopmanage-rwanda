@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 8 complete.** Phase 9 is next.
+Status: **Phase 9 complete.** Phase 10 is next.
 
 ---
 
@@ -506,7 +506,7 @@ there is no file storage until Phase 9 — `docs/reports.md` §5.
 
 ---
 
-### Phase 9 — Documents and meetings
+### Phase 9 — Documents and meetings ✅
 
 - Upload with extension, MIME and magic-byte validation, size cap, checksum, random storage key
 - Authenticated streaming download, preview for images and PDFs, categories, search, archive
@@ -514,6 +514,24 @@ there is no file storage until Phase 9 — `docs/reports.md` §5.
 
 **Exit:** a document URL is unreachable without a session, unreachable from another cooperative, and
 a disguised executable is rejected on upload.
+
+**Met**, checked against the demonstration cooperative's own seeded document through the real HTTP
+stack: no session is `401`, a session naming no cooperative is `403`, a session in another
+cooperative is `404` rather than a refusal that would confirm the document exists, and a Windows
+executable named `icyemezo.pdf` is `415` with `errors.files.executable`. A genuine PDF is still
+accepted, which matters as much — a gate that refused everything would also pass the criterion.
+`docs/documents-and-meetings.md` §5 records the run.
+
+Two defects worth naming, both found by the tests rather than by reading the code. A guest counted
+towards a cooperative's quorum, which a quorum — a number of **members** — must never allow; the
+service now reports the members present separately and measures quorum against that alone. And
+`apiRequest` serialised a `FormData` body as JSON, so the first upload sent its metadata with no
+file at all.
+
+The S3-compatible storage driver is **deliberately not here**: it lands in Phase 18 with the
+Supabase bucket it needs, and `STORAGE_DRIVER=s3` refuses at startup until then rather than writing
+a cooperative's documents to a container that is replaced on the next deployment.
+`docs/documents-and-meetings.md` §3 records it.
 
 ---
 

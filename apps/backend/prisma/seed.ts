@@ -32,7 +32,9 @@ import {
   nextMemberCode,
 } from '../src/lib/references.js'
 import { defaultCategoriesFor } from '../src/modules/finance/finance.categories.js'
+import { createHash } from 'node:crypto'
 import { scanLowStock } from '../src/modules/inventory/lowStock.js'
+import { newStorageKey, storage } from '../src/lib/storage/index.js'
 import { decreaseStock, increaseStock } from '../src/modules/inventory/stock.js'
 import {
   cancelSale,
@@ -381,6 +383,8 @@ async function seedDemoCooperative(): Promise<void> {
   await seedDemoFinance(cooperative.id)
   await seedDemoInventory(cooperative.id)
   await seedDemoSales(cooperative.id)
+  await seedDemoMeetings(cooperative.id)
+  await seedDemoDocuments(cooperative.id)
   await seedDemoReportRun(cooperative.id)
 }
 
@@ -1042,6 +1046,291 @@ async function seedDemoMemberPayments(
  * behaves exactly like one a real export wrote. The notification goes with it, because a run that
  * raised none would misrepresent what the module does.
  */
+/**
+ * Two meetings: last quarter's general assembly, closed with its record complete, and the next one
+ * still scheduled.
+ *
+ * The closed one is what makes the demonstration worth looking at — an agenda, attendance taken
+ * against the register, a quorum that was met, and two decisions one of which is an action still
+ * open. A cooperative evaluating the system sees the governance record as it will actually look,
+ * not an empty screen with a button on it.
+ */
+async function seedDemoMeetings(cooperativeId: string): Promise<void> {
+  if ((await prisma.meeting.count({ where: { cooperativeId } })) > 0) {
+    console.log('  demonstration meetings already present, left alone')
+    return
+  }
+
+  const staff = await prisma.cooperativeStaff.findMany({
+    where: { cooperativeId },
+    select: { id: true, role: { select: { key: true } } },
+  })
+  const secretary = staff.find((row) => row.role.key === 'SECRETARY') ?? staff[0]
+  const manager = staff.find((row) => row.role.key === 'MANAGER') ?? staff[0]
+  if (!secretary || !manager) return
+
+  const members = await prisma.member.findMany({
+    where: { cooperativeId, status: 'ACTIVE' },
+    orderBy: { memberCode: 'asc' },
+    select: { id: true },
+  })
+
+  const now = new Date()
+  const held = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 12, 8, 0, 0))
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 12, 8, 0, 0))
+
+  // A quorum of just over half the register, which is the rule most Rwandan cooperatives' own
+  // statutes set.
+  const quorum = Math.max(1, Math.ceil(members.length / 2))
+
+  const assembly = await prisma.meeting.create({
+    data: {
+      cooperativeId,
+      reference: `MTG-${held.getUTCFullYear()}-000001`,
+      title: 'Inteko rusange y’igihembwe',
+      type: 'GENERAL_ASSEMBLY',
+      scheduledFor: held,
+      endsAt: new Date(held.getTime() + 3 * 60 * 60 * 1000),
+      location: 'Inzu ya koperative, Muhoza',
+      status: 'COMPLETED',
+      quorumRequired: quorum,
+      createdById: (await staffUserId(secretary.id)) ?? null,
+      agenda: {
+        create: [
+          { position: 1, title: 'Ifungura n’ikurikirana ry’abitabiriye' },
+          {
+            position: 2,
+            title: 'Raporo y’imari y’igihembwe',
+            presenterStaffId: manager.id,
+          },
+          { position: 3, title: 'Umwuma w’ibigori wa kabiri' },
+        ],
+      },
+      attendees: {
+        create: [
+          // Three-quarters of the register attended, which clears the quorum, and the rest are
+          // recorded as absent rather than left out: attendance is taken against the register.
+          ...members.map((member, index) => ({
+            memberId: member.id,
+            status: index % 4 === 3 ? ('ABSENT' as const) : ('PRESENT' as const),
+            checkedInAt: index % 4 === 3 ? null : held,
+          })),
+          {
+            guestName: 'Umukozi w’akarere ushinzwe amakoperative',
+            status: 'PRESENT' as const,
+            checkedInAt: held,
+            note: 'Yitabiriye nk’umugenzuzi',
+          },
+        ],
+      },
+    },
+    select: { id: true, agenda: { select: { id: true, position: true } } },
+  })
+
+  const dryerItem = assembly.agenda.find((item) => item.position === 3)
+
+  await prisma.meetingDecision.createMany({
+    data: [
+      {
+        meetingId: assembly.id,
+        agendaItemId: dryerItem?.id ?? null,
+        title: 'Kugura umwuma wa kabiri w’ibigori mbere y’isarura',
+        description: 'Guhera ku bwizigame bwa koperative, hatanzwe amasezerano abiri y’ibiciro.',
+        decisionType: 'RESOLUTION',
+        votesFor: Math.max(1, Math.floor(members.length * 0.7)),
+        votesAgainst: 2,
+        abstentions: 1,
+        status: 'DONE',
+      },
+      {
+        meetingId: assembly.id,
+        title: 'Gusana igisenge cy’ububiko',
+        decisionType: 'ACTION',
+        dueOn: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 2, 1)),
+        responsibleStaffId: manager.id,
+        status: 'OPEN',
+      },
+    ],
+  })
+
+  await prisma.meeting.create({
+    data: {
+      cooperativeId,
+      reference: `MTG-${next.getUTCFullYear()}-000002`,
+      title: 'Inama y’ubuyobozi',
+      type: 'BOARD',
+      scheduledFor: next,
+      location: 'Inzu ya koperative, Muhoza',
+      status: 'SCHEDULED',
+      createdById: (await staffUserId(secretary.id)) ?? null,
+      agenda: {
+        create: [
+          { position: 1, title: 'Ikurikirana ry’ibyemezo byashize' },
+          { position: 2, title: 'Gutegura isarura' },
+        ],
+      },
+    },
+  })
+
+  console.log('  demonstration meetings: one held, one scheduled')
+}
+
+async function staffUserId(staffId: string): Promise<string | null> {
+  const row = await prisma.cooperativeStaff.findUnique({
+    where: { id: staffId },
+    select: { userId: true },
+  })
+  return row?.userId ?? null
+}
+
+/**
+ * Two documents, with real bytes behind them.
+ *
+ * Written through the storage driver rather than inserted as rows alone, so the demonstration's
+ * download actually downloads something — a row with no file behind it would show the reader the
+ * one failure mode this module is careful to report rather than the module working.
+ *
+ * The files are generated here: a one-page PDF is a few hundred bytes of PostScript and needs no
+ * fixture in the repository.
+ */
+async function seedDemoDocuments(cooperativeId: string): Promise<void> {
+  if ((await prisma.document.count({ where: { cooperativeId } })) > 0) {
+    console.log('  demonstration documents already present, left alone')
+    return
+  }
+
+  const staff = await prisma.cooperativeStaff.findFirst({
+    where: { cooperativeId, role: { key: 'SECRETARY' } },
+    select: { userId: true },
+  })
+  const uploadedById = staff?.userId ?? null
+
+  const meeting = await prisma.meeting.findFirst({
+    where: { cooperativeId, status: 'COMPLETED' },
+    select: { id: true },
+  })
+
+  const papers = [
+    {
+      title: 'Icyemezo cy’iyandikwa rya koperative',
+      category: 'REGISTRATION' as const,
+      fileName: 'icyemezo-cyiyandikwa.pdf',
+      body: 'Icyemezo cy’iyandikwa rya koperative — RCA',
+      meetingId: null,
+    },
+    {
+      title: 'Inyandikomvugo y’inteko rusange',
+      category: 'MEETING_MINUTES' as const,
+      fileName: 'inyandikomvugo-inteko-rusange.pdf',
+      body: 'Inyandikomvugo y’inteko rusange y’igihembwe',
+      meetingId: meeting?.id ?? null,
+    },
+  ]
+
+  for (const paper of papers) {
+    const bytes = onePagePdf(paper.body)
+    const key = newStorageKey()
+    await storage().put(key, bytes, 'application/pdf')
+
+    const document = await prisma.document.create({
+      data: {
+        cooperativeId,
+        title: paper.title,
+        category: paper.category,
+        fileName: paper.fileName,
+        storageKey: key,
+        mimeType: 'application/pdf',
+        sizeBytes: BigInt(bytes.length),
+        checksumSha256: createHash('sha256').update(bytes).digest('hex'),
+        visibility: 'COOPERATIVE',
+        meetingId: paper.meetingId,
+        uploadedById,
+        tags: paper.category === 'REGISTRATION' ? ['iyandikwa', 'rca'] : ['inama'],
+      },
+      select: { id: true },
+    })
+
+    // The minutes are attached to the meeting they belong to, which is what a cooperative's own
+    // filing does and what the minutes report reads to say whether they were filed.
+    if (paper.category === 'MEETING_MINUTES' && paper.meetingId) {
+      await prisma.meeting.update({
+        where: { id: paper.meetingId },
+        data: { minutesDocumentId: document.id },
+      })
+    }
+  }
+
+  console.log('  demonstration documents: two papers filed, with the minutes attached')
+}
+
+/**
+ * Text in Windows-1252, which is what `/WinAnsiEncoding` means in a PDF.
+ *
+ * Only two characters need it and both are Kinyarwanda punctuation: the right single quotation
+ * mark in `cy'iyandikwa` and the em dash. Writing the string's UTF-8 bytes instead — which the
+ * first version of this did — turned `Icyemezo cy’iyandikwa` into `Icyemezo cy iyandikwa` in the
+ * rendered page, because the viewer dropped the bytes it could not map.
+ */
+function winAnsi(text: string): string {
+  const replacements: Readonly<Record<string, string>> = {
+    '\u2019': '\u0092',
+    '\u2018': '\u0091',
+    '\u201c': '\u0093',
+    '\u201d': '\u0094',
+    '\u2013': '\u0096',
+    '\u2014': '\u0097',
+    '\u2026': '\u0085',
+  }
+  return [...text]
+    .map((character) => replacements[character] ?? character)
+    .filter((character) => character.charCodeAt(0) < 256)
+    .join('')
+}
+
+/**
+ * A valid one-page PDF, built by hand.
+ *
+ * Small enough to read: five objects, a cross-reference table with correct byte offsets, and a
+ * trailer. Generating it means the repository carries no binary fixture, and it is a real PDF, so
+ * the demonstration's preview shows a page rather than a broken frame.
+ */
+function onePagePdf(text: string): Buffer {
+  const escaped = winAnsi(text)
+    .replaceAll('\\', '\\\\')
+    .replaceAll('(', '\\(')
+    .replaceAll(')', '\\)')
+  const content = `BT /F1 16 Tf 72 720 Td (${escaped}) Tj ET\n`
+
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    `<< /Length ${content.length} >>\nstream\n${content}endstream`,
+  ]
+
+  let body = ''
+  const offsets: number[] = []
+  const header = '%PDF-1.4\n'
+  let at = header.length
+
+  objects.forEach((object, index) => {
+    const chunk = `${index + 1} 0 obj\n${object}\nendobj\n`
+    offsets.push(at)
+    body += chunk
+    at += chunk.length
+  })
+
+  const xrefAt = at
+  let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
+  for (const offset of offsets) {
+    xref += `${String(offset).padStart(10, '0')} 00000 n \n`
+  }
+  const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF\n`
+
+  return Buffer.from(header + body + xref + trailer, 'latin1')
+}
+
 async function seedDemoReportRun(cooperativeId: string): Promise<void> {
   const manager = await prisma.cooperativeStaff.findFirst({
     where: { cooperativeId, role: { key: 'MANAGER' } },

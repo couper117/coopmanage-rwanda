@@ -85,6 +85,41 @@ it executes script. Files are stored outside the web root, never in a public buc
 through the authorised streaming endpoint with `Content-Disposition: attachment` and
 `X-Content-Type-Options: nosniff`. A SHA-256 checksum is recorded.
 
+**Built in Phase 9, with these decisions worth recording.**
+
+The executable check runs **before** the extension is looked at, on the content, so a `.pdf` holding
+a Windows binary is refused as an executable rather than as a signature mismatch — the person
+uploading is told what the file actually is. Windows PE, ELF, Mach-O in both byte orders, the
+universal-binary signature that Java class files share, shell scripts and Windows batch files are all
+refused whatever the name says.
+
+A ZIP renamed `.docx` is refused too: every OOXML package carries `[Content_Types].xml` and a part
+prefix for its own kind, and both are checked, because the ZIP signature alone would have accepted an
+executable somebody zipped and renamed. Text has no signature and is checked the other way round — no
+NUL byte, valid UTF-8, and none of the executable headers.
+
+Uploads are parsed **in memory**, not to a temporary file. A temporary file means the bytes exist on
+disk before anything has looked at them, which is a window in which a disguised executable is a real
+file on the server, and a path to clean up on every failure.
+
+The storage key is `<year>/<month>/<48 hex characters>` from the system's cryptographic source and is
+pinned by a database check constraint and by the driver, so a key derived from a filename cannot reach
+the column. It appears in no API response.
+
+The filename kept as metadata has control characters, quotes and semicolons stripped and any path
+discarded: all three are header injection through a field the uploader controls, and
+`../../etc/passwd.pdf` is stored as `passwd.pdf`.
+
+A preview is served `inline` only for PDF and images, always with
+`Content-Security-Policy: sandbox; default-src 'none'` so a PDF's own scripting is neutralised, and
+`Cache-Control: private, no-store` so a cooperative's contract stays out of a shared proxy. A CSV
+asked for inline is sent as a download: serving an uploaded `text/*` inline is the shape of a
+stored-XSS bug.
+
+A restricted document is unreachable rather than hidden — the visibility rule is part of the `where`
+clause on every read, update, archive and download — and a caller who may not see it gets "not found",
+because the existence of a member's medical letter is itself the sensitive part.
+
 ## 6. Transport and headers
 
 A forwarded client address is trusted only where a proxy actually terminates the connection:

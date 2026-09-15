@@ -179,7 +179,12 @@ async function send(
       method,
       headers,
       credentials: 'include',
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      // `FormData` goes through untouched. Serialising it would send the string "{}" and lose the
+      // file entirely, which is exactly what the first version of the document upload did: the
+      // request succeeded, the metadata arrived, and the endpoint refused it for having no file.
+      ...(body === undefined
+        ? {}
+        : { body: body instanceof FormData ? body : JSON.stringify(body) }),
       ...(signal ? { signal } : {}),
     })
   } catch (error) {
@@ -200,7 +205,10 @@ function buildHeaders(options: RequestOptions, accept: string): Record<string, s
     Accept: accept,
     'Accept-Language': currentLanguage(),
   }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  // Never set for `FormData`: the browser has to add the multipart boundary itself, and a
+  // Content-Type without one makes the body unparseable at the other end.
+  if (body !== undefined && !(body instanceof FormData))
+    headers['Content-Type'] = 'application/json'
   if (idempotencyKey) headers[HEADERS.idempotencyKey] = idempotencyKey
   if (anonymous) return headers
 

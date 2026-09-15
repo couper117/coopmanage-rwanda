@@ -1,0 +1,129 @@
+{
+  "title": "Inyandiko",
+  "description": "Inyandiko za koperative: iyandikwa, amasezerano, ibyemezo, inyandikomvugo n'inyemezabwishyu zafotowe.",
+  "category": {
+    "REGISTRATION": "Iyandikwa",
+    "FINANCIAL": "Iy'imari",
+    "MEMBER": "Iy'umunyamuryango",
+    "CONTRACT": "Amasezerano",
+    "CERTIFICATE": "Icyemezo",
+    "MEETING_MINUTES": "Inyandikomvugo y'inama",
+    "REPORT": "Raporo",
+    "OTHER": "Izindi"
+  },
+  "visibility": {
+    "COOPERATIVE": "Umuntu wese wemerewe kureba inyandiko",
+    "RESTRICTED": "Jye gusa n'ababika inyandiko"
+  },
+  "visibilityShort": {
+    "COOPERATIVE": "Koperative",
+    "RESTRICTED": "Ifite aho igarukira"
+  },
+  "list": {
+    "caption": "Inyandiko, iya vuba iri imbere",
+    "emptyTitle": "Nta nyandiko yashyinguwe",
+    "emptyBody": "Shyiramo icyemezo cy'iyandikwa rya koperative, amasezerano cyangwa inyemezabwishyu yafotowe utangire.",
+    "emptyArchived": "Nta kintu cyabitswe mu bubiko.",
+    "columns": {
+      "title": "Inyandiko",
+      "category": "Ubwoko",
+      "size": "Ingano",
+      "uploadedBy": "Yashyinguwe na",
+      "when": "Yashyinguwe",
+      "actions": "Igikorwa"
+    },
+    "filters": {
+      "search": "Shakisha",
+      "searchPlaceholder": "Izina, izina ry'idosiye cyangwa ikimenyetso",
+      "category": "Ubwoko",
+      "allCategories": "Ubwoko bwose",
+      "archived": "Byabitswe",
+      "archivedExclude": "Bitabitswe",
+      "archivedOnly": "Ibyabitswe gusa",
+      "archivedInclude": "Byombi",
+      "sort": "Uko bikurikirana",
+      "sortNewest": "Iya vuba imbere",
+      "sortOldest": "Iya kera imbere",
+      "sortTitle": "Ku izina",
+      "sortSize": "Ingana cyane imbere",
+      "clear": "Kuraho amahitamo"
+    }
+  },
+  "actions": {
+    "upload": "Ongeraho inyandiko",
+    "download": "Kuramo",
+    "preview": "Fungura",
+    "edit": "Hindura amakuru",
+    "archive": "Bika mu bubiko",
+    "restore": "Garuza",
+    "close": "Funga"
+  },
+  "upload": {
+    "title": "Ongeraho inyandiko",
+    "description": "Idosiye igenzurwa mbere yo kubikwa: izina ryayo, ubwoko ivuga ko ari bwo, n'ibiyirimo bigomba kuba bihuje.",
+    "file": "Idosiye",
+    "fileHint": "Kugeza kuri MB {{maxMb}}. Byemewe: {{extensions}}.",
+    "chooseFile": "Hitamo idosiye",
+    "titleLabel": "Iyi nyandiko ni iki",
+    "titlePlaceholder": "Icyemezo cy'iyandikwa, 2019",
+    "categoryLabel": "Ubwoko",
+    "descriptionLabel": "Ibyandikwa",
+    "visibilityLabel": "Ninde wemerewe kuyireba",
+    "visibilityHint": "Inyandiko ifite aho igarukira ireba wowe gusa n'ubika inyandiko za koperative.",
+    "memberLabel": "Ireba umunyamuryango",
+    "noMember": "Ntireba umunyamuryango",
+    "meetingLabel": "Ireba inama",
+    "noMeeting": "Ntireba inama",
+    "tagsLabel": "Ibimenyetso",
+    "tagsHint": "Bitandukanye n'akitso. Kugeza ku icumi.",
+    "tagsPlaceholder": "ubutaka, icyemezo, 2026",
+    "save": "Ongeraho",
+    "saving": "Kongeramo…"
+  },
+  "edit": {
+    "title": "Hindura amakuru y'inyandiko",
+    "description": "Idosiye ubwayo ntihinduka. Verisiyo yakosowe ni inyandiko nshya ishyirwamo, iyi ijya mu bubiko.",
+    "save": "Bika impinduka",
+    "saving": "Kubika…"
+  },
+  "archiveDialog": {
+    "title": "Kubika iyi nyandiko mu bubiko?",
+    "body": "Ivamo ku rutonde rukoreshwa ariko iguma mu nyandiko za koperative n'impamvu utanze. Nta kintu gisibwa.",
+    "reason": "Impamvu yo kuyibika",
+    "reasonPlaceholder": "Yasimbuwe n'icyemezo cya 2026",
+    "confirm": "Bika mu bubiko",
+    "keep": "Reka igume ku rutonde"
+  },
+  "detail": {
+    "loadFailed": "Iyi nyandiko ntiyashoboye kuboneka.",
+    "fileName": "Idosiye",
+    "size": "Ingano",
+    "type": "Ubwoko bw'idosiye",
+    "checksum": "Ikimenyetso cy'ubusugire",
+    "checksumHint": "SHA-256 y'idosiye nk'uko yashyizwemo, ku buryo kopi ishobora kugenzurwa.",
+    "uploadedBy": "Yashyinguwe na",
+    "uploadedAt": "Yashyinguwe ku",
+    "member": "Umunyamuryango",
+    "meeting": "Inama",
+    "tags": "Ibimenyetso",
+    "notes": "Ibyandikwa",
+    "archived": "Yabitswe ku {{when}}",
+    "archivedBecause": "Yabitswe: {{reason}}",
+    "nothingRecorded": "Nta kintu cyanditswe",
+    "previewUnavailable": "Ubu bwoko bw'idosiye ntibushobora kwerekanwa hano. Iyikuremo usome."
+  },
+  "notice": {
+    "uploaded": "{{title}} yongewemo.",
+    "updated": "Inyandiko yahinduwe.",
+    "archived": "{{title}} yabitswe mu bubiko.",
+    "restored": "{{title}} yagaruwe."
+  },
+  "sizes": {
+    "bytes": "B {{size}}",
+    "kilobytes": "KB {{size}}",
+    "megabytes": "MB {{size}}"
+  },
+  "pagination": {
+    "summary": "Hagaragara {{from}} kugeza {{to}} kuri {{total}}"
+  }
+}
