@@ -94,8 +94,10 @@ describe('language switching', () => {
 
   it('translates the pending module page too', async () => {
     await changeLanguage('rw')
-    renderApp('/sales')
-    expect(screen.getByRole('heading', { level: 1, name: 'Amagurisha' })).toBeInTheDocument()
+    // The same module the English test uses, and for the same reason: a module still well ahead,
+    // so this does not have to move every time a phase lands.
+    renderApp('/announcements')
+    expect(screen.getByRole('heading', { level: 1, name: 'Amatangazo' })).toBeInTheDocument()
     expect(screen.getByText(/ntiraboneka/i)).toBeInTheDocument()
   })
 

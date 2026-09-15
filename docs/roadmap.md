@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 7 in progress.** The sales backend is complete; the screens are in review.
+Status: **Phase 7 complete.** Phase 8 is next.
 
 ---
 
@@ -431,7 +431,7 @@ means the demonstration store is built by exactly the code a storekeeper's recei
 
 ---
 
-### Phase 7 — Buyers and sales ✅ (backend; screens in review)
+### Phase 7 — Buyers and sales ✅
 
 - Buyers with history and totals
 - Sale draft, confirm, cancel; line items; discount and tax; payment recording
@@ -450,7 +450,16 @@ confirmed sale writes a `SALE_RETURN` per line and reverses the income, and the 
 carries one cancelled sale whose four movements — two out and two back — are all visible in the
 history.
 
-Three things are worth recording.
+Four things are worth recording.
+
+**The receipt is the first screen built for paper rather than for a browser.** A cooperative's
+dealings with a buyer end up in a file, so the print stylesheet the documentation had specified
+since Phase 0 was finally written: the shell is removed, the text is black on white, the state of
+the sale is words rather than a coloured badge, the table header repeats across pages, and the
+footer names the cooperative, the document, the sale and who produced it. The application chrome is
+marked `data-print="hide"` rather than left for a selector to guess at, so a screen added later
+inherits the behaviour without asking. Every figure on it is printed exactly as the server sent it,
+which is the only reason a buyer can be handed one and told it is what the records say.
 
 **A cancelled sale was reporting money still owed.** `outstanding` was the total less what was
 paid, and cancelling resets the paid figure to nil, so a sale that had been undone showed its whole

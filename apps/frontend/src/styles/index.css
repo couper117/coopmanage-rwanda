@@ -77,3 +77,80 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Printing.
+ *
+ * A Rwandan cooperative's general assembly runs on printed documents, and its dealings with a
+ * buyer end up in a file, so a receipt and a report have to come out of a printer looking like
+ * what they are rather than like a screenshot of a web page. `docs/ui-system.md` section 11 sets
+ * the rules; these are them.
+ *
+ * The shell goes first. A sidebar and a top bar on a sheet of A4 are wasted ink and a narrower
+ * column for the content that matters, so the navigation, the header and the skip link are all
+ * removed rather than merely hidden from view.
+ */
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  /* The application chrome. Marked by landmark so a new screen inherits this without asking. */
+  aside,
+  nav,
+  .skip-link,
+  [data-print='hide'] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  main > div {
+    max-width: none !important;
+    gap: 0 !important;
+  }
+
+  /* A page break in the middle of a table row, a heading, or the line it introduces is the most
+     common way a printed report becomes hard to read. */
+  table {
+    break-inside: auto;
+  }
+
+  tr,
+  img,
+  figure {
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* A link's address is no use on paper, and an underline on every one of them is noise. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}

@@ -9,6 +9,7 @@ import { ProfilePage } from '@/pages/ProfilePage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
 import { inventoryRoutes } from '@/features/inventory/inventoryRoutes'
+import { buyerRoutes, salesRoutes } from '@/features/sales/salesRoutes'
 import { contributionRoutes, memberRoutes } from '@/features/members/memberRoutes'
 import { CooperativeSettingsPage } from '@/pages/settings/CooperativeSettingsPage'
 import { PreferencesPage } from '@/pages/settings/PreferencesPage'
@@ -36,7 +37,14 @@ import { ALL_NAV_ITEMS } from './navigation'
  * means adding a screen cannot leave a placeholder shadowing it.
  */
 const BUILT_PATHS = new Set(
-  [...memberRoutes, ...contributionRoutes, ...financeRoutes, ...inventoryRoutes]
+  [
+    ...memberRoutes,
+    ...contributionRoutes,
+    ...financeRoutes,
+    ...inventoryRoutes,
+    ...salesRoutes,
+    ...buyerRoutes,
+  ]
     .map((route) => route.path)
     .filter((path): path is string => path !== undefined)
     .map((path) => (path.startsWith('/') ? path : `/${path}`)),
@@ -91,6 +99,8 @@ export const routes: RouteObject[] = [
       ...contributionRoutes,
       ...financeRoutes,
       ...inventoryRoutes,
+      ...salesRoutes,
+      ...buyerRoutes,
       ...adminRoutes,
       {
         path: 'settings/audit',

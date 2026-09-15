@@ -36,7 +36,15 @@ export function AppShell() {
         {t('skipToContent')}
       </a>
 
-      <aside className={cn('hidden shrink-0 md:block', collapsed ? 'w-sidebar-rail' : 'w-sidebar')}>
+      {/*
+        The chrome is marked rather than left for the print stylesheet to guess at. A landmark
+        selector would catch the sidebar, but the top bar is a div and a future screen may add
+        another, so `data-print` is the explicit signal.
+      */}
+      <aside
+        data-print="hide"
+        className={cn('hidden shrink-0 md:block', collapsed ? 'w-sidebar-rail' : 'w-sidebar')}
+      >
         <div className={cn('fixed inset-y-0 left-0', collapsed ? 'w-sidebar-rail' : 'w-sidebar')}>
           <Sidebar variant="desktop" collapsed={collapsed} canToggle={wide} />
         </div>
@@ -45,7 +53,9 @@ export function AppShell() {
       <MobileNavDrawer />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
+        <div data-print="hide">
+          <TopBar />
+        </div>
         <main id="main-content" className="flex-1 px-4 py-5 sm:px-6">
           <div className="mx-auto flex max-w-content flex-col gap-5">
             {/*
