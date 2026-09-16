@@ -339,11 +339,21 @@ Rules: direct labels rather than a legend where there are three or fewer series;
 for bars; no pie chart above three slices; no dual axes; no animation beyond a 150 ms fade on load;
 every chart has a table equivalent reachable in one click, which is also what screen readers get.
 
+That last rule is stronger than it sounds, and it is implemented literally. The table is **in the
+document at all times**, `sr-only` until revealed, and the bars and the line are `aria-hidden`. So a
+reader using a screen reader is given the figures rather than a row of decorative shapes, the button
+changes only whether they are also visible, and nothing is fetched to fill it. A table built on
+reveal would be a compliance gesture; this is the same content twice, once for each way of reading
+it.
+
 **Drawn by hand, not by a library.** The finance overview in Phase 5 is the first screen with a
 chart, and it has no charting package behind it. None is installed, and the content-security policy
 does not permit one from a CDN, which is a deliberate constraint rather than an obstacle: a bar is a
 `div` with a height, and a library that ships a hundred kilobytes to draw twelve of them is a poor
-trade on the connections this product is used over.
+trade on the connections this product is used over. The one line chart is an SVG path with
+`vector-effect="non-scaling-stroke"`, so it keeps an even width as the viewBox stretches to the
+panel, and each point sits at the centre of its month's column — which is what lets the labels
+below line up with it exactly.
 
 Two rules govern the arithmetic. A bar's height is worked out by converting each decimal string to
 its exact number of minor units as a `bigint` and dividing by integers to a tenth of a percent, so
@@ -443,9 +453,24 @@ with, and a round trip before them would be felt at the moment this product is j
 The activity log is the exception that proves the rule: an audit entry quotes whichever module wrote
 it, so that one screen loads nearly every namespace. `AUDIT_MESSAGE_NAMESPACES` says which, and why.
 
+**A panel may load its own strings, when a screen is eager and one block on it is not.** The
+dashboard is the only case. Its recent-activity list quotes the whole application, exactly as the
+activity log does, and only a reader holding `audit:view` has the list at all — so putting those
+strings in the first download would charge every storekeeper for a block they cannot see. The panel
+asks for them once the page is on screen and renders a skeleton **in its own place** until they
+arrive: nothing above it waits, and no reader is ever shown a translation key.
+`hooks/useLazyNamespaces.ts` is the mechanism, and it is deliberately narrow — a whole screen still
+loads its strings in its route loader, where a single `Suspense` boundary covers code and strings
+together.
+
+A loading state keeps the page's real heading. Only the figures become skeletons. A page whose data
+is still coming is still that page, and a reader using a screen reader on a district-office
+connection should be told which page they are on rather than handed a headingless document for a
+second and a half.
+
 Dependencies are grouped by when they are needed rather than by package: React and the router
 together, Radix together, and **zod with react-hook-form**, which are the largest dependency here
-and are needed only by screens with a form. First load is 240 kB gzipped; each screen after it costs
+and are needed only by screens with a form. First load is 243 kB gzipped; each screen after it costs
 5–8 kB.
 
 ---

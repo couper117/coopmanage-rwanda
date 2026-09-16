@@ -4,6 +4,7 @@ import { auditRouter } from './modules/audit/audit.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { catalogueRouter } from './modules/catalogue/catalogue.routes.js'
 import { cooperativesRouter } from './modules/cooperatives/cooperatives.routes.js'
+import { dashboardRouter } from './modules/dashboard/dashboard.routes.js'
 import { documentsRouter } from './modules/documents/documents.routes.js'
 import { financeRouter } from './modules/finance/finance.routes.js'
 import { healthRouter } from './modules/health/health.routes.js'
@@ -39,4 +40,5 @@ apiRouter.use('/', inventoryRouter)
 apiRouter.use('/', salesRouter)
 apiRouter.use('/', cooperativesRouter)
 apiRouter.use('/', staffRouter)
+apiRouter.use('/', dashboardRouter)
 apiRouter.use('/', referenceRouter)

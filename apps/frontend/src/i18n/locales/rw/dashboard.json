@@ -1,9 +1,148 @@
 {
   "title": "Incamake",
   "description": "Uko koperative yawe ihagaze uyu munsi",
+  "forCooperative": "Uko {{name}} ihagaze uyu munsi",
   "empty": {
     "title": "Imibare ya koperative yawe izagaragara hano",
     "body": "Nyuma yo kwandika abanyamuryango, amafaranga n'ububiko, iyi paji izerekana ibiteranyo, ibikorwa biheruka n'ibyihutirwa.",
     "action": "Tangira gutunganya koperative yawe"
+  },
+  "withheld": "Inshingano zawe ntizirimo: {{sections}}. Iyo mibare ntiyerekanwa aho kwerekana zeru.",
+  "sections": {
+    "members": "abanyamuryango",
+    "finance": "amafaranga",
+    "inventory": "ububiko",
+    "sales": "ibicuruzwa byagurishijwe",
+    "activity": "ibikorwa biheruka"
+  },
+  "tiles": {
+    "members": "Abanyamuryango bakora",
+    "balance": "Amafaranga asigaye",
+    "income": "Amafaranga yinjiye uku kwezi",
+    "stock": "Ibicuruzwa biri mu bubiko",
+    "sales": "Ibyagurishijwe uku kwezi",
+    "hint": {
+      "members": {
+        "total": "{{value}} ku rutonde rwose"
+      },
+      "expenses": "{{value}} yasohotse",
+      "lowStock": "{{value}} bigeze hasi",
+      "outstanding": "{{value}} ataraishyurwa"
+    }
+  },
+  "health": {
+    "rating": {
+      "GOOD": "Byiza",
+      "WATCH": "Bikwiye kwitonderwa",
+      "ATTENTION": "Bisaba igikorwa"
+    },
+    "headline": {
+      "GOOD": "Nta kintu gisaba igikorwa uyu munsi.",
+      "WATCH": "Hari bike bikwiye kwitonderwa.",
+      "ATTENTION": "Hari ikintu gisaba igikorwa uyu munsi."
+    },
+    "money": {
+      "GOOD": "Amafaranga asigaye ni {{balance}}, {{income}} yinjiye na {{expenses}} yasohotse uku kwezi.",
+      "WATCH": "Uku kwezi hasohotse {{expenses}} mu gihe hinjiye {{income}}, hasigara {{balance}}.",
+      "ATTENTION": "Amafaranga asigaye ni {{balance}}: koperative irimo umwenda uruta ibyo ifite. Uku kwezi yinjije {{income}} yasohora {{expenses}}."
+    },
+    "stock": {
+      "GOOD": "Ibicuruzwa {{products}} byose biri hejuru y'urwego ntarengwa.",
+      "GOOD_one": "Igicuruzwa kimwe koperative ifite kiri hejuru y'urwego ntarengwa.",
+      "WATCH": "Ibicuruzwa {{low}} kuri {{products}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi.",
+      "WATCH_one": "Igicuruzwa kimwe kuri {{products}} cyageze ku rwego ntarengwa cyangwa cyarushe hasi.",
+      "ATTENTION": "Ibicuruzwa {{empty}} byashize mu bubiko, naho {{low}} kuri {{products}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi.",
+      "ATTENTION_one": "Igicuruzwa kimwe cyashize mu bubiko, naho {{low}} kuri {{products}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi."
+    },
+    "receivables": {
+      "GOOD": "Abaguzi bose barishyuye; nta mwenda usigaye.",
+      "WATCH": "{{outstanding}} agomba n'abaguzi {{count}}, uwa kera arimo iminsi {{days}}.",
+      "WATCH_one": "{{outstanding}} agomba n'umuguzi umwe, hamaze iminsi {{days}}.",
+      "ATTENTION": "{{outstanding}} umaze iminsi igera kuri {{days}} utaraishyurwa n'abaguzi {{count}}.",
+      "ATTENTION_one": "{{outstanding}} umaze iminsi {{days}} utaraishyurwa n'umuguzi umwe."
+    }
+  },
+  "attention": {
+    "title": "Ibisaba igikorwa",
+    "description": "Ibikomeye mbere. Umurongo wose ufungura paji ibikemurirwaho.",
+    "go": "Fungura",
+    "severity": {
+      "WARNING": "Vuba",
+      "CRITICAL": "Byihutirwa"
+    },
+    "item": {
+      "negativeBalance": "Amafaranga asigaye ni {{balance}} — koperative irimo umwenda uruta ibyo ifite.",
+      "outOfStock": "Ibicuruzwa {{count}} byashize mu bubiko, harimo {{product}}.",
+      "outOfStock_one": "{{product}} yashize mu bubiko.",
+      "lowStock": "Ibicuruzwa {{count}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi, harimo {{product}}.",
+      "lowStock_one": "{{product}} yageze ku rwego ntarengwa cyangwa yarushe hasi.",
+      "oldDebt": "{{amount}} agomba n'abaguzi {{count}}, uwa kera amaze iminsi {{days}}.",
+      "oldDebt_one": "{{amount}} umaze iminsi {{days}} utaraishyurwa n'umuguzi umwe.",
+      "outstanding": "{{amount}} ntiwishyuwe n'abaguzi {{count}}.",
+      "outstanding_one": "{{amount}} ntiwishyuwe n'umuguzi umwe.",
+      "overdueActions": "Ibikorwa {{count}} byemejwe mu nama byarengeje itariki ntarengwa.",
+      "overdueActions_one": "Igikorwa cyemejwe mu nama cyarengeje itariki ntarengwa."
+    }
+  },
+  "lowStock": {
+    "title": "Ibigeze hasi",
+    "description": "Ibicuruzwa bigeze ku rwego ntarengwa mwashyize cyangwa bikarushe hasi.",
+    "caption": "Ibicuruzwa bigeze ku rwego ntarengwa cyangwa bikarushe hasi",
+    "product": "Igicuruzwa",
+    "left": "Biri mu bubiko",
+    "minimum": "Urwego ntarengwa",
+    "none": "Byashize mu bubiko"
+  },
+  "activity": {
+    "title": "Ibikorwa biheruka",
+    "all": "Urutonde rwose rw'ibikorwa",
+    "loading": "Turazana ibikorwa biheruka"
+  },
+  "charts": {
+    "showTable": "Erekana imibare",
+    "hideTable": "Hisha imibare",
+    "month": "Ukwezi",
+    "income": "Yinjiye",
+    "expenses": "Yasohotse",
+    "sold": "Byagurishijwe",
+    "previousPeriod": "Amezi atandatu abanziriza",
+    "category": "Icyiciro",
+    "amount": "Amafaranga",
+    "incomeExpense": {
+      "title": "Amafaranga yinjiye n'ayasohotse",
+      "description": "Amezi cumi n'abiri ashize, ukwezi ku kwezi.",
+      "caption": "Amafaranga yinjiye n'ayasohotse mu kwezi kose kw'amezi cumi n'abiri ashize"
+    },
+    "sales": {
+      "title": "Ibyagurishijwe",
+      "description": "Amezi atandatu ashize, ahuzwa n'atandatu abanziriza.",
+      "caption": "Ibyagurishijwe mu kwezi kose kw'amezi atandatu ashize, hamwe n'igihe kibanziriza"
+    },
+    "expensesByCategory": {
+      "title": "Aho amafaranga yagiye",
+      "description": "Amafaranga yasohotse uku kwezi, atangira ku menshi.",
+      "caption": "Amafaranga yasohotse uku kwezi mu byiciro",
+      "other": "Ibindi byose",
+      "empty": "Nta mafaranga yasohotse uku kwezi."
+    }
+  },
+  "search": {
+    "label": "Shakisha mu koperative",
+    "placeholder": "Shakisha abanyamuryango, ibicuruzwa, ibyagurishijwe…",
+    "shortcut": "Kanda / kugira ngo ushakishe",
+    "hint": "Andika nibura inyuguti ebyiri.",
+    "searching": "Turashakisha…",
+    "empty": "Nta kintu gihuye na {{query}}.",
+    "truncated": "Hagaragajwe gusa ibihuye neza. Ongera ukwegeranye ushakisha.",
+    "withheld": "Ntibyashakishijwe kuko inshingano zawe ntizirimo: {{kinds}}.",
+    "close": "Funga ishakisha",
+    "kind": {
+      "member": "Abanyamuryango",
+      "product": "Ibicuruzwa",
+      "buyer": "Abaguzi",
+      "sale": "Ibyagurishijwe",
+      "document": "Inyandiko",
+      "meeting": "Inama"
+    }
   }
 }

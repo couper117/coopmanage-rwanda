@@ -250,6 +250,19 @@ export async function loadNamespaces(
 }
 
 /**
+ * Whether a namespace's strings are already here.
+ *
+ * Lets a block that loads its own strings render them on the first pass when an earlier screen has
+ * already paid for them, instead of waiting a render to discover there was nothing to wait for.
+ */
+export function hasNamespaces(
+  namespaces: readonly FeatureNamespace[],
+  language: Language = currentLanguage(),
+): boolean {
+  return namespaces.every((namespace) => i18n.hasResourceBundle(language, namespace))
+}
+
+/**
  * Switches language, bringing every namespace already in use with it.
  *
  * The order matters: the namespaces are loaded **before** `changeLanguage`, so the interface never

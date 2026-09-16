@@ -4,13 +4,16 @@ import { ConnectionIndicator } from '@/components/ConnectionIndicator'
 import { CooperativeSwitcher } from '@/components/CooperativeSwitcher'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { UserMenu } from '@/components/UserMenu'
-import { useActiveMembership } from '@/features/auth/useSession'
+import { GlobalSearch } from '@/features/dashboard/GlobalSearch'
+import { useActiveMembership, usePermission } from '@/features/auth/useSession'
 import { useUiStore } from '@/stores/uiStore'
 
 export function TopBar() {
   const { t } = useTranslation(['nav', 'common'])
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen)
   const membership = useActiveMembership()
+  // Enforced on the server as well; this only decides whether the box is there to type in.
+  const canSearch = usePermission('search:use')
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
@@ -23,7 +26,7 @@ export function TopBar() {
         <Menu aria-hidden="true" className="size-5" strokeWidth={1.75} />
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         {membership ? (
           <CooperativeSwitcher />
         ) : (
@@ -31,6 +34,7 @@ export function TopBar() {
             {t('common:appTagline')}
           </p>
         )}
+        {membership && canSearch ? <GlobalSearch /> : null}
       </div>
 
       <div className="flex items-center gap-1.5">

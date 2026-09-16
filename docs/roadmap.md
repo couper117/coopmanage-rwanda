@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 9 complete.** Phase 10 is next.
+Status: **Phase 10 complete.** Phase 11 is next.
 
 ---
 
@@ -540,7 +540,7 @@ a cooperative's documents to a container that is replaced on the next deployment
 
 ---
 
-### Phase 10 — Dashboard and insights
+### Phase 10 — Dashboard and insights ✅
 
 - KPI tiles, recent activity, needs attention, quick actions, all permission-filtered
 - The three charts and one low-stock list from `ui-system.md` §10, and nothing else
@@ -552,6 +552,45 @@ a cooperative's documents to a container that is replaced on the next deployment
 position within ten seconds of the page loading; the dashboard is one API round trip; searching a
 member name returns that member and their related records, and returns nothing the caller may not
 see.
+
+**Met**, and checked against the running system with a manager's token on the demonstration
+cooperative. `GET /dashboard` answers the whole page in one request: five tiles, three charts, the
+low-stock list, two attention items, eight activity entries and a health rating of `ATTENTION`
+carrying all three of its signals. The rating was earned by a 1,040,000 debt standing 69 days,
+which is the sentence the banner prints — not a coloured dot. `GET /search?q=uwa` returned five
+members ranked at 70 for a prefix match with `truncated: true`, and `?q=x` is refused with 422
+rather than being allowed to scan the register on one letter.
+
+**One endpoint, not four.** The plan listed a dashboard endpoint per block; there is one, because
+the exit criterion asks for a single round trip and because four requests on a district-office
+connection is four chances to be slow and four spinners finishing at different moments. Every block
+inside is still gated by the permission covering its own data, and a block the reader may not see is
+_named_ in `withheld` rather than dropped — a storekeeper's dashboard says the money was left out,
+so nobody reads an absent tile as a cooperative with no money. `docs/api.md` §Dashboard records the
+deviation.
+
+Four things are worth recording, because each changed the product rather than the tests.
+
+- **"Watch" meant two different things on one page**: the health rating and the severity of an
+  attention line. One word, two meanings, side by side. The severity is now _Soon_ / _Urgent_, named
+  for when the work has to happen.
+- **"1 products are out of stock"** is what the stock sentence produced, because three independent
+  figures cannot all govern a verb. The signal now carries `count` — the number that sentence is
+  about, which changes with the rating — and each sentence has a singular form written for it in
+  both languages. The same applies to every count-bearing line in the attention list.
+- **The dashboard kept its heading while its figures were still coming.** The loading state showed a
+  grey box where the `h1` belonged, so for a second and a half a screen reader had a document with
+  no heading at all. The heading is real from the first frame; only the figures are skeletons.
+- **The activity list fetches its own strings.** It quotes whichever module wrote each entry, so it
+  needs nearly every namespace — and only a reader holding `audit:view` has the list at all. Those
+  strings would have gone into the first download for every storekeeper who cannot see them, so the
+  panel asks for them after the page is on screen and shows a skeleton in its own place until they
+  arrive. First load stayed at 243 kB gzipped. `hooks/useLazyNamespaces.ts` records the rule.
+
+The charts are still drawn by hand: no charting package is installed, the content-security policy
+would not load one, and every bar is a `div` whose height is an exact integer ratio of minor units.
+Each one keeps its table of figures **in the document at all times**, `sr-only` until revealed, so
+what a screen reader gets is the figures rather than a row of decorative shapes.
 
 ---
 

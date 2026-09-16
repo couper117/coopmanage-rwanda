@@ -1,11 +1,50 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Providers } from '../src/app/Providers'
 import { routes } from '../src/app/routes'
 import { signInAs } from './session'
 import { changeLanguage } from '../src/i18n'
+
+/**
+ * The dashboard is the index route, and since Phase 10 it is a screen with figures on it rather
+ * than a placeholder. These tests are about the shell — its heading, its navigation, its
+ * languages — so the dashboard is answered with a cooperative that has nothing recorded yet: the
+ * smallest true response, and the one whose empty state the shell tests already assert.
+ */
+const EMPTY_BOARD = {
+  cooperative: { name: 'Abahuzamugambi Coffee', code: 'ABAHUZA-HUYE' },
+  month: '2026-09',
+  tiles: [],
+  charts: [],
+  lowStock: [],
+  attention: [],
+  activity: [],
+  health: { rating: 'GOOD', signals: [] },
+  withheld: [],
+}
+
+beforeEach(() => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((input: string) =>
+      Promise.resolve(
+        String(input).includes('/dashboard')
+          ? new Response(JSON.stringify({ data: EMPTY_BOARD }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            })
+          : new Response(
+              JSON.stringify({
+                error: { code: 'NOT_FOUND', messageKey: 'errors.notFound', message: 'no stub' },
+              }),
+              { status: 404, headers: { 'Content-Type': 'application/json' } },
+            ),
+      ),
+    ),
+  )
+})
 
 function renderApp(path = '/') {
   // These screens live behind the session guard, so a test that wants to see one signs in first.
@@ -19,6 +58,7 @@ function renderApp(path = '/') {
 }
 
 afterEach(async () => {
+  vi.unstubAllGlobals()
   await changeLanguage('en')
 })
 
@@ -26,15 +66,17 @@ afterEach(async () => {
  * The Phase 1 exit criterion: the shell renders, navigates, and reads correctly in both languages.
  */
 describe('application shell', () => {
-  it('renders the dashboard with a single page heading', () => {
+  it('renders the dashboard with a single page heading', async () => {
     renderApp()
-    expect(screen.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument(),
+    )
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
   })
 
-  it('shows the empty state a brand new cooperative should see', () => {
+  it('shows the empty state a brand new cooperative should see', async () => {
     renderApp()
-    expect(screen.getByText(/figures will appear here/i)).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText(/figures will appear here/i)).toBeInTheDocument())
   })
 
   it('offers a skip link before the navigation for keyboard users', async () => {
@@ -84,7 +126,9 @@ describe('language switching', () => {
     await changeLanguage('rw')
     renderApp()
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Incamake' })).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Incamake' })).toBeInTheDocument(),
+    )
     const nav = screen.getByRole('navigation', { name: "Ibyerekezo by'ingenzi" })
     expect(within(nav).getByRole('link', { name: 'Abanyamuryango' })).toBeInTheDocument()
     expect(within(nav).getByRole('link', { name: 'Ububiko' })).toBeInTheDocument()

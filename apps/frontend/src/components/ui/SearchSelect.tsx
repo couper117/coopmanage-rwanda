@@ -208,7 +208,7 @@ export function SearchSelect({
             <ul
               id={listId}
               role="listbox"
-              className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-line-strong bg-surface py-1 shadow-lg"
+              className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-line-strong bg-surface py-1 shadow-overlay"
             >
               {loading && options.length === 0 ? (
                 <li className="px-3 py-2 text-sm text-ink-muted">{loadingLabel}</li>

@@ -154,3 +154,20 @@
     margin: 14mm;
   }
 }
+
+/*
+ * The one animation this product has.
+ *
+ * `docs/ui-system.md` §10 allows a 150 ms fade on a chart as it loads and nothing else: a bar that
+ * grows out of the floor is a chart drawing attention to itself rather than to its figures. It is
+ * applied through `motion-safe:`, so a reader who has asked their system for reduced motion gets
+ * the chart with no animation at all.
+ */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

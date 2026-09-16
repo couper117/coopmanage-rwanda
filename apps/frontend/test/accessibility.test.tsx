@@ -1,12 +1,37 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Providers } from '../src/app/Providers'
 import { routes } from '../src/app/routes'
 import { signInAs } from './session'
 import { EmptyState, FormField, Input } from '../src/components/ui'
 import { useUiStore } from '../src/stores/uiStore'
 import { setViewportWidth } from './setup'
+
+/**
+ * Nothing here needs data — these tests are about headings, labels and focus. The network is
+ * stubbed all the same, so a screen that fetches on mount fails fast against a stub instead of
+ * reaching for localhost and timing out.
+ */
+beforeEach(() => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            error: { code: 'NOT_FOUND', messageKey: 'errors.notFound', message: 'no stub' },
+          }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    ),
+  )
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 function renderApp(path = '/') {
   // These screens live behind the session guard, so a test that wants to see one signs in first.

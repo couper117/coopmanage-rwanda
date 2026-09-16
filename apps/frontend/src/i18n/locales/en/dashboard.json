@@ -1,9 +1,148 @@
 {
   "title": "Dashboard",
   "description": "How your cooperative is doing today",
+  "forCooperative": "How {{name}} is doing today",
   "empty": {
     "title": "Your cooperative's figures will appear here",
     "body": "Once members, money and stock are recorded, this page shows totals, recent activity and anything that needs attention.",
     "action": "Set up your cooperative"
+  },
+  "withheld": "Your role does not cover: {{sections}}. Those figures are left out rather than shown as zero.",
+  "sections": {
+    "members": "members",
+    "finance": "money",
+    "inventory": "stock",
+    "sales": "sales",
+    "activity": "recent activity"
+  },
+  "tiles": {
+    "members": "Active members",
+    "balance": "Balance",
+    "income": "Income this month",
+    "stock": "Products in stock",
+    "sales": "Sales this month",
+    "hint": {
+      "members": {
+        "total": "{{value}} on the register"
+      },
+      "expenses": "{{value}} spent",
+      "lowStock": "{{value}} running low",
+      "outstanding": "{{value}} still owed"
+    }
+  },
+  "health": {
+    "rating": {
+      "GOOD": "Good",
+      "WATCH": "Watch",
+      "ATTENTION": "Needs attention"
+    },
+    "headline": {
+      "GOOD": "Nothing needs your attention today.",
+      "WATCH": "A few things are worth keeping an eye on.",
+      "ATTENTION": "Something needs your attention today."
+    },
+    "money": {
+      "GOOD": "The balance is {{balance}}, with {{income}} in and {{expenses}} out this month.",
+      "WATCH": "{{expenses}} went out this month against {{income}} in, leaving a balance of {{balance}}.",
+      "ATTENTION": "The balance is {{balance}}: the cooperative owes more than it holds. Income this month was {{income}} and expenses {{expenses}}."
+    },
+    "stock": {
+      "GOOD": "All {{products}} products are above their minimum.",
+      "GOOD_one": "The cooperative's one product is above its minimum.",
+      "WATCH": "{{low}} products of {{products}} are at or below their minimum.",
+      "WATCH_one": "One product of {{products}} is at or below its minimum.",
+      "ATTENTION": "{{empty}} products are out of stock, with {{low}} of {{products}} at or below the minimum.",
+      "ATTENTION_one": "One product is out of stock, with {{low}} of {{products}} at or below the minimum."
+    },
+    "receivables": {
+      "GOOD": "Every buyer has paid; nothing is outstanding.",
+      "WATCH": "{{outstanding}} is owed by {{count}} buyers, the oldest for {{days}} days.",
+      "WATCH_one": "{{outstanding}} is owed by one buyer, for {{days}} days.",
+      "ATTENTION": "{{outstanding}} has been owed by {{count}} buyers for up to {{days}} days.",
+      "ATTENTION_one": "{{outstanding}} has been owed by one buyer for {{days}} days."
+    }
+  },
+  "attention": {
+    "title": "Needs attention",
+    "description": "Worst first. Each line opens the screen where it is dealt with.",
+    "go": "Open",
+    "severity": {
+      "WARNING": "Soon",
+      "CRITICAL": "Urgent"
+    },
+    "item": {
+      "negativeBalance": "The balance is {{balance}} — the cooperative owes more than it holds.",
+      "outOfStock": "{{count}} products are out of stock, including {{product}}.",
+      "outOfStock_one": "{{product}} is out of stock.",
+      "lowStock": "{{count}} products are at or below their minimum, including {{product}}.",
+      "lowStock_one": "{{product}} is at or below its minimum.",
+      "oldDebt": "{{amount}} is owed by {{count}} buyers, the oldest for {{days}} days.",
+      "oldDebt_one": "{{amount}} has been owed by one buyer for {{days}} days.",
+      "outstanding": "{{amount}} is still owed by {{count}} buyers.",
+      "outstanding_one": "{{amount}} is still owed by one buyer.",
+      "overdueActions": "{{count}} actions agreed at a meeting are past their due date.",
+      "overdueActions_one": "An action agreed at a meeting is past its due date."
+    }
+  },
+  "lowStock": {
+    "title": "Running low",
+    "description": "Products at or below the minimum you set for them.",
+    "caption": "Products at or below their minimum stock level",
+    "product": "Product",
+    "left": "In stock",
+    "minimum": "Minimum",
+    "none": "Out of stock"
+  },
+  "activity": {
+    "title": "Recent activity",
+    "all": "Full activity log",
+    "loading": "Loading recent activity"
+  },
+  "charts": {
+    "showTable": "Show figures",
+    "hideTable": "Hide figures",
+    "month": "Month",
+    "income": "Income",
+    "expenses": "Expenses",
+    "sold": "Sold",
+    "previousPeriod": "Previous six months",
+    "category": "Category",
+    "amount": "Amount",
+    "incomeExpense": {
+      "title": "Money in and out",
+      "description": "The last twelve months, month by month.",
+      "caption": "Income and expenses for each of the last twelve months"
+    },
+    "sales": {
+      "title": "Sales",
+      "description": "The last six months, against the six before them.",
+      "caption": "Sales for each of the last six months, with the same month of the previous period"
+    },
+    "expensesByCategory": {
+      "title": "Where the money went",
+      "description": "This month's expenses, largest first.",
+      "caption": "This month's expenses by category",
+      "other": "Everything else",
+      "empty": "Nothing has been spent this month."
+    }
+  },
+  "search": {
+    "label": "Search the cooperative",
+    "placeholder": "Search members, products, sales…",
+    "shortcut": "Press / to search",
+    "hint": "Type at least two characters.",
+    "searching": "Searching…",
+    "empty": "Nothing matches {{query}}.",
+    "truncated": "Only the closest matches are shown. Narrow the search to see fewer.",
+    "withheld": "Not searched, because your role does not cover them: {{kinds}}.",
+    "close": "Close search",
+    "kind": {
+      "member": "Members",
+      "product": "Products",
+      "buyer": "Buyers",
+      "sale": "Sales",
+      "document": "Documents",
+      "meeting": "Meetings"
+    }
   }
 }

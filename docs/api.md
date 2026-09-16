@@ -496,23 +496,45 @@ of a member, a member of staff or a guest.
 
 ### Dashboard, search, notifications — Phases 10 and 12
 
-| Method | Path                         | Permission                                       |
-| ------ | ---------------------------- | ------------------------------------------------ |
-| GET    | `/dashboard/summary`         | `dashboard:view` (cards filtered per permission) |
-| GET    | `/dashboard/activity`        | `dashboard:view`                                 |
-| GET    | `/dashboard/attention`       | `dashboard:view`                                 |
-| GET    | `/dashboard/health`          | `dashboard:view`                                 |
-| GET    | `/search?q=`                 | `search:use`                                     |
-| GET    | `/notifications`             | `notifications:view`                             |
-| POST   | `/notifications/:id/read`    | `notifications:view`                             |
-| POST   | `/notifications/read-all`    | `notifications:view`                             |
-| POST   | `/notifications/:id/dismiss` | `notifications:view`                             |
-| GET    | `/announcements`             | `announcements:view`                             |
-| POST   | `/announcements`             | `announcements:manage`                           |
-| POST   | `/announcements/:id/publish` | `announcements:manage`                           |
-| POST   | `/announcements/:id/archive` | `announcements:manage`                           |
-| POST   | `/sms/send`                  | `sms:send`                                       |
-| GET    | `/sms/messages`              | `sms:send`                                       |
+| Method | Path                         | Permission                                          |
+| ------ | ---------------------------- | --------------------------------------------------- |
+| GET    | `/dashboard`                 | `dashboard:view` (blocks filtered per permission)   |
+| GET    | `/search?q=`                 | `search:use` (each resource per its own permission) |
+| GET    | `/notifications`             | `notifications:view`                                |
+| POST   | `/notifications/:id/read`    | `notifications:view`                                |
+| POST   | `/notifications/read-all`    | `notifications:view`                                |
+| POST   | `/notifications/:id/dismiss` | `notifications:view`                                |
+| GET    | `/announcements`             | `announcements:view`                                |
+| POST   | `/announcements`             | `announcements:manage`                              |
+| POST   | `/announcements/:id/publish` | `announcements:manage`                              |
+| POST   | `/announcements/:id/archive` | `announcements:manage`                              |
+| POST   | `/sms/send`                  | `sms:send`                                          |
+| GET    | `/sms/messages`              | `sms:send`                                          |
+
+**One dashboard endpoint, not four.** This table listed `/dashboard/summary`, `/activity`,
+`/attention` and `/health` separately. There is one `GET /dashboard`, and it returns the tiles, the
+charts, the low-stock list, the attention list, the recent activity and the health rating together.
+
+The reason is the phase's own exit criterion — the dashboard is one API round trip — and the
+connection this product is used over: four requests is four chances to be slow and four spinners
+finishing at different moments, for a page whose entire job is to be readable at a glance. Splitting
+it would also have meant four permission checks answering four different subsets of the same page.
+
+Every block is still gated by the permission covering its own data: members by `members:view`, the
+money and its two charts by `finance:view`, stock and the low-stock list by `inventory:view`, sales
+by `sales:view`, the activity list by `audit:view`, and the overdue-actions line by `meetings:view`.
+`dashboard:view` opens the endpoint and nothing more.
+
+A block the caller may not read is **named** in `withheld`, not silently absent, so the interface can
+say "your role does not cover money" instead of leaving a reader to decide whether a missing tile
+means zero.
+
+`GET /search` follows the same rule one level deeper: a resource the caller may not read is never
+queried — not filtered out afterwards — because filtering after the fact would make the search box a
+way to learn that a member or a restricted document exists without being allowed to open it. Kinds
+that were not searched come back in `withheld`. `q` is at least two characters: one letter matches
+most of a register. At most five hits of each kind are returned, with `truncated` saying when there
+were more, so one noisy resource cannot crowd out the rest.
 
 ### Audit, assistant, platform administration — Phases 2, 14, 3
 
