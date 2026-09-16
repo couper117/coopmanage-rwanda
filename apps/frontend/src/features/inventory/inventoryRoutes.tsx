@@ -1,10 +1,39 @@
+import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { RequirePermission } from '@/features/auth/RequireAuth'
-import { MovementsPage } from '@/pages/inventory/MovementsPage'
-import { ProductsPage } from '@/pages/inventory/ProductsPage'
-import { StockOverviewPage } from '@/pages/inventory/StockOverviewPage'
-import { UnitsPage } from '@/pages/inventory/UnitsPage'
-import { WarehousesPage } from '@/pages/inventory/WarehousesPage'
+import { loadNamespaces } from '@/i18n'
+
+/**
+ * Every screen here is loaded on demand.
+ *
+ * `lazy` rather than a direct import, so the first page a cooperative opens does not carry the code
+ * for the screens it did not ask for. The shell holds the one `Suspense` boundary and shows the
+ * same skeleton the screens use for their own data, so a navigation looks like one wait rather than
+ * two.
+ *
+ * The loader awaits the screen's **strings** as well as its code, so a screen never renders
+ * with its translation keys showing and then corrects itself. `docs/ui-system.md` §13 records it.
+ */
+const MovementsPage = lazy(async () => {
+  await loadNamespaces(['inventory'])
+  return { default: (await import('@/pages/inventory/MovementsPage')).MovementsPage }
+})
+const ProductsPage = lazy(async () => {
+  await loadNamespaces(['inventory'])
+  return { default: (await import('@/pages/inventory/ProductsPage')).ProductsPage }
+})
+const StockOverviewPage = lazy(async () => {
+  await loadNamespaces(['inventory'])
+  return { default: (await import('@/pages/inventory/StockOverviewPage')).StockOverviewPage }
+})
+const UnitsPage = lazy(async () => {
+  await loadNamespaces(['inventory'])
+  return { default: (await import('@/pages/inventory/UnitsPage')).UnitsPage }
+})
+const WarehousesPage = lazy(async () => {
+  await loadNamespaces(['inventory'])
+  return { default: (await import('@/pages/inventory/WarehousesPage')).WarehousesPage }
+})
 
 /**
  * The store and its catalogue, mounted inside the application shell.

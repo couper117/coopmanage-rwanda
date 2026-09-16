@@ -307,12 +307,17 @@ references untouched.
 meeting adds several in a row, and a dialog keeps the list, the filters and the place in it. The
 deviation from the planned `/members/new` route is recorded in `api.md` §3.
 
-Two things are deliberately left for later. Recording and voiding a share movement has no interface
-yet: the endpoints exist and are tested, and the controls belong with the member profile's shares
-panel rather than with the finance screens, so they are listed against Phase 16's pass over the
-member profile. And the built frontend bundle is now 699 kB, 210 kB gzipped, in a single chunk; on
-the connections this product is used over that wants route-level code splitting, which is listed
-against Phase 16.
+Two things were deliberately left for later here. **Both were closed before Phase 10**, because
+they had stopped being polish: the bundle had grown to 309 kB gzipped in one chunk by Phase 9, and a
+share movement that can be recorded by the API and not by the interface is a feature a cooperative
+cannot use.
+
+- Route-level code splitting is done. Every screen and its translations are fetched when asked for,
+  first load is 240 kB gzipped and each screen after it costs 5–8 kB. `ui-system.md` §12.
+- Recording and voiding a share movement now has its interface, on the member profile's shares
+  panel where it belongs. A purchase asks for the income category the money lands in and a transfer
+  asks for the member on the other side — each only when that kind is chosen — and a movement is
+  cancelled with a reason, never deleted.
 
 ---
 

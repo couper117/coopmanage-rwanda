@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { Providers } from '../src/app/Providers'
@@ -31,12 +31,26 @@ describe('heading structure', () => {
     }
   })
 
-  it('gives every route exactly one h1', () => {
+  it('gives every route exactly one h1', async () => {
     for (const path of ['/', '/members', '/no-such-page']) {
       const { unmount } = renderApp(path)
-      expect(document.querySelectorAll('h1'), `on ${path}`).toHaveLength(1)
+      // A feature screen is fetched on demand, so the heading arrives after the shell. The
+      // dashboard and the not-found page are eager and resolve on the first check.
+      await waitFor(() => {
+        expect(document.querySelectorAll('h1'), `on ${path}`).toHaveLength(1)
+      })
       unmount()
     }
+  })
+
+  it('shows one heading, not none, while a screen is still being fetched', async () => {
+    // The shell's own skeleton stands in until the screen arrives, so the page is never headingless
+    // for a reader using a screen reader on a slow connection — and never briefly two-headed.
+    const { unmount } = renderApp('/members')
+    await waitFor(() => {
+      expect(document.querySelectorAll('h1').length).toBeLessThanOrEqual(1)
+    })
+    unmount()
   })
 
   it('lets an empty state carry the page heading when it is the whole page', () => {

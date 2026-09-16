@@ -206,6 +206,8 @@ describe('forgot password', () => {
     authApi.requestPasswordReset.mockResolvedValue(undefined)
     renderApp('/forgot-password')
 
+    // The password screens are fetched on demand, so the form arrives a tick after the render.
+    await screen.findByLabelText('Email address')
     await userEvent.type(screen.getByLabelText('Email address'), 'nobody@example.test')
     await userEvent.click(screen.getByRole('button', { name: 'Send the reset link' }))
 
@@ -224,6 +226,7 @@ describe('choosing a new password', () => {
   it('refuses a password the API would refuse, before sending it', async () => {
     renderApp('/reset-password/some-reset-token-value-here')
 
+    await screen.findByLabelText('New password')
     await userEvent.type(screen.getByLabelText('New password'), 'password123')
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'password123')
     await userEvent.click(screen.getByRole('button', { name: 'Save the new password' }))
@@ -235,6 +238,7 @@ describe('choosing a new password', () => {
   it('catches two passwords that do not match', async () => {
     renderApp('/reset-password/some-reset-token-value-here')
 
+    await screen.findByLabelText('New password')
     await userEvent.type(screen.getByLabelText('New password'), 'a-good-long-passphrase')
     await userEvent.type(screen.getByLabelText('Confirm new password'), 'a-good-long-passphrasx')
     await userEvent.click(screen.getByRole('button', { name: 'Save the new password' }))

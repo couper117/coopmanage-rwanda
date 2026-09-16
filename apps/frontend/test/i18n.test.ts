@@ -1,7 +1,30 @@
 import { describe, expect, it } from 'vitest'
-import { NAMESPACES, resources, SUPPORTED_LANGUAGES } from '../src/i18n'
+import { NAMESPACES, SUPPORTED_LANGUAGES } from '../src/i18n'
 
 type Json = Record<string, unknown>
+
+/**
+ * Every translation file, read straight off disk.
+ *
+ * Not through `resources` from `src/i18n`: that object deliberately holds only the namespaces the
+ * shell needs before anything renders, because the rest are fetched when the screen that needs
+ * them is opened. A test that imported the whole set from the application would put the whole set
+ * back into the application's first download — the exact thing the split was for.
+ *
+ * `import.meta.glob` with `eager` is Vite's way of reading a directory at build time, so the files
+ * are still checked at their real paths and a namespace added without a Kinyarwanda counterpart
+ * still fails here.
+ */
+const files = import.meta.glob<{ default: Json }>('../src/i18n/locales/*/*.json', { eager: true })
+
+const resources: Record<'en' | 'rw', Record<string, Json>> = { en: {}, rw: {} }
+for (const [path, module] of Object.entries(files)) {
+  const match = /locales\/(en|rw)\/([a-z]+)\.json$/.exec(path)
+  const language = match?.[1]
+  const namespace = match?.[2]
+  if (!language || !namespace) continue
+  resources[language as 'en' | 'rw'][namespace] = module.default
+}
 
 /** Flattens a nested resource object into dotted key paths. */
 function flatten(input: Json, prefix = ''): string[] {
@@ -15,7 +38,7 @@ function flatten(input: Json, prefix = ''): string[] {
 }
 
 function keysFor(language: 'en' | 'rw', namespace: string): string[] {
-  const bundle = (resources[language] as Record<string, Json>)[namespace]
+  const bundle = resources[language][namespace]
   return flatten(bundle ?? {}).sort()
 }
 
@@ -45,7 +68,7 @@ describe('translation parity', () => {
   it('has no empty string in any language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       for (const namespace of NAMESPACES) {
-        const bundle = (resources[language] as Record<string, Json>)[namespace] ?? {}
+        const bundle = resources[language][namespace] ?? {}
         for (const key of flatten(bundle)) {
           const value = key
             .split('.')
@@ -64,8 +87,8 @@ describe('translation parity', () => {
       [...text.matchAll(/\{\{(\w+)\}\}/g)].map((match) => match[1] as string).sort()
 
     for (const namespace of NAMESPACES) {
-      const en = (resources.en as Record<string, Json>)[namespace] ?? {}
-      const rw = (resources.rw as Record<string, Json>)[namespace] ?? {}
+      const en = resources.en[namespace] ?? {}
+      const rw = resources.rw[namespace] ?? {}
       for (const key of flatten(en)) {
         const read = (bundle: Json): string =>
           String(key.split('.').reduce<unknown>((node, part) => (node as Json)?.[part], bundle))
@@ -88,8 +111,8 @@ describe('translation parity', () => {
     ])
 
     for (const namespace of NAMESPACES) {
-      const en = (resources.en as Record<string, Json>)[namespace] ?? {}
-      const rw = (resources.rw as Record<string, Json>)[namespace] ?? {}
+      const en = resources.en[namespace] ?? {}
+      const rw = resources.rw[namespace] ?? {}
       const identical: string[] = []
       for (const key of flatten(en)) {
         if (allowedIdentical.has(key)) continue

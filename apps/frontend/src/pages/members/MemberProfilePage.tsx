@@ -1,4 +1,4 @@
-import { ArrowLeft, CircleSlash, Clock, Coins, UserX } from 'lucide-react'
+import { ArrowLeft, CircleSlash, Clock, Coins, Plus, UserX } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
@@ -25,6 +25,7 @@ import {
 import { usePermission } from '@/features/auth/useSession'
 import { MemberFormDialog } from '@/features/members/MemberFormDialog'
 import { RecordContributionDialog } from '@/features/members/RecordContributionDialog'
+import { RecordShareDialog } from '@/features/members/RecordShareDialog'
 import {
   MEMBER_STATUSES,
   type ContributionRow,
@@ -42,6 +43,7 @@ import {
   useMemberSummary,
   useMemberTimeline,
   useSetMemberStatus,
+  useVoidShare,
 } from '@/features/members/members.hooks'
 
 /**
@@ -217,7 +219,12 @@ export function MemberProfilePage() {
 
       <ContributionsPanel id={id} allowed={canViewContributions} />
 
-      <SharesPanel id={id} allowed={canViewShares} />
+      <SharesPanel
+        id={id}
+        allowed={canViewShares}
+        member={{ id: member.id, fullName: member.fullName, memberCode: member.memberCode }}
+        onNotice={setNotice}
+      />
 
       <MemberFormDialog
         open={editOpen}
@@ -627,12 +634,52 @@ function ContributionsPanel({ id, allowed }: { id: string | undefined; allowed: 
   )
 }
 
-function SharesPanel({ id, allowed }: { id: string | undefined; allowed: boolean }) {
+function SharesPanel({
+  id,
+  allowed,
+  member,
+  onNotice,
+}: {
+  id: string | undefined
+  allowed: boolean
+  /** Null while the profile is still loading; the controls appear with it. */
+  member: { id: string; fullName: string; memberCode: string } | null
+  onNotice: (notice: string) => void
+}) {
   const { t } = useTranslation(['members', 'common'])
   const describeError = useMemberError()
   const formatDate = useFormatDate()
   const formatNumber = useFormatNumber()
   const shares = useMemberShares(id, allowed)
+
+  // `shares:manage` is a separate permission from `shares:view`, because reading a member's stake
+  // and changing it are different jobs. The server checks it again on every request.
+  const canManage = usePermission('shares:manage')
+  const [recording, setRecording] = useState(false)
+  const [voiding, setVoiding] = useState<ShareRow | null>(null)
+  const [reason, setReason] = useState('')
+  const [reasonError, setReasonError] = useState<string | null>(null)
+  const voidShare = useVoidShare()
+
+  function submitVoid(): void {
+    const target = voiding
+    if (!target || !member) return
+    const trimmed = reason.trim()
+    if (trimmed.length === 0) {
+      setReasonError('validation.required')
+      return
+    }
+    voidShare.mutate(
+      { memberId: member.id, shareId: target.id, reason: trimmed },
+      {
+        onSuccess: () => {
+          onNotice(t('members:shares.cancelled'))
+          setVoiding(null)
+          setReason('')
+        },
+      },
+    )
+  }
 
   const columns: Column<ShareRow>[] = [
     {
@@ -679,6 +726,32 @@ function SharesPanel({ id, allowed }: { id: string | undefined; allowed: boolean
         </Badge>
       ),
     },
+    ...(canManage
+      ? [
+          {
+            key: 'actions',
+            header: t('members:shares.columns.actions'),
+            align: 'right' as const,
+            width: '9rem',
+            // Only a posted movement can be cancelled. A cancelled one stays in the table with its
+            // state, because the correction is part of the history.
+            render: (row: ShareRow) =>
+              row.status === 'POSTED' ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setReason('')
+                    setReasonError(null)
+                    setVoiding(row)
+                  }}
+                >
+                  {t('members:shares.cancel')}
+                </Button>
+              ) : null,
+          },
+        ]
+      : []),
   ]
 
   if (!allowed) {
@@ -697,16 +770,28 @@ function SharesPanel({ id, allowed }: { id: string | undefined; allowed: boolean
       title={t('members:shares.title')}
       description={t('members:shares.description')}
       actions={
-        holding ? (
-          <p className="text-sm text-ink-secondary">
-            {t('members:shares.holding')} <Money value={holding.value} />{' '}
-            <span className="text-ink-muted">
-              {t('members:shares.holdingQuantity', {
-                quantity: formatNumber(holding.quantity),
-              })}
-            </span>
-          </p>
-        ) : undefined
+        <div className="flex flex-wrap items-center gap-3">
+          {holding ? (
+            <p className="text-sm text-ink-secondary">
+              {t('members:shares.holding')} <Money value={holding.value} />{' '}
+              <span className="text-ink-muted">
+                {t('members:shares.holdingQuantity', {
+                  quantity: formatNumber(holding.quantity),
+                })}
+              </span>
+            </p>
+          ) : null}
+          {canManage && member ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              leadingIcon={<Plus aria-hidden="true" className="size-4" />}
+              onClick={() => setRecording(true)}
+            >
+              {t('members:shares.record.open')}
+            </Button>
+          ) : null}
+        </div>
       }
     >
       {shares.isError ? (
@@ -754,6 +839,83 @@ function SharesPanel({ id, allowed }: { id: string | undefined; allowed: boolean
           )}
         />
       )}
+
+      {recording && member ? (
+        <RecordShareDialog
+          open
+          onOpenChange={setRecording}
+          member={member}
+          onRecorded={(result) =>
+            onNotice(
+              t('members:shares.recorded', {
+                quantity: formatNumber(result.quantity),
+                value: formatMoney(result.totalValue),
+              }),
+            )
+          }
+        />
+      ) : null}
+
+      {/*
+        A cancellation, not a deletion: the movement stays in the register with its reason and a
+        purchase's income row is reversed rather than removed. The dismiss button says what keeping
+        it means, because "Cancel" beside "Cancel the movement" is two opposite meanings of one word.
+      */}
+      <Dialog
+        open={voiding !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setVoiding(null)
+            setReason('')
+            setReasonError(null)
+          }
+        }}
+        title={t('members:shares.cancelTitle')}
+        description={
+          voiding
+            ? t('members:shares.cancelDescription', {
+                quantity: formatNumber(voiding.quantity),
+                value: formatMoney(voiding.totalValue),
+              })
+            : undefined
+        }
+        busy={voidShare.isPending}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setVoiding(null)}
+              disabled={voidShare.isPending}
+            >
+              {t('members:shares.keep')}
+            </Button>
+            <Button variant="danger" onClick={submitVoid} loading={voidShare.isPending}>
+              {t('members:shares.cancelConfirm')}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-ink-muted">{t('members:shares.cancelConsequence')}</p>
+          <FormField
+            label={t('members:shares.reason')}
+            hint={t('members:shares.reasonHint')}
+            error={reasonError ?? undefined}
+          >
+            <Textarea
+              rows={3}
+              value={reason}
+              onChange={(event) => {
+                setReason(event.target.value)
+                setReasonError(null)
+              }}
+            />
+          </FormField>
+          {voidShare.isError ? (
+            <Alert tone="danger">{describeError(voidShare.error).message}</Alert>
+          ) : null}
+        </div>
+      </Dialog>
     </Panel>
   )
 }

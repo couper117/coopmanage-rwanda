@@ -23,5 +23,6 @@
   },
   "discountTooLarge": "Igabanuka ntirishobora kuruta agaciro k'igurisha.",
   "paymentExceedsTotal": "Ibyo biruta agaciro k'igurisha.",
-  "paymentExceedsOutstanding": "Ibyo biruta ibisigaye kwishyurwa kuri iri gurisha."
+  "paymentExceedsOutstanding": "Ibyo biruta ibisigaye kwishyurwa kuri iri gurisha.",
+  "positiveWholeNumber": "Andika umubare wuzuye uri hejuru ya zeru."
 }

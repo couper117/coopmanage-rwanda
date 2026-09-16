@@ -1,8 +1,31 @@
+import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { RequirePermission } from '@/features/auth/RequireAuth'
-import { ContributionsPage } from '@/pages/members/ContributionsPage'
-import { MemberProfilePage } from '@/pages/members/MemberProfilePage'
-import { MembersPage } from '@/pages/members/MembersPage'
+import { loadNamespaces } from '@/i18n'
+
+/**
+ * Every screen here is loaded on demand.
+ *
+ * `lazy` rather than a direct import, so the first page a cooperative opens does not carry the code
+ * for the screens it did not ask for. The shell holds the one `Suspense` boundary and shows the
+ * same skeleton the screens use for their own data, so a navigation looks like one wait rather than
+ * two.
+ *
+ * The loader awaits the screen's **strings** as well as its code, so a screen never renders
+ * with its translation keys showing and then corrects itself. `docs/ui-system.md` §13 records it.
+ */
+const ContributionsPage = lazy(async () => {
+  await loadNamespaces(['members'])
+  return { default: (await import('@/pages/members/ContributionsPage')).ContributionsPage }
+})
+const MemberProfilePage = lazy(async () => {
+  await loadNamespaces(['members'])
+  return { default: (await import('@/pages/members/MemberProfilePage')).MemberProfilePage }
+})
+const MembersPage = lazy(async () => {
+  await loadNamespaces(['members'])
+  return { default: (await import('@/pages/members/MembersPage')).MembersPage }
+})
 
 /**
  * The member register, mounted inside the application shell.

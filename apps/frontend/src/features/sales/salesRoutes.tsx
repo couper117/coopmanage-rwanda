@@ -1,11 +1,43 @@
+import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { RequirePermission } from '@/features/auth/RequireAuth'
-import { BuyerProfilePage } from '@/pages/sales/BuyerProfilePage'
-import { BuyersPage } from '@/pages/sales/BuyersPage'
-import { SaleDetailPage } from '@/pages/sales/SaleDetailPage'
-import { SaleFormPage } from '@/pages/sales/SaleFormPage'
-import { SaleReceiptPage } from '@/pages/sales/SaleReceiptPage'
-import { SalesPage } from '@/pages/sales/SalesPage'
+import { loadNamespaces } from '@/i18n'
+
+/**
+ * Every screen here is loaded on demand.
+ *
+ * `lazy` rather than a direct import, so the first page a cooperative opens does not carry the code
+ * for the screens it did not ask for. The shell holds the one `Suspense` boundary and shows the
+ * same skeleton the screens use for their own data, so a navigation looks like one wait rather than
+ * two.
+ *
+ * The loader awaits the screen's **strings** as well as its code, so a screen never renders
+ * with its translation keys showing and then corrects itself. `docs/ui-system.md` §13 records it.
+ */
+const BuyerProfilePage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/BuyerProfilePage')).BuyerProfilePage }
+})
+const BuyersPage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/BuyersPage')).BuyersPage }
+})
+const SaleDetailPage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/SaleDetailPage')).SaleDetailPage }
+})
+const SaleFormPage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/SaleFormPage')).SaleFormPage }
+})
+const SaleReceiptPage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/SaleReceiptPage')).SaleReceiptPage }
+})
+const SalesPage = lazy(async () => {
+  await loadNamespaces(['sales'])
+  return { default: (await import('@/pages/sales/SalesPage')).SalesPage }
+})
 
 /**
  * Sales and buyers, mounted inside the application shell.

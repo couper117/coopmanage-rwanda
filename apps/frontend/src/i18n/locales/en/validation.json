@@ -23,5 +23,6 @@
   },
   "discountTooLarge": "The discount cannot be more than the sale is worth.",
   "paymentExceedsTotal": "That is more than the sale is worth.",
-  "paymentExceedsOutstanding": "That is more than is still owed on this sale."
+  "paymentExceedsOutstanding": "That is more than is still owed on this sale.",
+  "positiveWholeNumber": "Enter a whole number greater than zero."
 }

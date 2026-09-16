@@ -419,7 +419,38 @@ a printed grid with no rows to click. What the two share is what matters: a real
 
 ---
 
-## 12. Language and content
+## 12. Loading the interface
+
+Every screen is fetched when it is asked for, not when the application starts. The shell holds one
+`Suspense` boundary showing the same skeleton the screens use for their own data, so a navigation
+looks like one wait rather than two.
+
+**A route's loader fetches its strings as well as its code.** The translations are the larger half —
+340 kB across the two languages — and they are split by namespace and by language, so a Kinyarwanda
+cooperative never downloads the English sales strings. Awaiting them inside the loader is what stops
+a screen rendering its translation keys for a moment and then correcting itself.
+
+Four things stay eager, and the reason is the same for all of them: they are what a session begins
+with, and a round trip before them would be felt at the moment this product is judged on.
+
+- the sign-in screen
+- the dashboard
+- the module placeholder and the not-found page
+- the core namespaces: `common`, `nav`, `auth`, `errors`, `validation`, `dashboard`,
+  `notifications`, `modules` — in **both** languages, so switching language is instant rather than
+  a loading state
+
+The activity log is the exception that proves the rule: an audit entry quotes whichever module wrote
+it, so that one screen loads nearly every namespace. `AUDIT_MESSAGE_NAMESPACES` says which, and why.
+
+Dependencies are grouped by when they are needed rather than by package: React and the router
+together, Radix together, and **zod with react-hook-form**, which are the largest dependency here
+and are needed only by screens with a form. First load is 240 kB gzipped; each screen after it costs
+5–8 kB.
+
+---
+
+## 13. Language and content
 
 Interface English is plain and direct: "Record expense", "Add member", "Money in". No jargon, no
 exclamation marks, no cleverness. Sentence case for every label, heading and button; title case

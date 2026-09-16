@@ -70,6 +70,14 @@ function lastCallTo(fragment: string): StubRequest | undefined {
   return [...calls].reverse().find((call) => call.url.includes(fragment))
 }
 
+/**
+ * The most recent write to a path, as opposed to the most recent request of any kind: a successful
+ * mutation invalidates the feature and the refetch that follows is a `GET` to the same path.
+ */
+function lastWriteTo(fragment: string, method: string): StubRequest | undefined {
+  return [...calls].reverse().find((call) => call.url.includes(fragment) && call.method === method)
+}
+
 const MEMBER_ROW = {
   id: MEMBER_ID,
   memberCode: 'ABAH-0001',
@@ -1116,5 +1124,136 @@ describe('the contributions ledger', () => {
     expect(screen.getByText("Igiteranyo cy'ibyatoranyijwe")).toBeInTheDocument()
     expect(screen.queryByText('Contributions')).toBeNull()
     unmount()
+  })
+})
+
+describe('share movements', () => {
+  const SHARE_ID = '9a8b7c6d-5e4f-4312-9876-1a2b3c4d5e6f'
+
+  const POSTED = {
+    id: SHARE_ID,
+    type: 'PURCHASE',
+    quantity: 12,
+    unitValue: '10000.00',
+    totalValue: '120000.00',
+    issuedOn: '2026-03-04',
+    certificateNo: 'CERT-0042',
+    status: 'POSTED',
+    note: null,
+  }
+
+  function withShares(handlers: Record<string, StubValue> = {}) {
+    stubApi({
+      [`/members/${MEMBER_ID}/shares`]: {
+        items: [POSTED],
+        holding: { quantity: 12, value: '120000.00' },
+      },
+      ...handlers,
+    })
+  }
+
+  async function openProfile(): Promise<void> {
+    renderAt(`/members/${MEMBER_ID}`)
+    await waitFor(() => {
+      expect(screen.getAllByText('CERT-0042').length).toBeGreaterThan(0)
+    })
+  }
+
+  it('offers no recording controls to somebody who may only read shares', async () => {
+    signInAs('VIEWER', { permissions: ['members:view', 'shares:view', 'dashboard:view'] })
+    withShares()
+    await openProfile()
+
+    // Reading a member's stake and changing it are different jobs, and the server checks the
+    // second on every request whatever the interface shows.
+    expect(screen.queryByText('Record a movement')).toBeNull()
+    expect(screen.queryByText('Cancel it')).toBeNull()
+  })
+
+  it('records a purchase with its category and restates the total first', async () => {
+    withShares({
+      [`/members/${MEMBER_ID}/shares`]: (request: StubRequest) =>
+        request.method === 'POST'
+          ? { id: SHARE_ID, quantity: 5, totalValue: '50000.00' }
+          : { items: [POSTED], holding: { quantity: 12, value: '120000.00' } },
+    })
+    await openProfile()
+
+    fireEvent.click(screen.getByText('Record a movement'))
+    await waitFor(() => expect(screen.getByLabelText('What happened')).toBeTruthy())
+
+    fireEvent.change(screen.getByLabelText('What happened'), { target: { value: 'PURCHASE' } })
+    fireEvent.change(screen.getByLabelText('Number of shares'), { target: { value: '5' } })
+    fireEvent.change(screen.getByLabelText('Value of one share'), { target: { value: '10000' } })
+
+    // Five shares at ten thousand is what a member's certificate will say, so the dialog states it
+    // before anybody commits to it.
+    await waitFor(() => expect(screen.getByText('50,000 RWF')).toBeTruthy())
+
+    // A purchase puts money into the cooperative, so the category is asked for — and only for a
+    // purchase.
+    fireEvent.change(screen.getByLabelText('Income category'), { target: { value: CATEGORY_ID } })
+    fireEvent.click(screen.getByText('Record it'))
+
+    await waitFor(() => {
+      const request = lastWriteTo('/shares', 'POST')
+      expect(request?.body).toMatchObject({
+        type: 'PURCHASE',
+        quantity: 5,
+        // A decimal string, exactly as typed. Never a JavaScript number.
+        unitValue: '10000',
+        categoryId: CATEGORY_ID,
+      })
+    })
+  })
+
+  it('asks for the other member only on a transfer', async () => {
+    withShares()
+    await openProfile()
+
+    fireEvent.click(screen.getByText('Record a movement'))
+    await waitFor(() => expect(screen.getByLabelText('What happened')).toBeTruthy())
+
+    // A redemption has neither a category nor another member.
+    fireEvent.change(screen.getByLabelText('What happened'), { target: { value: 'REDEMPTION' } })
+    expect(screen.queryByLabelText('Income category')).toBeNull()
+    expect(screen.queryByLabelText('The other member')).toBeNull()
+
+    // A transfer has two sides, and this is the other one.
+    fireEvent.change(screen.getByLabelText('What happened'), { target: { value: 'TRANSFER_OUT' } })
+    await waitFor(() => expect(screen.getByLabelText('The other member')).toBeTruthy())
+    expect(screen.queryByLabelText('Income category')).toBeNull()
+
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull())
+  })
+
+  it('cancels a movement with a reason, and never deletes one', async () => {
+    withShares({
+      [`/members/${MEMBER_ID}/shares/${SHARE_ID}/void`]: { id: SHARE_ID, status: 'VOID' },
+    })
+    await openProfile()
+
+    fireEvent.click(screen.getAllByText('Cancel it')[0] as HTMLElement)
+    await waitFor(() => expect(screen.getByText('Cancel the movement')).toBeTruthy())
+
+    // The dismiss button says what keeping it means: "Cancel" beside "Cancel the movement" would
+    // be two opposite meanings of one word.
+    expect(screen.getByText('Keep it recorded')).toBeTruthy()
+
+    calls = []
+    fireEvent.click(screen.getByText('Cancel the movement'))
+    // A reason is required: a member can ask about this years later.
+    expect(calls.filter((call) => call.method === 'POST')).toEqual([])
+
+    fireEvent.change(screen.getByLabelText('Why it is being cancelled'), {
+      target: { value: 'Recorded against the wrong member' },
+    })
+    fireEvent.click(screen.getByText('Cancel the movement'))
+
+    await waitFor(() => {
+      const request = lastWriteTo('/void', 'POST')
+      expect(request?.body).toEqual({ reason: 'Recorded against the wrong member' })
+    })
   })
 })

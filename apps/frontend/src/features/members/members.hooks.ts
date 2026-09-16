@@ -27,11 +27,14 @@ import {
   MEMBER_SORTS,
   MEMBER_STATUSES,
   recordContribution,
+  recordShare,
+  voidShare,
   setMemberStatus,
   updateMember,
   voidContribution,
   type ContributionFilters,
   type ContributionInput,
+  type ShareInput,
   type ContributionStatus,
   type ContributionType,
   type MemberFilters,
@@ -349,6 +352,18 @@ export function useUpdateMember() {
 export function useSetMemberStatus() {
   return useMemberMutation((input: { id: string; change: MemberStatusChange }) =>
     setMemberStatus(input.id, input.change),
+  )
+}
+
+export function useRecordShare() {
+  return useMemberMutation((input: { memberId: string; share: ShareInput }) =>
+    recordShare(input.memberId, input.share),
+  )
+}
+
+export function useVoidShare() {
+  return useMemberMutation((input: { memberId: string; shareId: string; reason: string }) =>
+    voidShare(input.memberId, input.shareId, input.reason),
   )
 }
 

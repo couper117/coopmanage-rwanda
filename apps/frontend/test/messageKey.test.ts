@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest'
-import i18n, { changeLanguage } from '../src/i18n'
+import { beforeAll, describe, expect, it } from 'vitest'
+import i18n, { AUDIT_MESSAGE_NAMESPACES, changeLanguage, loadNamespaces } from '../src/i18n'
 import { toI18nKey, translateParams } from '../src/lib/messageKey'
+
+/**
+ * The namespaces an audit entry can quote are fetched when the activity log is opened, not bundled
+ * with the shell, so a test of the resolver has to load them the same way the route does. Asserting
+ * against strings that happened to be bundled would be testing a situation the application is no
+ * longer in.
+ */
+beforeAll(async () => {
+  await loadNamespaces(AUDIT_MESSAGE_NAMESPACES)
+})
 
 /**
  * How a message the server composed is put into the reader's language.

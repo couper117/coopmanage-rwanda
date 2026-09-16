@@ -269,7 +269,8 @@
       "unitValue": "Agaciro ka buri umwe",
       "totalValue": "Agaciro yose",
       "certificate": "Icyemezo cyanditse",
-      "status": "Imiterere"
+      "status": "Imiterere",
+      "actions": "Igikorwa"
     },
     "emptyTitle": "Nta mugabane wanditswe",
     "emptyBody": "Uyu munyamuryango ntaragira imigabane. Kugura umugabane bwandikirwa ku rupapuro rw'imigabane.",
@@ -284,6 +285,41 @@
     "status": {
       "POSTED": "Byanditswe",
       "VOID": "Byahagaritswe"
+    },
+    "cancel": "Hagarika",
+    "cancelled": "Ikinyuranyo cy'imigabane cyahagaritswe.",
+    "cancelTitle": "Guhagarika iki kinyuranyo cy'imigabane?",
+    "cancelDescription": "Imigabane {{quantity}} ifite agaciro ka {{value}}.",
+    "cancelConsequence": "Ikinyuranyo kiguma mu gitabo n'impamvu utanze, kandi amafaranga yinjiye yo kugura asubizwa aho gukurwaho. Nta kintu gisibwa.",
+    "cancelConfirm": "Hagarika ikinyuranyo",
+    "keep": "Reka kigume cyanditse",
+    "reason": "Impamvu yo guhagarika",
+    "reasonHint": "Umunyamuryango ashobora kubibaza nyuma y'imyaka, bityo vuga icyari kitagenze neza.",
+    "recorded": "Imigabane {{quantity}} ifite agaciro ka {{value}} yanditswe.",
+    "record": {
+      "open": "Andika ikinyuranyo",
+      "title": "Andika ikinyuranyo cy'imigabane",
+      "description": "Kuri {{member}} ({{code}}).",
+      "type": "Icyabaye",
+      "chooseType": "Hitamo icyabaye",
+      "quantity": "Umubare w'imigabane",
+      "unitValue": "Agaciro k'umugabane umwe",
+      "total": "Agaciro kose",
+      "issuedOn": "Itariki",
+      "counterparty": "Undi munyamuryango",
+      "counterpartyHint": "Kwimura bigira impande ebyiri, iyi ni indi ruhande.",
+      "chooseMember": "Shakisha ku izina cyangwa inomero y'umunyamuryango",
+      "noMemberFound": "Nta munyamuryango wabonetse",
+      "clearMember": "Kuraho umunyamuryango",
+      "category": "Icyiciro cy'amafaranga yinjira",
+      "categoryHint": "Kugura imigabane bishyira amafaranga muri koperative, bityo bigomba kugaragara mu bitabo.",
+      "chooseCategory": "Hitamo icyiciro",
+      "noCategories": "Nta cyiciro cy'amafaranga yinjira cyarashyirwaho, bityo kugura ntibishobora kwandikwa. Banza ushyireho kimwe muri Amafaranga.",
+      "method": "Uko byishyuwe",
+      "certificateNo": "Inomero y'icyemezo",
+      "note": "Icyitonderwa",
+      "save": "Andika",
+      "saving": "Kwandika…"
     }
   },
   "method": {

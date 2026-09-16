@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router-dom'
 import { RouteErrorBoundary } from '@/app/RouteErrorBoundary'
+import { Skeleton } from '@/components/ui'
 import { useMediaQuery, WIDE_LAYOUT_QUERY } from '@/hooks/useMediaQuery'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/stores/uiStore'
@@ -14,6 +15,23 @@ import { TopBar } from './TopBar'
  * section 5: a full sidebar at 1280px and above, a 64px icon rail from 768px, and a modal drawer
  * below that.
  */
+/**
+ * What fills the page while a screen's code is being fetched.
+ *
+ * Deliberately the same shape as the screens' own loading state — a heading-sized bar and a block
+ * — rather than a spinner. A spinner says "something is happening"; this says "a screen is coming",
+ * and it does not move, which matters on a slow connection where a spinner turns for ten seconds
+ * and reads as a fault.
+ */
+function RouteFallback() {
+  return (
+    <div className="flex flex-col gap-4" aria-busy="true">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-64 w-full" />
+    </div>
+  )
+}
+
 export function AppShell() {
   const { t } = useTranslation('nav')
   // Below 1280px the sidebar is always a rail: there is not enough width for labels beside a
@@ -63,7 +81,17 @@ export function AppShell() {
               the layout, so the sidebar and top bar keep working and the user can navigate away.
             */}
             <RouteErrorBoundary key={location.pathname}>
-              <Outlet />
+              {/*
+                Every feature screen is loaded on demand, so the first page a cooperative opens
+                does not carry the code for the eleven it did not. On a district office connection
+                that is the difference between a few seconds and a few tens of seconds.
+
+                The fallback is the same skeleton the screens use while their own data loads, so a
+                navigation looks like one wait rather than two.
+              */}
+              <Suspense fallback={<RouteFallback />}>
+                <Outlet />
+              </Suspense>
             </RouteErrorBoundary>
           </div>
         </main>

@@ -1,11 +1,10 @@
+import { lazy, Suspense, type ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { RequireAuth, RequirePermission } from '@/features/auth/RequireAuth'
 import { AppShell } from '@/layouts/AppShell'
-import { AuditLogPage } from '@/pages/AuditLogPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { ProfilePage } from '@/pages/ProfilePage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
 import { documentRoutes } from '@/features/documents/documentRoutes'
@@ -14,13 +13,55 @@ import { meetingRoutes } from '@/features/meetings/meetingRoutes'
 import { reportRoutes } from '@/features/reports/reportRoutes'
 import { buyerRoutes, salesRoutes } from '@/features/sales/salesRoutes'
 import { contributionRoutes, memberRoutes } from '@/features/members/memberRoutes'
-import { CooperativeSettingsPage } from '@/pages/settings/CooperativeSettingsPage'
-import { PreferencesPage } from '@/pages/settings/PreferencesPage'
-import { StaffPage } from '@/pages/settings/StaffPage'
-import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
-import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
+import { AUDIT_MESSAGE_NAMESPACES, loadNamespaces } from '@/i18n'
 import { ALL_NAV_ITEMS } from './navigation'
+
+/**
+ * The screens that are loaded on demand.
+ *
+ * The dashboard, the module placeholder, the not-found page and the sign-in screen stay eager:
+ * they are the first thing a session renders, and splitting them would add a round trip to the
+ * very moment this product is judged on. Everything else a cooperative navigates to is fetched
+ * when it is asked for — its code and its strings together, so a screen never renders with its
+ * translation keys showing. `docs/ui-system.md` §13 records the rule.
+ */
+const AuditLogPage = lazy(async () => {
+  // Not just `audit`: an entry quotes the module that wrote it, so the activity log needs the
+  // strings of nearly every module to avoid printing a key at a reader. `AUDIT_MESSAGE_NAMESPACES`
+  // says which, and why.
+  await loadNamespaces(AUDIT_MESSAGE_NAMESPACES)
+  return { default: (await import('@/pages/AuditLogPage')).AuditLogPage }
+})
+const ProfilePage = lazy(async () => {
+  await loadNamespaces(['profile'])
+  return { default: (await import('@/pages/ProfilePage')).ProfilePage }
+})
+const CooperativeSettingsPage = lazy(async () => {
+  await loadNamespaces(['settings'])
+  return {
+    default: (await import('@/pages/settings/CooperativeSettingsPage')).CooperativeSettingsPage,
+  }
+})
+const PreferencesPage = lazy(async () => {
+  await loadNamespaces(['settings'])
+  return { default: (await import('@/pages/settings/PreferencesPage')).PreferencesPage }
+})
+const StaffPage = lazy(async () => {
+  await loadNamespaces(['staff', 'settings'])
+  return { default: (await import('@/pages/settings/StaffPage')).StaffPage }
+})
+
+/**
+ * The authentication screens are lazy too, and for the opposite reason: a signed-in cooperative
+ * never loads them, and they carry their own forms and validation.
+ */
+const ForgotPasswordPage = lazy(async () => ({
+  default: (await import('@/pages/auth/ForgotPasswordPage')).ForgotPasswordPage,
+}))
+const ResetPasswordPage = lazy(async () => ({
+  default: (await import('@/pages/auth/ResetPasswordPage')).ResetPasswordPage,
+}))
 
 /**
  * Three kinds of route.
@@ -63,10 +104,37 @@ const pendingRoutes: RouteObject[] = ALL_NAV_ITEMS.filter(
   element: <ModulePendingPage moduleKey={item.key} phase={item.availableFromPhase} />,
 }))
 
+/**
+ * The authentication screens have no shell above them, so they carry their own boundary.
+ *
+ * A bare `Suspense` with no visible fallback: these screens are small and the page they replace is
+ * a full-height centred card, so a skeleton flashing in the middle of an empty page would be more
+ * distracting than a moment of nothing.
+ */
+function Anonymous({ children }: { children: ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>
+}
+
 export const routes: RouteObject[] = [
+  // Eager: signing in is the first thing that happens, and a round trip before the form appears
+  // is the worst possible first impression of a product used over a district office connection.
   { path: '/login', element: <LoginPage /> },
-  { path: '/forgot-password', element: <ForgotPasswordPage /> },
-  { path: '/reset-password/:token', element: <ResetPasswordPage /> },
+  {
+    path: '/forgot-password',
+    element: (
+      <Anonymous>
+        <ForgotPasswordPage />
+      </Anonymous>
+    ),
+  },
+  {
+    path: '/reset-password/:token',
+    element: (
+      <Anonymous>
+        <ResetPasswordPage />
+      </Anonymous>
+    ),
+  },
   {
     path: '/',
     element: (

@@ -269,7 +269,8 @@
       "unitValue": "Value each",
       "totalValue": "Total value",
       "certificate": "Written certificate",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Action"
     },
     "emptyTitle": "No shares recorded",
     "emptyBody": "This member holds no shares yet. A share purchase is recorded from the shares screen.",
@@ -284,6 +285,41 @@
     "status": {
       "POSTED": "Recorded",
       "VOID": "Cancelled"
+    },
+    "cancel": "Cancel it",
+    "cancelled": "The share movement was cancelled.",
+    "cancelTitle": "Cancel this share movement?",
+    "cancelDescription": "{{quantity}} shares worth {{value}}.",
+    "cancelConsequence": "The movement stays in the register with the reason you give, and a purchase's income entry is reversed rather than removed. Nothing is deleted.",
+    "cancelConfirm": "Cancel the movement",
+    "keep": "Keep it recorded",
+    "reason": "Why it is being cancelled",
+    "reasonHint": "A member can ask about this years later, so say what was wrong.",
+    "recorded": "{{quantity}} shares worth {{value}} were recorded.",
+    "record": {
+      "open": "Record a movement",
+      "title": "Record a share movement",
+      "description": "For {{member}} ({{code}}).",
+      "type": "What happened",
+      "chooseType": "Choose what happened",
+      "quantity": "Number of shares",
+      "unitValue": "Value of one share",
+      "total": "Total value",
+      "issuedOn": "Date",
+      "counterparty": "The other member",
+      "counterpartyHint": "A transfer has two sides, and this is the other one.",
+      "chooseMember": "Search by name or member number",
+      "noMemberFound": "No member found",
+      "clearMember": "Clear the member",
+      "category": "Income category",
+      "categoryHint": "Buying shares puts money into the cooperative, so it has to appear in the books.",
+      "chooseCategory": "Choose a category",
+      "noCategories": "No income category has been set up yet, so a purchase cannot be recorded. Add one under Money first.",
+      "method": "How it was paid",
+      "certificateNo": "Certificate number",
+      "note": "Note",
+      "save": "Record it",
+      "saving": "Recording…"
     }
   },
   "method": {

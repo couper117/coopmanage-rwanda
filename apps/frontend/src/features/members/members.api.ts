@@ -337,6 +337,57 @@ export interface ContributionInput {
   categoryId: string
 }
 
+/**
+ * A share movement.
+ *
+ * `unitValue` is a decimal string, like every other amount that crosses this API. The quantity is
+ * a whole number of shares, which is what it is: a cooperative issues shares, not fractions of one.
+ *
+ * Two fields are conditionally required and the server enforces both. A `PURCHASE` names the income
+ * category the money lands in, because buying shares puts money into the cooperative and that money
+ * has to appear in the books. A transfer names the member on the other side of it, because a
+ * transfer with one party is not a transfer.
+ */
+export interface ShareInput {
+  type: ShareType
+  quantity: number
+  unitValue: string
+  issuedOn?: string
+  certificateNo?: string
+  counterpartyMemberId?: string | null
+  note?: string
+  categoryId?: string
+  method?: PaymentMethod
+}
+
+export function recordShare(
+  memberId: string,
+  input: ShareInput,
+): Promise<{ id: string; quantity: number; totalValue: string }> {
+  return apiRequest<{ id: string; quantity: number; totalValue: string }>(
+    `/members/${memberId}/shares`,
+    { method: 'POST', body: input },
+  )
+}
+
+/**
+ * Corrects a share movement recorded in error.
+ *
+ * A void, never a delete: the movement stays in the history with its reason, and a purchase's
+ * income row is reversed rather than removed — which is what lets a cooperative's books still add
+ * up after the correction.
+ */
+export function voidShare(
+  memberId: string,
+  shareId: string,
+  reason: string,
+): Promise<{ id: string; status: string }> {
+  return apiRequest<{ id: string; status: string }>(`/members/${memberId}/shares/${shareId}/void`, {
+    method: 'POST',
+    body: { reason },
+  })
+}
+
 export function recordContribution(
   memberId: string,
   input: ContributionInput,

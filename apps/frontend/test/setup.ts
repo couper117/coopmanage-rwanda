@@ -1,9 +1,22 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, beforeEach } from 'vitest'
 import '../src/i18n'
 import { queryClient } from '../src/app/queryClient'
 import { resetSession } from './session'
+
+/**
+ * Every screen is loaded on demand, so a test that renders one waits for a module to be fetched
+ * and transformed before the first element exists. In a browser that is a network request measured
+ * in tens of milliseconds; under Vitest it is a transform, and with twenty test files across
+ * parallel workers it can take several seconds on a loaded machine.
+ *
+ * The default one-second budget produced exactly the failure that looks like a bug and is not: a
+ * different handful of files failing on every run with "unable to find" on a screen that renders
+ * perfectly when its file is run alone. Five seconds is the wait for something that is coming, not
+ * a licence for a slow assertion — a test that genuinely fails still fails, five seconds later.
+ */
+configure({ asyncUtilTimeout: 5000 })
 
 /**
  * jsdom implements no layout engine, and the Radix primitives the design system is built on rely
