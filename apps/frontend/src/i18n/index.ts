@@ -56,6 +56,7 @@ export const CORE_NAMESPACES = [
  */
 export const FEATURE_NAMESPACES = [
   'announcements',
+  'assistant',
   'members',
   'finance',
   'inventory',
@@ -141,6 +142,7 @@ const LOADERS: Readonly<
 > = {
   en: {
     announcements: () => import('./locales/en/announcements.json'),
+    assistant: () => import('./locales/en/assistant.json'),
     members: () => import('./locales/en/members.json'),
     finance: () => import('./locales/en/finance.json'),
     inventory: () => import('./locales/en/inventory.json'),
@@ -156,6 +158,7 @@ const LOADERS: Readonly<
   },
   rw: {
     announcements: () => import('./locales/rw/announcements.json'),
+    assistant: () => import('./locales/rw/assistant.json'),
     members: () => import('./locales/rw/members.json'),
     finance: () => import('./locales/rw/finance.json'),
     inventory: () => import('./locales/rw/inventory.json'),

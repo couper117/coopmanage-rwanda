@@ -366,7 +366,7 @@ the persisted cache — `docs/security.md` §9 lists everything kept on the devi
 
 ---
 
-## 13. The assistant ("Ask CoopManage", Phase 14)
+## 13. The assistant ("Ask CoopManage", built in Phase 14)
 
 The assistant answers questions **from SQL, not from the model's memory**. The model is given a
 fixed catalogue of read-only, parameterised query tools (`countMembers`, `sumFinance`,
@@ -378,6 +378,25 @@ The model never sees raw SQL from the user, never receives another cooperative's
 write tools in V1. If no tool fits the question, the assistant says so and links to the relevant
 screen. This is the only way "never invent financial numbers" can be an architectural guarantee
 rather than a prompt instruction.
+
+### As built
+
+One decision goes further than the sketch above, and it is the decision the guarantee rests on.
+**The model does not turn rows into a sentence.** An answer is a translation key and its values,
+assembled from what the tool returned and rendered by the interface — so no model writes any part
+of an answer, not the numbers and not the words around them.
+
+Two reasons, and the second is the one that made it obvious. A sentence a model wrote would be a
+sentence in one language, and Kinyarwanda is a first-class language here rather than a translation
+layer. And a figure inside a written sentence is a figure nobody can trace: the point of a tool
+catalogue is that every number has a query behind it, which is only true if the number travels as a
+value rather than as text.
+
+What a planner contributes is therefore a tool key from a list it was handed and arguments that are
+then parsed against that tool's own schema. `lib/assistant/` holds the interface and the driver that
+ships — a rules planner that matches word stems in both languages and needs no credentials — with
+one file to add a model-backed one. Because a planner never produces a figure, the guarantee does
+not depend on which is live. `docs/assistant.md` is the reference, including the adversarial set.
 
 ---
 

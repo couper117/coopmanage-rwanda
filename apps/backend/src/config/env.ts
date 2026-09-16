@@ -74,6 +74,15 @@ const envSchema = z
      */
     SMS_PROVIDER: z.enum(['mock']).default('mock'),
     /**
+     * Which planner reads a question and picks a tool for the assistant.
+     *
+     * One value today, and it needs no credentials: `rules` matches the words in a question
+     * against a fixed table in both languages. A model-backed planner lands behind the same
+     * interface when there is an account to run it under, and the guarantee does not depend on
+     * which is live — a planner never produces a figure, because every figure comes from a query.
+     */
+    ASSISTANT_PLANNER: z.enum(['rules']).default('rules'),
+    /**
      * The name a cooperative's messages appear to come from, where the gateway supports one.
      * Optional: most Rwandan gateways assign a short code, and a made-up sender is worse than none.
      */

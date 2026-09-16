@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { adminRouter } from './modules/admin/admin.routes.js'
 import { announcementsRouter } from './modules/announcements/announcements.routes.js'
+import { assistantRouter } from './modules/assistant/assistant.routes.js'
 import { auditRouter } from './modules/audit/audit.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { catalogueRouter } from './modules/catalogue/catalogue.routes.js'
@@ -33,6 +34,7 @@ apiRouter.use('/audit', auditRouter)
 apiRouter.use('/reports', reportsRouter)
 apiRouter.use('/documents', documentsRouter)
 apiRouter.use('/meetings', meetingsRouter)
+apiRouter.use('/assistant', assistantRouter)
 apiRouter.use('/notifications', notificationsRouter)
 apiRouter.use('/announcements', announcementsRouter)
 apiRouter.use('/sms', smsRouter)

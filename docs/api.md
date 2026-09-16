@@ -570,23 +570,25 @@ be reached" is the ordinary answer rather than an error.
 
 ### Audit, assistant, platform administration — Phases 2, 14, 3
 
-| Method | Path                       | Permission                     |
-| ------ | -------------------------- | ------------------------------ |
-| GET    | `/audit`                   | `audit:view`                   |
-| POST   | `/assistant/ask`           | `assistant:use`                |
-| GET    | `/assistant/conversations` | `assistant:use`                |
-| GET    | `/admin/cooperatives`      | `platform:cooperatives:view`   |
-| POST   | `/admin/cooperatives`      | `platform:cooperatives:manage` |
-| PATCH  | `/admin/cooperatives/:id`  | `platform:cooperatives:manage` |
-| GET    | `/admin/users`             | `platform:users:view`          |
-| POST   | `/admin/users`             | `platform:users:manage`        |
-| PATCH  | `/admin/users/:id`         | `platform:users:manage`        |
-| GET    | `/admin/settings`          | `platform:settings:manage`     |
-| PUT    | `/admin/settings/:key`     | `platform:settings:manage`     |
-| GET    | `/admin/audit`             | `platform:audit:view`          |
-| GET    | `/admin/health`            | `platform:health:view`         |
-| GET    | `/health`                  | —                              |
-| GET    | `/health/ready`            | —                              |
+| Method | Path                      | Permission                     |
+| ------ | ------------------------- | ------------------------------ |
+| GET    | `/audit`                  | `audit:view`                   |
+| POST   | `/assistant/ask`          | `assistant:use` (rate limited) |
+| GET    | `/assistant/catalogue`    | `assistant:use`                |
+| GET    | `/assistant/threads`      | `assistant:use` (own only)     |
+| GET    | `/assistant/threads/:id`  | `assistant:use` (own only)     |
+| GET    | `/admin/cooperatives`     | `platform:cooperatives:view`   |
+| POST   | `/admin/cooperatives`     | `platform:cooperatives:manage` |
+| PATCH  | `/admin/cooperatives/:id` | `platform:cooperatives:manage` |
+| GET    | `/admin/users`            | `platform:users:view`          |
+| POST   | `/admin/users`            | `platform:users:manage`        |
+| PATCH  | `/admin/users/:id`        | `platform:users:manage`        |
+| GET    | `/admin/settings`         | `platform:settings:manage`     |
+| PUT    | `/admin/settings/:key`    | `platform:settings:manage`     |
+| GET    | `/admin/audit`            | `platform:audit:view`          |
+| GET    | `/admin/health`           | `platform:health:view`         |
+| GET    | `/health`                 | —                              |
+| GET    | `/health/ready`           | —                              |
 
 The whole `/admin` namespace answers **404, not 403**, to a caller who is not a platform
 administrator, so an ordinary user cannot discover that it exists or which parts of it are there.
@@ -594,6 +596,24 @@ This is the same reasoning that makes a wrong-tenant record report "not found" r
 "forbidden".
 
 ---
+
+### The assistant answers with a key, not a sentence
+
+`POST /assistant/ask` returns `answerKey`, `answerParams`, `figures`, `href` and the `tool` that
+answered. It never returns prose, and that is the point rather than a convenience: an answer written
+as a sentence would be an answer in one language, and a figure inside it would be a figure nobody
+could trace. The interface renders the key in the reader's language and shows the figures beside it.
+
+`GET /assistant/catalogue` is what the screen reads first: the tools this caller may use, and
+whether the live planner understands language or matches words. A screen that knows the planner
+matches words can tell a reader to ask plainly and show examples, instead of letting them phrase a
+question three ways and conclude the product is broken.
+
+A thread belongs to the person who asked it. `/assistant/threads` lists only their own and
+`/assistant/threads/:id` answers 404 for anybody else's — including a manager's, at the same
+cooperative. What somebody asked about the cooperative's money is theirs.
+
+`docs/assistant.md` is the reference, including the adversarial set the phase was tested against.
 
 ## 3. Frontend route map
 

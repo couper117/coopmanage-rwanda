@@ -178,6 +178,7 @@ model User {
   announcementsWritten   Announcement[]            @relation("AnnouncementAuthor")
   announcementsPublished Announcement[]            @relation("AnnouncementPublisher")
   smsSent                SmsMessage[]              @relation("SmsSender")
+  assistantThreads       AssistantConversation[]
 
   @@index([status])
   @@map("users")
@@ -253,7 +254,7 @@ model Cooperative {
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  type                CooperativeType        @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  type                CooperativeType         @relation(fields: [typeId], references: [id], onDelete: Restrict)
   staff               CooperativeStaff[]
   units               UnitOfMeasure[]
   auditLog            AuditLog[]
@@ -277,6 +278,7 @@ model Cooperative {
   meetings            Meeting[]
   announcements       Announcement[]
   smsMessages         SmsMessage[]
+  assistantThreads    AssistantConversation[]
 
   @@index([status])
   @@map("cooperatives")
@@ -1512,4 +1514,67 @@ model SmsMessage {
   @@index([announcementId])
   @@index([memberId])
   @@map("sms_messages")
+}
+
+// ---------------------------------------------------------------------------
+// M14 — the assistant
+// ---------------------------------------------------------------------------
+
+enum AssistantRole {
+  USER
+  ASSISTANT
+
+  @@map("assistant_role")
+}
+
+/// One thread of questions, so a reader can look back at what they asked.
+model AssistantConversation {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String   @map("cooperative_id") @db.Uuid
+  /// Whose conversation it is. Nobody else may read it, not even a manager.
+  userId        String   @map("user_id") @db.Uuid
+  /// The first question, trimmed, so a list of threads is readable.
+  title         String
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative        @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    AssistantMessage[]
+
+  @@index([cooperativeId, userId, updatedAt(sort: Desc)])
+  @@map("assistant_conversations")
+}
+
+/// A question, or an answer.
+///
+/// An answer is **not** stored as prose. `answer_key` and `answer_params` are a translation key and
+/// its values, exactly as a notification is, so the same answer reads in English or in Kinyarwanda
+/// and an answer given last year still reads correctly in a language the cooperative switched to
+/// since. Nothing in this table is a sentence a model wrote.
+///
+/// `figures` holds what the reader is shown beside the answer, and `data_snapshot` holds the rows
+/// the tool returned — so any figure the assistant states can be traced to the query that produced
+/// it, which is the whole basis of the phase's guarantee.
+model AssistantMessage {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String        @map("conversation_id") @db.Uuid
+  role           AssistantRole
+  /// The question as it was typed. Null on an answer, which carries a key instead.
+  question       String?
+  answerKey      String?       @map("answer_key")
+  answerParams   Json?         @map("answer_params")
+  /// Which tool answered, or null where none fitted and the assistant said so.
+  tool           String?
+  toolArgs       Json?         @map("tool_args")
+  figures        Json?
+  dataSnapshot   Json?         @map("data_snapshot")
+  /// The screen the answer points at, so a reader can go and see it for themselves.
+  href           String?
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  conversation AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("assistant_messages")
 }

@@ -593,13 +593,26 @@ report again from `params`** rather than serving a kept copy, which means a corr
 the run appears in the reproduced file. That is a deliberate deviation, recorded in
 `docs/reports.md` §5 rather than left for somebody to discover.
 
-### AssistantConversation / AssistantMessage (M11)
+### AssistantConversation / AssistantMessage (M14)
 
-Conversation: `id`, `cooperative_id`, `user_id`, `title`, timestamps.
-Message: `id`, `conversation_id` CASCADE, `role` enum(USER, ASSISTANT), `content`,
-`tool_calls` jsonb null, `data_snapshot` jsonb null, `created_at`.
+Conversation: `id`, `cooperative_id` CASCADE, `user_id` CASCADE, `title`, timestamps.
+Index (cooperative_id, user_id, updated_at desc). A thread belongs to the person who asked it, and
+every read is scoped by both columns: nobody else sees it, not even a manager.
+
+Message: `id`, `conversation_id` CASCADE, `role` enum(USER, ASSISTANT), `question` null,
+`answer_key` null, `answer_params` jsonb null, `tool` null, `tool_args` jsonb null, `figures` jsonb
+null, `data_snapshot` jsonb null, `href` null, `created_at`.
+
+**There is no `content` column, and that is the point.** An answer is a translation key and its
+values, never prose, so the same answer reads in English or in Kinyarwanda and no part of it was
+written by a model. A check constraint enforces the shape: a `USER` row has a question and no
+answer, an `ASSISTANT` row has an answer key and no question, and a row naming a tool names its
+arguments too — a tool recorded without its arguments could not be re-run to check the figure it
+produced.
+
 `data_snapshot` stores the rows the answer was built from, so any figure the assistant states can be
-traced back to the query that produced it.
+traced back to the query that produced it. `figures` stores what the reader was shown beside the
+sentence, which is not always the whole snapshot.
 
 ---
 
@@ -653,7 +666,7 @@ implies a different phase is wrong.
 | M8 ✅     | 8     | `ReportRun`                                                                                                                               |
 | M9 ✅     | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
 | M12 ✅    | 12    | `Announcement`, `SmsMessage`                                                                                                              |
-| M13       | 14    | `AssistantConversation`, `AssistantMessage`                                                                                               |
+| M14 ✅    | 14    | `AssistantConversation`, `AssistantMessage`                                                                                               |
 
 The migration numbers follow the phase rather than a running count: the announcements and SMS
 migration is **M12**, not M10, because it lands in Phase 12 and a name that disagrees with its phase

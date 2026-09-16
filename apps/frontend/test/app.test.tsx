@@ -2,8 +2,10 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ALL_NAV_ITEMS } from '../src/app/navigation'
 import { Providers } from '../src/app/Providers'
 import { routes } from '../src/app/routes'
+import { ModulePendingPage } from '../src/pages/ModulePendingPage'
 import { signInAs } from './session'
 import { changeLanguage } from '../src/i18n'
 
@@ -50,6 +52,20 @@ function renderApp(path = '/') {
   // These screens live behind the session guard, so a test that wants to see one signs in first.
   signInAs('MANAGER')
   const router = createMemoryRouter(routes, { initialEntries: [path] })
+  return render(
+    <Providers>
+      <RouterProvider router={router} />
+    </Providers>,
+  )
+}
+
+/**
+ * Renders one screen with the providers and a router around it, for a page no route reaches any
+ * more. The pending page carries a link back to the dashboard, so it needs a router even when
+ * nothing navigates to it.
+ */
+function renderAlone(element: React.ReactElement) {
+  const router = createMemoryRouter([{ path: '/', element }], { initialEntries: ['/'] })
   return render(
     <Providers>
       <RouterProvider router={router} />
@@ -104,16 +120,37 @@ describe('application shell', () => {
     )
   })
 
-  it('tells the truth about a module that is not built yet', () => {
-    // A module reached before its phase says so and names the phase, rather than showing an
-    // empty screen that reads as a fault. Once a module is built its placeholder disappears on
-    // its own, because the pending route set is derived from the real routes — so this names a
-    // module still ahead, and moves on when that phase lands. It was Announcements until Phase 12
-    // built them.
-    renderApp('/assistant')
-    expect(screen.getByRole('heading', { level: 1, name: 'Ask CoopManage' })).toBeInTheDocument()
-    expect(screen.getByText('Ask CoopManage is not available yet')).toBeInTheDocument()
-    expect(screen.getByText(/arrives in phase 14/i)).toBeInTheDocument()
+  it('has a real screen behind every item in the navigation', async () => {
+    /**
+     * The placeholder has nothing left to point at.
+     *
+     * A module reached before its phase used to say so and name the phase, and the pending route
+     * set was derived from the real routes so a placeholder disappeared the moment its module
+     * landed. Phase 14 built the last one — the assistant — so this test changed from naming a
+     * module still ahead to asserting that none is: every navigation item leads to a screen, and
+     * nothing in the application says "not available yet".
+     *
+     * `ModulePendingPage` and its strings are kept and tested directly below, because a later
+     * module will need them again.
+     */
+    for (const item of ALL_NAV_ITEMS) {
+      const { unmount } = renderApp(item.to)
+      await waitFor(() => expect(document.querySelectorAll('h1')).toHaveLength(1))
+      expect(
+        screen.queryByText(/is not available yet/i),
+        `${item.to} still shows the placeholder`,
+      ).toBeNull()
+      unmount()
+    }
+  }, 30_000)
+
+  it('keeps the placeholder itself working, for the next module that needs it', () => {
+    // Rendered directly rather than through a route, because no route uses it any more. The
+    // component and its strings stay covered so the next phase that adds a module finds them
+    // working rather than rotted.
+    renderAlone(<ModulePendingPage moduleKey="announcements" phase={99} />)
+    expect(screen.getByText('Announcements is not available yet')).toBeInTheDocument()
+    expect(screen.getByText(/arrives in phase 99/i)).toBeInTheDocument()
   })
 
   it('shows a real not-found page for an unknown route', () => {
@@ -139,10 +176,10 @@ describe('language switching', () => {
 
   it('translates the pending module page too', async () => {
     await changeLanguage('rw')
-    // The same module the English test uses, and for the same reason: a module still ahead, so
-    // this does not have to move every time a phase lands.
-    renderApp('/assistant')
-    expect(screen.getByRole('heading', { level: 1, name: 'Baza CoopManage' })).toBeInTheDocument()
+    // Rendered directly for the same reason as its English counterpart: every module is built, so
+    // there is no route that reaches this page. The strings still have to work.
+    renderAlone(<ModulePendingPage moduleKey="announcements" phase={99} />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Amatangazo' })).toBeInTheDocument()
     expect(screen.getByText(/ntiraboneka/i)).toBeInTheDocument()
   })
 

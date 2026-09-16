@@ -7,6 +7,7 @@ import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
 import { announcementRoutes } from '@/features/announcements/announcementRoutes'
+import { assistantRoutes } from '@/features/assistant/assistantRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
 import { documentRoutes } from '@/features/documents/documentRoutes'
 import { inventoryRoutes } from '@/features/inventory/inventoryRoutes'
@@ -104,6 +105,7 @@ const BUILT_PATHS = new Set(
     ...documentRoutes,
     ...meetingRoutes,
     ...announcementRoutes,
+    ...assistantRoutes,
   ]
     .map((route) => route.path)
     .filter((path): path is string => path !== undefined)
@@ -192,6 +194,7 @@ export const routes: RouteObject[] = [
       ...documentRoutes,
       ...meetingRoutes,
       ...announcementRoutes,
+      ...assistantRoutes,
       ...adminRoutes,
       {
         path: 'notifications',

@@ -45,7 +45,7 @@ phase that delivers them, rather than showing a mock-up.
 | [docs/deployment.md](docs/deployment.md)     | Environments, release, backup and restore                                |
 | [docs/roadmap.md](docs/roadmap.md)           | Feature map and the 18 phases with exit criteria                         |
 
-Four modules carry enough of their own reasoning to be written down separately:
+Five modules carry enough of their own reasoning to be written down separately:
 
 | Document                                                         | What it settles                                                           |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -53,6 +53,7 @@ Four modules carry enough of their own reasoning to be written down separately:
 | [docs/documents-and-meetings.md](docs/documents-and-meetings.md) | File validation, storage keys, minutes, attendance and quorum             |
 | [docs/dashboard-and-search.md](docs/dashboard-and-search.md)     | The one-request dashboard, cooperative health, and permission-safe search |
 | [docs/announcements-and-sms.md](docs/announcements-and-sms.md)   | Notifications, announcements, and the SMS provider and message log        |
+| [docs/assistant.md](docs/assistant.md)                           | Ask CoopManage: the tool catalogue, the planner, and the adversarial set  |
 
 ## Stack
 

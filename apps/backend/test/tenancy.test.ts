@@ -54,6 +54,7 @@ interface Tenant {
   decisionId: string
   announcementId: string
   notificationId: string
+  assistantThreadId: string
 }
 
 let a: Tenant
@@ -193,6 +194,13 @@ async function buildTenant(name: string): Promise<Tenant> {
     .send({ title: `Notice from ${name}`, body: 'Something for the members of this cooperative.' })
     .expect(201)
 
+  // A thread of this cooperative's own, asked by its own manager. The sweep then tries to read it
+  // as the other cooperative — and a thread is private to the person who asked, so even a manager
+  // of the same cooperative could not.
+  const asked = await call('post', '/assistant/ask')
+    .send({ question: 'Abanyamuryango bangahe dufite?' })
+    .expect(200)
+
   // A notification is written by whichever module noticed something rather than by an endpoint, so
   // this one is written directly. Addressed to the whole cooperative, which is the case that has
   // to be scoped: a row with no user on it must still never be reachable from another tenant.
@@ -229,6 +237,7 @@ async function buildTenant(name: string): Promise<Tenant> {
     decisionId: (decision.body.data.decisions as { id: string }[])[0]?.id as string,
     announcementId: announcement.body.data.id as string,
     notificationId: notification.id,
+    assistantThreadId: asked.body.data.conversationId as string,
   }
 }
 
@@ -329,6 +338,7 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
     '/announcements/:id/archive': { id: b.announcementId, body: { reason: 'archived from away' } },
     '/notifications/:id/read': { id: b.notificationId, body: {} },
     '/notifications/:id/dismiss': { id: b.notificationId, body: {} },
+    '/assistant/threads/:id': { id: b.assistantThreadId },
   }
 }
 

@@ -140,3 +140,52 @@ export const smsSendLimiter = byCooperative({
   windowMs: 60 * MINUTE,
   limit: SMS_SEND_LIMIT.perHour,
 })
+
+/**
+ * Asking the assistant, limited per person and again per cooperative.
+ *
+ * `docs/security.md` §8 commits to both, and the reason is the planner that has not landed yet: a
+ * model-backed planner costs money per question, and a limit added after the thing that charges is
+ * a limit added too late. Twenty an hour is far more than anybody asks in a working day; two
+ * hundred a day across a cooperative is the ceiling on what one office can spend.
+ *
+ * The per-person limit uses the signed-in user rather than the address, because a cooperative
+ * office shares one public address and a per-IP limit would let the first person through lock out
+ * the rest.
+ */
+export const ASSISTANT_ASK_LIMIT = { perUserPerHour: 20, perCooperativePerDay: 200 } as const
+
+function byUser(options: { windowMs: number; limit: number }): RateLimitRequestHandler {
+  return rateLimit({
+    windowMs: options.windowMs,
+    limit: options.limit,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    skip: () => isTest,
+    keyGenerator: (req) => req.ctx?.user.id ?? 'anonymous',
+    handler: (_req, _res, next) => {
+      next(AppError.rateLimited())
+    },
+  })
+}
+
+const assistantPerUser = byUser({
+  windowMs: 60 * MINUTE,
+  limit: ASSISTANT_ASK_LIMIT.perUserPerHour,
+})
+
+const assistantPerCooperative = byCooperative({
+  windowMs: 24 * 60 * MINUTE,
+  limit: ASSISTANT_ASK_LIMIT.perCooperativePerDay,
+})
+
+/** Both limits, in order: the person first, because that is the one they can do something about. */
+export const assistantAskLimiter: RequestHandler = (req, res, next) => {
+  assistantPerUser(req, res, (error?: unknown) => {
+    if (error) {
+      next(error)
+      return
+    }
+    assistantPerCooperative(req, res, next)
+  })
+}

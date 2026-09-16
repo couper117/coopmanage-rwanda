@@ -1,0 +1,125 @@
+{
+  "title": "Ask CoopManage",
+  "description": "Questions about your cooperative's own records, answered from the database.",
+  "field": {
+    "question": "Your question",
+    "placeholder": "How many members do we have?",
+    "hint": "Enter asks. Shift and Enter starts a new line.",
+    "ask": "Ask"
+  },
+  "plainly": {
+    "title": "Ask plainly",
+    "body": "This assistant matches the words in your question against what it can look up. It does not understand language the way a person does, so a short, plain question works best — and everything it can answer is listed below."
+  },
+  "empty": {
+    "title": "Ask a question about your cooperative",
+    "body": "Every answer comes from your cooperative's own records, with the figures beside it and a link to the screen that shows them in full. Nothing is guessed."
+  },
+  "refused": {
+    "title": "Nothing here answers that",
+    "body": "The assistant only reports what is in your cooperative's records. It will not guess, and it cannot reach anything your role does not cover. The list below is everything it can answer."
+  },
+  "fromTool": "This figure came from: {{tool}}",
+  "seeForYourself": "See it on the screen",
+  "canAsk": {
+    "title": "What you can ask",
+    "body": "This list is yours: it covers only what your role lets you see. Select one to put it in the box."
+  },
+  "history": {
+    "title": "Your earlier questions",
+    "body": "Only you can see these."
+  },
+  "tools": {
+    "countMembers": "How many members are on the register, and how many are active",
+    "membersWithoutPhone": "How many members have no phone number, so cannot be reached by SMS",
+    "contributionsTotal": "What members contributed over a period",
+    "financeBalance": "What the cooperative holds now",
+    "financeFlows": "Money in and out over a period",
+    "topExpenseCategories": "What the cooperative spent most on over a period",
+    "lowStockProducts": "Which products are at or below their minimum",
+    "stockOnHand": "How much of one product is in the store",
+    "salesTotal": "What was sold over a period",
+    "outstandingFromBuyers": "What buyers still owe",
+    "nextMeeting": "When the next meeting is",
+    "openDecisions": "Which actions agreed at a meeting are still open"
+  },
+  "examples": {
+    "countMembers": "How many members do we have?",
+    "membersWithoutPhone": "How many members have no phone number?",
+    "contributionsTotal": "How much did members contribute this month?",
+    "financeBalance": "What is our balance?",
+    "financeFlows": "How much came in and went out this month?",
+    "topExpenseCategories": "What did we spend most on this month?",
+    "lowStockProducts": "What is running low in the store?",
+    "stockOnHand": "How much fertiliser is in the store?",
+    "salesTotal": "How much did we sell this month?",
+    "outstandingFromBuyers": "What do buyers still owe us?",
+    "nextMeeting": "When is the next meeting?",
+    "openDecisions": "Which decisions are still open?"
+  },
+  "answer": {
+    "countMembers": "The register holds {{total}} members, of whom {{active}} are active.",
+    "membersWithoutPhone_one": "One of your {{active}} active members has no phone number, so an SMS will not reach them.",
+    "membersWithoutPhone": "{{count}} of your {{active}} active members have no phone number, so an SMS will not reach them.",
+    "contributionsTotal_one": "One contribution of {{amount}} was recorded between {{from}} and {{to}}.",
+    "contributionsTotal": "Members contributed {{amount}} across {{count}} contributions between {{from}} and {{to}}.",
+    "financeBalance": "The cooperative holds {{balance}}.",
+    "financeFlows": "Between {{from}} and {{to}}, {{income}} came in and {{expenses}} went out.",
+    "topExpenseCategories": "The largest expense between {{from}} and {{to}} was {{category}}, at {{amount}}.",
+    "topExpenseCategories.none": "Nothing was spent between {{from}} and {{to}}.",
+    "lowStockProducts_one": "One product is at or below its minimum: {{product}}.",
+    "lowStockProducts": "{{count}} products are at or below their minimum, starting with {{product}}.",
+    "lowStockProducts.none": "Every product is above its minimum.",
+    "stockOnHand": "The store holds {{quantity}} {{unit}} of {{product}}.",
+    "stockOnHand.noSuchProduct": "There is no product called {{name}} in the catalogue.",
+    "salesTotal_one": "One sale of {{sold}} was confirmed between {{from}} and {{to}}.",
+    "salesTotal": "{{sold}} was sold across {{count}} sales between {{from}} and {{to}}.",
+    "outstandingFromBuyers_one": "{{amount}} is still owed, by {{buyer}}, from a sale on {{since}}.",
+    "outstandingFromBuyers": "{{amount}} is still owed across {{count}} sales, the oldest by {{buyer}} from {{since}}.",
+    "outstandingFromBuyers.none": "Every buyer has paid.",
+    "nextMeeting": "The next meeting is {{title}}, on {{date}}.",
+    "nextMeeting.none": "No meeting is scheduled.",
+    "openDecisions_one": "One action agreed at a meeting is still open, and {{overdue}} of them is past its due date.",
+    "openDecisions": "{{count}} actions agreed at meetings are still open, {{overdue}} of them past their due date.",
+    "openDecisions.none": "Every action agreed at a meeting has been closed."
+  },
+  "refusal": {
+    "noToolFits": "I cannot answer that from your cooperative's records.",
+    "notAQuestion": "I did not find a question there.",
+    "badArguments": "I understood the question but could not work out what to look up."
+  },
+  "figure": {
+    "members": {
+      "total": "On the register",
+      "active": "Active",
+      "inactive": "Not active",
+      "withoutPhone": "Without a phone number"
+    },
+    "contributions": {
+      "total": "Contributed",
+      "count": "Contributions"
+    },
+    "finance": {
+      "balance": "Balance",
+      "income": "Money in",
+      "expenses": "Money out",
+      "incomeAllTime": "Money in, all time",
+      "expensesAllTime": "Money out, all time",
+      "net": "Difference",
+      "entries": "Entries"
+    },
+    "stock": {
+      "onHand": "In the store"
+    },
+    "sales": {
+      "sold": "Sold",
+      "paid": "Paid",
+      "outstanding": "Still owed",
+      "count": "Sales"
+    },
+    "meeting": {
+      "title": "Meeting",
+      "when": "When"
+    }
+  }
+}

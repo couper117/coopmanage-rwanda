@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 13 complete.** Phase 14 is next.
+Status: **Phase 14 complete.** Phase 15 is next.
 
 ---
 
@@ -784,7 +784,7 @@ be left clean. `docs/security.md` §9 records the decision.
 
 ---
 
-### Phase 14 — Ask CoopManage
+### Phase 14 — Ask CoopManage ✅
 
 - A fixed catalogue of read-only query tools, each declaring its permission
 - The tool set built per request from the caller's permissions
@@ -793,6 +793,50 @@ be left clean. `docs/security.md` §9 records the decision.
 
 **Exit:** an adversarial prompt set cannot make the assistant produce a number absent from the
 database or reach another cooperative's data.
+
+**Met**, and checked against the running system with twelve adversarial questions asked as a
+manager and again as a storekeeper. None of the invented figures — 9,999,999, 500,000, 1,000,000 —
+appears in any answer or parameter; a question naming another cooperative was answered from the
+caller's own; and counted before and after the whole set, the demonstration cooperative still has
+120 members, 181 contributions and 281 ledger entries. The only rows the run wrote were the threads
+recording the questions. `docs/assistant.md` §5 is the table.
+
+**The answer is composed by our code, not by a model, and that is the whole design.** An answer is a
+translation key and its values — `answer.countMembers` with `{ total, active }` — assembled from
+what a tool returned and rendered by the interface. There is nowhere for an invented sentence to
+live, and the same answer reads in English or in Kinyarwanda. A model that wrote prose would be
+writing in one language and stating figures nobody could trace; this was never going to be an
+assistant that talks.
+
+**The planner's only job is to choose.** It returns a tool key from the list it was handed and
+proposes arguments, which are then parsed by that tool's own schema. It never sees a row. The worst
+a bad planner can do is pick the wrong tool or refuse — both visible, both harmless to the figures.
+So the guarantee holds whichever planner is live, which is what makes it a guarantee rather than a
+prompt.
+
+**The shipped planner matches words and says so.** It scores a question against a table of stems in
+both languages — `nyamuryango` catches _abanyamuryango_, `gurish` catches _byagurishijwe_ — and
+reports `understandsLanguage: false`, which the screen shows before the first question alongside
+everything that can be asked. A blank box that invites any question and refuses most of them teaches
+a cooperative that the feature is broken rather than that it answers a dozen questions well. A
+model-backed planner lands behind the same interface when there is an account to run it under;
+`ASSISTANT_PLANNER=model` is refused at startup until then.
+
+**Permissions decide what can be learned, before the question is read.** A storekeeper's catalogue
+holds no tool that knows about money, so "what is our balance?" is refused with nothing queried at
+all — not filtered after the fact. And a thread belongs to the person who asked it: a manager
+reading a colleague's questions gets 404.
+
+Two defects the build surfaced, both fixed. The planner read the Kinyarwanda "how many" — _bingahe_
+— as a product name and asked the store about a product called "bingahe"; question words are now
+excluded and a stock question naming no product is refused rather than guessed. And the assistant's
+balance disagreed with the ledger's until it imported `COUNTS_TOWARDS_TOTALS` from the finance
+service rather than restating the rule — an assistant that disagrees with the screen it points at is
+worse than none.
+
+This was the last module in the navigation. Every item now leads to a real screen, so
+`ModulePendingPage` has no route left: it and its strings are kept and tested directly, for the
+next phase that needs them.
 
 ---
 

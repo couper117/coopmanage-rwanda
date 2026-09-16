@@ -1,0 +1,125 @@
+{
+  "title": "Baza CoopManage",
+  "description": "Ibibazo ku nyandiko za koperative yawe, bisubizwa hakoreshejwe amakuru abitse.",
+  "field": {
+    "question": "Ikibazo cyawe",
+    "placeholder": "Abanyamuryango bangahe dufite?",
+    "hint": "Enter ibaza. Shift na Enter itangira umurongo mushya.",
+    "ask": "Baza"
+  },
+  "plainly": {
+    "title": "Baza mu magambo yoroshye",
+    "body": "Uyu mufasha ahuza amagambo yo mu kibazo cyawe n'ibyo ashobora gushakisha. Ntiyumva ururimi nk'umuntu, bityo ikibazo kigufi kandi cyoroshye ni cyo kigenda neza — kandi ibyo ashobora kusubiza byose biri hasi."
+  },
+  "empty": {
+    "title": "Baza ikibazo ku koperative yawe",
+    "body": "Igisubizo cyose kiva mu nyandiko za koperative yawe, hamwe n'imibare iri iruhande n'umurongo ujya ku paji ibyerekana byose. Nta kintu giteganywa."
+  },
+  "refused": {
+    "title": "Nta kintu hano gisubiza icyo",
+    "body": "Uyu mufasha atanga gusa ibiri mu nyandiko za koperative yawe. Ntateganya, kandi ntashobora kugera ku bintu inshingano zawe ntizirimo. Urutonde ruri hasi ni ibyo ashobora kusubiza byose."
+  },
+  "fromTool": "Uyu mubare waturutse kuri: {{tool}}",
+  "seeForYourself": "Bireba ku mashini",
+  "canAsk": {
+    "title": "Ibyo ushobora kubaza",
+    "body": "Uru rutonde ni rwawe: rurimo gusa ibyo inshingano zawe zikwemerera kureba. Hitamo kimwe ushyire mu kazu."
+  },
+  "history": {
+    "title": "Ibibazo wabajije mbere",
+    "body": "Ni wowe wenyine ubibona."
+  },
+  "tools": {
+    "countMembers": "Abanyamuryango bangahe bari ku rutonde, n'abangahe bakora",
+    "membersWithoutPhone": "Abanyamuryango bangahe nta nimero ya telefone bafite, bityo SMS ntibageraho",
+    "contributionsTotal": "Ibyo abanyamuryango batanze mu gihe runaka",
+    "financeBalance": "Amafaranga koperative ifite ubu",
+    "financeFlows": "Amafaranga yinjiye n'ayasohotse mu gihe runaka",
+    "topExpenseCategories": "Icyo koperative yakoresheje amafaranga menshi mu gihe runaka",
+    "lowStockProducts": "Ibicuruzwa bigeze ku rugero ntarengwa cyangwa birushe hasi",
+    "stockOnHand": "Igicuruzwa kimwe kingana iki mu bubiko",
+    "salesTotal": "Ibyagurishijwe mu gihe runaka",
+    "outstandingFromBuyers": "Umwenda abaguzi bakiriho",
+    "nextMeeting": "Inama ikurikira izaba ryari",
+    "openDecisions": "Ibikorwa byemejwe mu nama bikiri bifunguye"
+  },
+  "examples": {
+    "countMembers": "Abanyamuryango bangahe dufite?",
+    "membersWithoutPhone": "Abanyamuryango bangahe nta nimero ya telefone bafite?",
+    "contributionsTotal": "Abanyamuryango batanze angahe uku kwezi?",
+    "financeBalance": "Amafaranga asigaye ni angahe?",
+    "financeFlows": "Yinjiye angahe n'ayasohotse angahe uku kwezi?",
+    "topExpenseCategories": "Twakoresheje amafaranga menshi ku iki uku kwezi?",
+    "lowStockProducts": "Ibiki bigeze hasi mu bubiko?",
+    "stockOnHand": "Hari ifumbire ingana iki mu bubiko?",
+    "salesTotal": "Twagurishije angahe uku kwezi?",
+    "outstandingFromBuyers": "Abaguzi baradutira angahe?",
+    "nextMeeting": "Inama ikurikira ni ryari?",
+    "openDecisions": "Ibyemezo biki bikiri bifunguye?"
+  },
+  "answer": {
+    "countMembers": "Urutonde rurimo abanyamuryango {{total}}, muri bo {{active}} bakora.",
+    "membersWithoutPhone_one": "Umwe mu banyamuryango {{active}} bakora nta nimero ya telefone afite, bityo SMS ntimugeraho.",
+    "membersWithoutPhone": "Abanyamuryango {{count}} kuri {{active}} bakora nta nimero ya telefone bafite, bityo SMS ntibageraho.",
+    "contributionsTotal_one": "Umusanzu umwe wa {{amount}} wanditswe hagati ya {{from}} na {{to}}.",
+    "contributionsTotal": "Abanyamuryango batanze {{amount}} mu misanzu {{count}} hagati ya {{from}} na {{to}}.",
+    "financeBalance": "Koperative ifite {{balance}}.",
+    "financeFlows": "Hagati ya {{from}} na {{to}}, hinjiye {{income}} hasohoka {{expenses}}.",
+    "topExpenseCategories": "Amafaranga menshi yasohotse hagati ya {{from}} na {{to}} ni {{category}}, angana {{amount}}.",
+    "topExpenseCategories.none": "Nta mafaranga yasohotse hagati ya {{from}} na {{to}}.",
+    "lowStockProducts_one": "Igicuruzwa kimwe cyageze ku rugero ntarengwa cyangwa cyarushe hasi: {{product}}.",
+    "lowStockProducts": "Ibicuruzwa {{count}} bigeze ku rugero ntarengwa cyangwa bikarushe hasi, hatangiye kuri {{product}}.",
+    "lowStockProducts.none": "Ibicuruzwa byose biri hejuru y'urugero ntarengwa.",
+    "stockOnHand": "Ububiko burimo {{quantity}} {{unit}} bya {{product}}.",
+    "stockOnHand.noSuchProduct": "Nta gicuruzwa cyitwa {{name}} kiri ku rutonde.",
+    "salesTotal_one": "Igurisha rimwe rya {{sold}} ryemejwe hagati ya {{from}} na {{to}}.",
+    "salesTotal": "Byagurishijwe {{sold}} mu magurisha {{count}} hagati ya {{from}} na {{to}}.",
+    "outstandingFromBuyers_one": "{{amount}} ntiwishyuwe, atangwa na {{buyer}}, ku igurisha ryo ku {{since}}.",
+    "outstandingFromBuyers": "{{amount}} ntiwishyuwe ku magurisha {{count}}, uwa kera ni wa {{buyer}} wo ku {{since}}.",
+    "outstandingFromBuyers.none": "Abaguzi bose barishyuye.",
+    "nextMeeting": "Inama ikurikira ni {{title}}, ku {{date}}.",
+    "nextMeeting.none": "Nta nama yateganyijwe.",
+    "openDecisions_one": "Igikorwa kimwe cyemejwe mu nama kiracyafunguye, kandi {{overdue}} cyarengeje itariki ntarengwa.",
+    "openDecisions": "Ibikorwa {{count}} byemejwe mu nama biracyafunguye, {{overdue}} muri byo byarengeje itariki ntarengwa.",
+    "openDecisions.none": "Ibikorwa byose byemejwe mu nama byarangiye."
+  },
+  "refusal": {
+    "noToolFits": "Ntibashoboka kusubiza icyo mu nyandiko za koperative yawe.",
+    "notAQuestion": "Nta kibazo nabonye aho.",
+    "badArguments": "Numvise ikibazo ariko sinashoboye kumenya icyo nshakisha."
+  },
+  "figure": {
+    "members": {
+      "total": "Ku rutonde",
+      "active": "Bakora",
+      "inactive": "Ntibakora",
+      "withoutPhone": "Nta nimero ya telefone"
+    },
+    "contributions": {
+      "total": "Batanze",
+      "count": "Imisanzu"
+    },
+    "finance": {
+      "balance": "Amafaranga asigaye",
+      "income": "Yinjiye",
+      "expenses": "Yasohotse",
+      "incomeAllTime": "Yinjiye kuva kera",
+      "expensesAllTime": "Yasohotse kuva kera",
+      "net": "Itandukaniro",
+      "entries": "Ibyanditswe"
+    },
+    "stock": {
+      "onHand": "Mu bubiko"
+    },
+    "sales": {
+      "sold": "Byagurishijwe",
+      "paid": "Byishyuwe",
+      "outstanding": "Ntibyishyuwe",
+      "count": "Amagurisha"
+    },
+    "meeting": {
+      "title": "Inama",
+      "when": "Igihe"
+    }
+  }
+}
