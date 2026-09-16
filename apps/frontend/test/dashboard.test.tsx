@@ -350,11 +350,11 @@ describe('the attention list', () => {
 
   it('puts the urgent line first and opens the screen it names', async () => {
     const { router } = renderPage()
-    await waitFor(() => expect(screen.getByText('Urgent')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Today')).toBeInTheDocument())
 
     const list = screen.getByText('Needs attention').closest('section') as HTMLElement
-    const badges = within(list).getAllByText(/Urgent|Soon/)
-    expect(badges[0]).toHaveTextContent('Urgent')
+    const badges = within(list).getAllByText(/Today|Soon/)
+    expect(badges[0]).toHaveTextContent('Today')
 
     const [first] = within(list).getAllByRole('link', { name: 'Open' })
     fireEvent.click(first as HTMLElement)
@@ -527,7 +527,8 @@ describe('the whole page in Kinyarwanda', () => {
 
     // The heading is on screen while the figures are still coming, so this waits for something
     // only the loaded page has.
-    await waitFor(() => expect(screen.getByText('Bikwiye kwitonderwa')).toBeInTheDocument())
+    // WITONDE, the term the glossary fixed in Phase 0 for a WATCH rating.
+    await waitFor(() => expect(screen.getByText('Witonde')).toBeInTheDocument())
     expect(screen.getByRole('heading', { level: 1, name: 'Incamake' })).toBeInTheDocument()
     expect(screen.getByText('Abanyamuryango bakora')).toBeInTheDocument()
     expect(screen.getByText('Ibisaba igikorwa')).toBeInTheDocument()

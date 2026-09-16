@@ -57,19 +57,19 @@ const BY_TYPE: Record<string, { income: SeedCategory[]; expense: SeedCategory[] 
   },
   COFFEE: {
     income: [
-      { name: 'Sale of coffee cherry', nameRw: 'Kugurisha ikawa y’umutobe' },
+      { name: 'Sale of coffee cherry', nameRw: "Kugurisha ikawa y'umutobe" },
       { name: 'Sale of parchment coffee', nameRw: 'Kugurisha ikawa yumye' },
     ],
     expense: [
       { name: 'Fertiliser', nameRw: 'Ifumbire' },
-      { name: 'Washing station running costs', nameRw: 'Ibiciro by’ikigo cy’imesa' },
+      { name: 'Washing station running costs', nameRw: "Ibiciro by'ikigo cy'imesa" },
       { name: 'Packaging', nameRw: 'Ibipfunyika' },
     ],
   },
   DAIRY: {
     income: [{ name: 'Sale of milk', nameRw: 'Kugurisha amata' }],
     expense: [
-      { name: 'Animal feed', nameRw: 'Ibiribwa by’amatungo' },
+      { name: 'Animal feed', nameRw: "Ibiribwa by'amatungo" },
       { name: 'Veterinary care', nameRw: 'Kuvuza amatungo' },
       { name: 'Cooling and collection', nameRw: 'Gukonjesha no gukusanya' },
     ],
@@ -80,7 +80,7 @@ const BY_TYPE: Record<string, { income: SeedCategory[]; expense: SeedCategory[] 
       { name: 'Sale of animal products', nameRw: 'Kugurisha ibikomoka ku matungo' },
     ],
     expense: [
-      { name: 'Animal feed', nameRw: 'Ibiribwa by’amatungo' },
+      { name: 'Animal feed', nameRw: "Ibiribwa by'amatungo" },
       { name: 'Veterinary care', nameRw: 'Kuvuza amatungo' },
     ],
   },
@@ -95,7 +95,7 @@ const BY_TYPE: Record<string, { income: SeedCategory[]; expense: SeedCategory[] 
     income: [{ name: 'Sale of products', nameRw: 'Kugurisha ibicuruzwa' }],
     expense: [
       { name: 'Raw materials', nameRw: 'Ibikoresho fatizo' },
-      { name: 'Electricity and water', nameRw: 'Amashanyarazi n’amazi' },
+      { name: 'Electricity and water', nameRw: "Amashanyarazi n'amazi" },
       { name: 'Equipment maintenance', nameRw: 'Gusana ibikoresho' },
     ],
   },
@@ -107,7 +107,7 @@ const BY_TYPE: Record<string, { income: SeedCategory[]; expense: SeedCategory[] 
     ],
   },
   TRANSPORT: {
-    income: [{ name: 'Transport fees', nameRw: 'Amafaranga y’ubwikorezi' }],
+    income: [{ name: 'Transport fees', nameRw: "Amafaranga y'ubwikorezi" }],
     expense: [
       { name: 'Fuel', nameRw: 'Lisansi' },
       { name: 'Vehicle maintenance', nameRw: 'Gusana ibinyabiziga' },

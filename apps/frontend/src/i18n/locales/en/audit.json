@@ -37,7 +37,8 @@
     "shareVoided": "{{quantity}} shares recorded for {{member}} as {{type}} were cancelled",
     "contributionRecorded": "{{amount}} RWF was recorded for {{member}} as {{type}}",
     "contributionVoided": "A contribution of {{amount}} RWF for {{member}} was cancelled",
-    "exported": "The member register was exported, {{count}} members"
+    "exported": "The member register was exported, {{count}} members",
+    "exported_one": "The member register was exported, one member"
   },
   "finance": {
     "posted": "{{amount}} RWF was entered under {{category}}, reference {{reference}}",
@@ -46,6 +47,7 @@
     "categoryCreated": "The {{kind}} category {{name}} was added",
     "categoryUpdated": "The category {{name}} was changed",
     "exported": "The books were exported as {{format}}, {{count}} entries",
+    "exported_one": "The books were exported as {{format}}, one entry",
     "kind": {
       "INCOME": "money in",
       "EXPENSE": "money out"

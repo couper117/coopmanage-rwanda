@@ -146,7 +146,11 @@ export async function createUnit(ctx: RequestContext, input: CreateUnitInput): P
       entityType: 'UnitOfMeasure',
       entityId: created.id,
       messageKey: 'audit.catalogue.unitCreated',
-      messageParams: { unit: input.nameEn, key: input.key },
+      messageParams: {
+        unit: input.nameEn,
+        unitRw: input.nameRw,
+        key: input.key,
+      },
       after: { key: input.key, nameEn: input.nameEn, nameRw: input.nameRw },
     },
   )
@@ -175,7 +179,14 @@ export async function updateUnit(
   const cooperativeId = requireCooperativeId(ctx)
   const existing = await prisma.unitOfMeasure.findFirst({
     where: { id, OR: [{ cooperativeId: null }, { cooperativeId }] },
-    select: { id: true, cooperativeId: true, key: true, nameEn: true, isActive: true },
+    select: {
+      id: true,
+      cooperativeId: true,
+      key: true,
+      nameEn: true,
+      nameRw: true,
+      isActive: true,
+    },
   })
   if (!existing) throw AppError.notFound()
 
@@ -203,7 +214,10 @@ export async function updateUnit(
       entityType: 'UnitOfMeasure',
       entityId: id,
       messageKey: 'audit.catalogue.unitUpdated',
-      messageParams: { unit: input.nameEn ?? existing.nameEn },
+      messageParams: {
+        unit: input.nameEn ?? existing.nameEn,
+        unitRw: input.nameRw ?? existing.nameRw,
+      },
       before: { nameEn: existing.nameEn, isActive: existing.isActive },
       after: {
         nameEn: input.nameEn ?? existing.nameEn,
@@ -317,7 +331,7 @@ export async function createProductCategory(
       entityType: 'ProductCategory',
       entityId: created.id,
       messageKey: 'audit.catalogue.categoryCreated',
-      messageParams: { category: input.name },
+      messageParams: { category: input.name, categoryRw: input.nameRw ?? input.name },
       after: { name: input.name, nameRw: input.nameRw ?? null },
     },
   )
@@ -336,7 +350,7 @@ export async function updateProductCategory(
   const cooperativeId = requireCooperativeId(ctx)
   const existing = await prisma.productCategory.findFirst({
     where: { id, cooperativeId },
-    select: { id: true, name: true, isActive: true },
+    select: { id: true, name: true, nameRw: true, isActive: true },
   })
   if (!existing) throw AppError.notFound()
 
@@ -364,7 +378,10 @@ export async function updateProductCategory(
       entityType: 'ProductCategory',
       entityId: id,
       messageKey: 'audit.catalogue.categoryUpdated',
-      messageParams: { category: input.name ?? existing.name },
+      messageParams: {
+        category: input.name ?? existing.name,
+        categoryRw: input.nameRw ?? existing.nameRw ?? input.name ?? existing.name,
+      },
       before: { name: existing.name, isActive: existing.isActive },
       after: { name: input.name ?? existing.name, isActive: input.isActive ?? existing.isActive },
     },
@@ -628,7 +645,7 @@ export async function createProduct(
       entityType: 'Product',
       entityId: created.id,
       messageKey: 'audit.catalogue.productCreated',
-      messageParams: { product: input.name, sku },
+      messageParams: { product: input.name, productRw: input.nameRw ?? input.name, sku },
       after: { sku, name: input.name, type: input.type, trackInventory: input.trackInventory },
     },
   )
@@ -656,6 +673,7 @@ export async function updateProduct(
       id: true,
       sku: true,
       name: true,
+      nameRw: true,
       unitId: true,
       trackInventory: true,
       isActive: true,
@@ -771,7 +789,11 @@ export async function updateProduct(
       entityType: 'Product',
       entityId: id,
       messageKey: 'audit.catalogue.productUpdated',
-      messageParams: { product: input.name ?? existing.name, sku: input.sku ?? existing.sku },
+      messageParams: {
+        product: input.name ?? existing.name,
+        productRw: input.nameRw ?? existing.nameRw ?? input.name ?? existing.name,
+        sku: input.sku ?? existing.sku,
+      },
       before: {
         name: existing.name,
         sku: existing.sku,

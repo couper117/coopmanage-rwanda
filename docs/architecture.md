@@ -272,8 +272,22 @@ Rules that hold from the first commit:
   columns rather than only free text.
 - The selected language persists in `localStorage` and, for signed-in users, on the `User` record,
   so it follows the person across devices.
+- A parameter named `xRw` in `messageParams` is the Kinyarwanda rendering of `x`. A cooperative
+  names its own products and expense categories in both languages, and an entry recording only the
+  English one would read in English on a Kinyarwanda screen for ever; the writer records both and
+  the reader picks. Only for names that genuinely exist twice — a member's name and a reference are
+  recorded once because that is all there is of them.
 - A CI check compares the English and Kinyarwanda key sets and fails on any key present in one and
-  missing from the other.
+  missing from the other. It lives in `scripts/translations/check.mjs`, is imported by the frontend
+  suite and run as its own CI step, and covers more than parity: no empty string, identical
+  interpolation placeholders, no string left as a copy of the English, a `_one` form beside every
+  string that interpolates `count` (so "1 products" cannot come back), the straight apostrophe that
+  Kinyarwanda elision actually uses — in the locale files **and** in the source files that carry
+  Kinyarwanda, including the seed, because those names become rows in a cooperative's database — and
+  none of the terms `docs/glossary.md` §8 rules out.
+- Dead keys are swept at the end of a phase rather than enforced, because a key can be reached
+  through a computed path — `tiles.${tile.key}` — and a check strict enough to catch cruft would
+  also fail a build for a key that is genuinely in use.
 
 ---
 

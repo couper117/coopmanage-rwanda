@@ -12,7 +12,7 @@
     "members": "abanyamuryango",
     "finance": "amafaranga",
     "inventory": "ububiko",
-    "sales": "ibicuruzwa byagurishijwe",
+    "sales": "amagurisha",
     "activity": "ibikorwa biheruka"
   },
   "tiles": {
@@ -20,7 +20,7 @@
     "balance": "Amafaranga asigaye",
     "income": "Amafaranga yinjiye uku kwezi",
     "stock": "Ibicuruzwa biri mu bubiko",
-    "sales": "Ibyagurishijwe uku kwezi",
+    "sales": "Amagurisha y'uku kwezi",
     "hint": {
       "members": {
         "total": "{{value}} ku rutonde rwose"
@@ -33,8 +33,8 @@
   "health": {
     "rating": {
       "GOOD": "Byiza",
-      "WATCH": "Bikwiye kwitonderwa",
-      "ATTENTION": "Bisaba igikorwa"
+      "WATCH": "Witonde",
+      "ATTENTION": "Byihutirwa"
     },
     "headline": {
       "GOOD": "Nta kintu gisaba igikorwa uyu munsi.",
@@ -47,8 +47,8 @@
       "ATTENTION": "Amafaranga asigaye ni {{balance}}: koperative irimo umwenda uruta ibyo ifite. Uku kwezi yinjije {{income}} yasohora {{expenses}}."
     },
     "stock": {
-      "GOOD": "Ibicuruzwa {{products}} byose biri hejuru y'urwego ntarengwa.",
-      "GOOD_one": "Igicuruzwa kimwe koperative ifite kiri hejuru y'urwego ntarengwa.",
+      "GOOD": "Ibicuruzwa {{products}} byose biri hejuru y'urugero ntarengwa.",
+      "GOOD_one": "Igicuruzwa kimwe koperative ifite kiri hejuru y'urugero ntarengwa.",
       "WATCH": "Ibicuruzwa {{low}} kuri {{products}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi.",
       "WATCH_one": "Igicuruzwa kimwe kuri {{products}} cyageze ku rwego ntarengwa cyangwa cyarushe hasi.",
       "ATTENTION": "Ibicuruzwa {{empty}} byashize mu bubiko, naho {{low}} kuri {{products}} bigeze ku rwego ntarengwa cyangwa bikarushe hasi.",
@@ -68,7 +68,7 @@
     "go": "Fungura",
     "severity": {
       "WARNING": "Vuba",
-      "CRITICAL": "Byihutirwa"
+      "CRITICAL": "Uyu munsi"
     },
     "item": {
       "negativeBalance": "Amafaranga asigaye ni {{balance}} — koperative irimo umwenda uruta ibyo ifite.",
@@ -90,7 +90,7 @@
     "caption": "Ibicuruzwa bigeze ku rwego ntarengwa cyangwa bikarushe hasi",
     "product": "Igicuruzwa",
     "left": "Biri mu bubiko",
-    "minimum": "Urwego ntarengwa",
+    "minimum": "Urugero ntarengwa",
     "none": "Byashize mu bubiko"
   },
   "activity": {
@@ -114,9 +114,9 @@
       "caption": "Amafaranga yinjiye n'ayasohotse mu kwezi kose kw'amezi cumi n'abiri ashize"
     },
     "sales": {
-      "title": "Ibyagurishijwe",
+      "title": "Amagurisha",
       "description": "Amezi atandatu ashize, ahuzwa n'atandatu abanziriza.",
-      "caption": "Ibyagurishijwe mu kwezi kose kw'amezi atandatu ashize, hamwe n'igihe kibanziriza"
+      "caption": "Amagurisha y'ukwezi kose kw'amezi atandatu ashize, hamwe n'igihe kibanziriza"
     },
     "expensesByCategory": {
       "title": "Aho amafaranga yagiye",
@@ -128,7 +128,7 @@
   },
   "search": {
     "label": "Shakisha mu koperative",
-    "placeholder": "Shakisha abanyamuryango, ibicuruzwa, ibyagurishijwe…",
+    "placeholder": "Shakisha abanyamuryango, ibicuruzwa, amagurisha…",
     "shortcut": "Kanda / kugira ngo ushakishe",
     "hint": "Andika nibura inyuguti ebyiri.",
     "searching": "Turashakisha…",
@@ -140,7 +140,7 @@
       "member": "Abanyamuryango",
       "product": "Ibicuruzwa",
       "buyer": "Abaguzi",
-      "sale": "Ibyagurishijwe",
+      "sale": "Amagurisha",
       "document": "Inyandiko",
       "meeting": "Inama"
     }

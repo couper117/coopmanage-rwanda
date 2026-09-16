@@ -527,7 +527,8 @@ describe('the attendance editor', () => {
     // guest who is also present is counted beside it rather than added in, because a quorum is a
     // number of members.
     expect(screen.getByText(/1 present of 2 members/)).toBeTruthy()
-    expect(screen.getByText(/plus 1 guests/)).toBeTruthy()
+    // "plus 1 guests" until Phase 11 gave the string its singular form.
+    expect(screen.getByText(/plus one guest/)).toBeTruthy()
 
     fireEvent.change(screen.getByLabelText('Nsengimana Alphonse'), {
       target: { value: 'PRESENT' },

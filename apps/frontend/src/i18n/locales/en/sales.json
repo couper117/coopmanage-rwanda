@@ -54,7 +54,6 @@
     "show": "Filters",
     "showWithCount": "Filters ({{total}})",
     "buyer": "Buyer",
-    "anyBuyer": "Every buyer",
     "buyerPlaceholder": "Search by name, organisation or phone number",
     "buyerEmpty": "No buyer matches that",
     "buyerLoading": "Searching the buyers",

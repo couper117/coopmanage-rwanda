@@ -15,8 +15,9 @@
   "scripts": {
     "dev": "concurrently -n api,web -c green,cyan \"npm run dev -w @coopmanage/backend\" \"npm run dev -w @coopmanage/frontend\"",
     "build": "npm run build -w @coopmanage/shared && npm run build -w @coopmanage/backend && npm run build -w @coopmanage/frontend",
-    "typecheck": "npm run typecheck -w @coopmanage/shared && npm run typecheck -w @coopmanage/backend && npm run typecheck -w @coopmanage/frontend",
+    "typecheck": "npm run typecheck -w @coopmanage/shared && npm run typecheck -w @coopmanage/backend && npm run typecheck -w @coopmanage/frontend && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",
+    "check:translations": "node scripts/translations/check.mjs",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

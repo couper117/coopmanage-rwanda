@@ -37,7 +37,8 @@
     "shareVoided": "Imigabane {{quantity}} yanditswe kuri {{member}} nka {{type}} yahagaritswe",
     "contributionRecorded": "{{amount}} RWF yanditswe kuri {{member}} nka {{type}}",
     "contributionVoided": "Umusanzu wa {{amount}} RWF wa {{member}} warahagaritswe",
-    "exported": "Urutonde rw'abanyamuryango rwasohotse, abanyamuryango {{count}}"
+    "exported": "Urutonde rw'abanyamuryango rwasohotse, abanyamuryango {{count}}",
+    "exported_one": "Urutonde rw'abanyamuryango rwasohotse, umunyamuryango umwe"
   },
   "finance": {
     "posted": "{{amount}} RWF yinjijwe muri {{category}}, inomero {{reference}}",
@@ -46,6 +47,7 @@
     "categoryCreated": "Icyiciro {{name}} cy'{{kind}} cyongeweho",
     "categoryUpdated": "Icyiciro {{name}} cyahinduwe",
     "exported": "Ibitabo byasohotse nka {{format}}, ibyanditswe {{count}}",
+    "exported_one": "Ibitabo byasohotse nka {{format}}, icyanditswe kimwe",
     "kind": {
       "INCOME": "amafaranga yinjiye",
       "EXPENSE": "amafaranga yasohotse"

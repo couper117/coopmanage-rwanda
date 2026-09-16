@@ -14,19 +14,19 @@ export const ROLE_DESCRIPTIONS: Record<
     nameEn: 'Accountant',
     nameRw: 'Umubaruramari',
     descriptionEn: 'Records money, contributions and shares, and reports on them',
-    descriptionRw: 'Yandika amafaranga, imisanzu n’imigabane kandi agakora raporo',
+    descriptionRw: "Yandika amafaranga, imisanzu n'imigabane kandi agakora raporo",
   },
   SECRETARY: {
     nameEn: 'Secretary',
     nameRw: 'Umunyamabanga',
     descriptionEn: 'Manages members, meetings, documents and announcements',
-    descriptionRw: 'Acunga abanyamuryango, inama, inyandiko n’amatangazo',
+    descriptionRw: "Acunga abanyamuryango, inama, inyandiko n'amatangazo",
   },
   INVENTORY_OFFICER: {
     nameEn: 'Inventory officer',
     nameRw: 'Ushinzwe ububiko',
     descriptionEn: 'Manages products and everything that moves in or out of store',
-    descriptionRw: 'Acunga ibicuruzwa n’ibyinjira n’ibisohoka mu bubiko',
+    descriptionRw: "Acunga ibicuruzwa n'ibyinjira n'ibisohoka mu bubiko",
   },
   VIEWER: {
     nameEn: 'Viewer',

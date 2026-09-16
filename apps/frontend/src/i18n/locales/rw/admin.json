@@ -39,7 +39,7 @@
     },
     "noResults": {
       "title": "Nta koperative ihuye n'ibyo washakishije",
-      "body": "Gerageza andi magambo, cyangwa usibe muyunguruzi kugira ngo wongere ubone koperative zose."
+      "body": "Gerageza andi magambo, cyangwa ukureho muyunguruzi kugira ngo wongere ubone koperative zose."
     },
     "error": {
       "body": "Ntitwashoboye kuzana urutonde rwa koperative. Reba umurandasi wawe hanyuma wongere ugerageze."
@@ -50,7 +50,7 @@
     "actions": {
       "suspend": "Guhagarika",
       "restore": "Gusubizaho",
-      "archive": "Gushyingura"
+      "archive": "Bika mu bubiko"
     },
     "confirm": {
       "suspend": {
@@ -64,9 +64,9 @@
         "confirm": "Subizaho koperative"
       },
       "archive": {
-        "title": "Ushyingura {{name}}?",
+        "title": "Ubika {{name}} mu bubiko?",
         "body": "Inyandiko zigumaho kugira ngo zibashe kurebwa, ariko koperative ifungwa burundu. Banza uhagarike abakozi basigaye.",
-        "confirm": "Shyingura koperative"
+        "confirm": "Bika koperative mu bubiko"
       }
     },
     "form": {
@@ -159,7 +159,7 @@
     },
     "noResults": {
       "title": "Nta muntu uhuye n'ibyo washakishije",
-      "body": "Gerageza andi magambo, cyangwa usibe muyunguruzi kugira ngo wongere ubone bose."
+      "body": "Gerageza andi magambo, cyangwa ukureho muyunguruzi kugira ngo wongere ubone bose."
     },
     "error": {
       "body": "Ntitwashoboye kuzana urutonde rwa konti. Reba umurandasi wawe hanyuma wongere ugerageze."
@@ -258,7 +258,7 @@
     }
   },
   "apiErrors": {
-    "archiveHasStaff": "Banza uhagarike abakozi bakiri gukora muri iyi koperative mbere yo kuyishyingura.",
+    "archiveHasStaff": "Banza uhagarike abakozi bakiri gukora muri iyi koperative mbere yo kuyibika mu bubiko.",
     "notSelf": "Ntushobora guhindura uburenganzira bwawe. Saba undi ucunga sisitemu abikore.",
     "lastPlatformAdmin": "Uyu ni we wenyine usigaye ucunga sisitemu. Banza ushyireho undi.",
     "cooperativeCodeTaken": "Indi koperative isanzwe ikoresha iyo kode ngufi. Hitamo indi.",

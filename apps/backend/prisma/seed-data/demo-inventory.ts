@@ -42,7 +42,7 @@ export interface DemoProductCategory {
 
 export const DEMO_PRODUCT_CATEGORIES: DemoProductCategory[] = [
   { name: 'Produce', nameRw: 'Umusaruro' },
-  { name: 'Inputs', nameRw: 'Ibikoresho by’ubuhinzi' },
+  { name: 'Inputs', nameRw: "Ibikoresho by'ubuhinzi" },
   { name: 'Packaging', nameRw: 'Ibipfunyika' },
   { name: 'Services', nameRw: 'Serivisi' },
 ]
@@ -118,7 +118,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
   },
   {
     name: 'Maize seed, certified',
-    nameRw: 'Imbuto y’ibigori',
+    nameRw: "Imbuto y'ibigori",
     category: 'Inputs',
     unitKey: 'KG',
     trackInventory: true,
@@ -130,7 +130,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
   },
   {
     name: 'Pesticide, for armyworm',
-    nameRw: 'Umuti w’ibyonnyi',
+    nameRw: "Umuti w'ibyonnyi",
     category: 'Inputs',
     unitKey: 'LITRE',
     trackInventory: true,
@@ -142,7 +142,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
   },
   {
     name: 'Sacks, fifty kilogram',
-    nameRw: 'Amafuka y’ibiro mirongo itanu',
+    nameRw: "Amafuka y'ibiro mirongo itanu",
     category: 'Packaging',
     unitKey: 'PIECE',
     trackInventory: true,

@@ -107,3 +107,62 @@ describe('parameters that are themselves keys', () => {
     expect(translateParams(undefined, (key) => key)).toEqual({})
   })
 })
+
+/**
+ * A name a cooperative gave in both languages.
+ *
+ * An audit entry records the names it was written with, and where the cooperative had two it
+ * records both: `category` and `categoryRw`. The reader is shown the one that matches the page
+ * they are on, so the cooperative's own expense category does not read in English on a Kinyarwanda
+ * screen — the whole point of Phase 11 — and does not read in Kinyarwanda on an English one.
+ */
+describe('a name recorded in both languages', () => {
+  it('shows the English name to an English reader', async () => {
+    await changeLanguage('en')
+    const resolved = translateParams(
+      {
+        reference: 'FIN-2026-000412',
+        category: 'Sale of produce',
+        categoryRw: 'Kugurisha umusaruro',
+      },
+      (key) => i18n.t(key),
+    )
+    expect(resolved.category).toBe('Sale of produce')
+    // And the Kinyarwanda copy is not left in the options: the sentence interpolates `{{category}}`
+    // in both languages, so a second placeholder would be a different sentence.
+    expect(resolved.categoryRw).toBeUndefined()
+  })
+
+  it('shows the Kinyarwanda name to a Kinyarwanda reader', async () => {
+    await changeLanguage('rw')
+    const resolved = translateParams(
+      {
+        reference: 'FIN-2026-000412',
+        category: 'Sale of produce',
+        categoryRw: 'Kugurisha umusaruro',
+      },
+      (key) => i18n.t(key),
+    )
+    expect(resolved.category).toBe('Kugurisha umusaruro')
+    expect(resolved.reference).toBe('FIN-2026-000412')
+    await changeLanguage('en')
+  })
+
+  it('falls back to what an older entry recorded', async () => {
+    // Every entry written before the convention carries only the English name. A trail shows what
+    // was recorded; it does not go looking for a better version.
+    await changeLanguage('rw')
+    const resolved = translateParams({ category: 'Sale of produce' }, (key) => i18n.t(key))
+    expect(resolved.category).toBe('Sale of produce')
+    await changeLanguage('en')
+  })
+
+  it('still resolves an enum that arrives as a key', async () => {
+    await changeLanguage('rw')
+    const resolved = translateParams({ type: 'members.contributions.type.SAVINGS' }, (key) =>
+      i18n.t(key),
+    )
+    expect(resolved.type).not.toBe('members.contributions.type.SAVINGS')
+    await changeLanguage('en')
+  })
+})

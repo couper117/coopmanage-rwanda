@@ -24,19 +24,19 @@
     "notFoundBody": "Paji wasabye ntibaho, cyangwa yarimuwe.",
     "backToDashboard": "Subira ku ncamake",
     "forbiddenTitle": "Nta burenganzira ufite kuri uru rupapuro",
-    "forbiddenBody": "Uruhare rwawe ntirukubiyemo iki gice cya sisitemu. Baza umuyobozi w’ikoperative niba ukeneye.",
-    "forbiddenBodyWithPermission": "Uru rupapuro rusaba uburenganzira bwa \"{{permission}}\", butari mu ruhare rwawe. Umuyobozi w’ikoperative ashobora kubuguha."
+    "forbiddenBody": "Uruhare rwawe ntirukubiyemo iki gice cya sisitemu. Baza umuyobozi w'ikoperative niba ukeneye.",
+    "forbiddenBodyWithPermission": "Uru rupapuro rusaba uburenganzira bwa \"{{permission}}\", butari mu ruhare rwawe. Umuyobozi w'ikoperative ashobora kubuguha."
   },
   "boundary": {
     "title": "Iyi paji ntiyashoboye kugaragara",
     "body": "Ibindi bice bya sisitemu biracyakora. Ushobora gusubira ku ncamake cyangwa kongera kugerageza."
   },
   "tokenExpired": "Umukoro wawe warangiye. Ongera winjire.",
-  "invalidCredentials": "Iyo aderesi ya imeyili n’iryo jambobanga ntibihuye na konti.",
+  "invalidCredentials": "Iyo aderesi ya imeyili n'iryo jambobanga ntibihuye na konti.",
   "accountLocked": "Wagerageje kenshi. Ongera ugerageze mu minota {{minutes}}.",
   "resetTokenInvalid": "Uyu murongo wo guhindura warangiye cyangwa wakoreshejwe. Saba undi.",
   "cooperative": {
-    "registrationNumberTaken": "Iyo nomero y’iyandikwa isanzwe ikoreshwa n’indi koperative."
+    "registrationNumberTaken": "Iyo nomero y'iyandikwa isanzwe ikoreshwa n'indi koperative."
   },
   "staff": {
     "lastManager": "Uyu ni we muyobozi umwe ukora. Banza ushyireho undi muyobozi.",

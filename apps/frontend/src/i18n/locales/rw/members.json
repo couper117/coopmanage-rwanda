@@ -379,7 +379,7 @@
     "cancel": "Guhagarika",
     "cancelTitle": "Uremeza guhagarika uyu musanzu?",
     "cancelDescription": "{{amount}} RWF yanditswe kuri {{name}}.",
-    "cancelConsequence": "Umusanzu uguma mu nyandiko, kandi mu bitabo bya koperative handikwa igikosora kingana na wo ku buryo umutungo usubira uko wari. Nta kintu gisibwa.",
+    "cancelConsequence": "Umusanzu uguma mu nyandiko, kandi mu bitabo bya koperative handikwa igikosora kingana na wo ku buryo amafaranga asigaye asubira uko yari. Nta kintu gisibwa.",
     "cancelConfirm": "Emeza guhagarika umusanzu",
     "cancelled": "Umusanzu wa {{name}} warahagaritswe. Igikosora ni {{reference}}.",
     "reason": "Impamvu ihagarikirwa",

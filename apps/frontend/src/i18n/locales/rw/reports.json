@@ -1,18 +1,18 @@
 {
   "title": "Raporo",
-  "description": "Kora raporo za koperative z’igihe runaka, uzisome ku mashini, hanyuma uzicapye cyangwa uzikuremo dosiye.",
+  "description": "Kora raporo za koperative z'igihe runaka, uzisome ku mashini, hanyuma uzicapye cyangwa uzikuremo dosiye.",
   "notPermitted": "Uruhare rwawe ntirukubemerera kureba iyi raporo.",
   "notYetAvailable": "Iyi raporo isaba amakuru azaza mu cyiciro cya {{phase}}.",
   "withheldWarning": "Iyi raporo izakorwa hatariho ibi bice, kuko uruhare rwawe ntibibariyemo: {{sections}}.",
   "emptyPeriod": "Nta kintu cyanditswe muri iki gihe, bityo raporo irimo ubusa. Reba amatariki.",
   "type": {
-    "monthly-cooperative": "Raporo y’ukwezi ya koperative",
-    "financial": "Raporo y’imari",
-    "member": "Raporo y’abanyamuryango",
-    "inventory": "Raporo y’ububiko",
-    "sales": "Raporo y’amagurisha",
-    "activity": "Raporo y’ibikorwa",
-    "meeting": "Raporo y’inyandikomvugo z’inama"
+    "monthly-cooperative": "Raporo y'ukwezi ya koperative",
+    "financial": "Raporo y'imari",
+    "member": "Raporo y'abanyamuryango",
+    "inventory": "Raporo y'ububiko",
+    "sales": "Raporo y'amagurisha",
+    "activity": "Raporo y'ibikorwa",
+    "meeting": "Raporo y'inyandikomvugo z'inama"
   },
   "format": {
     "pdf": "PDF, yo gucapa",
@@ -26,7 +26,7 @@
     "from": "Kuva",
     "to": "Kugeza",
     "format": "Dosiye",
-    "backwards": "Itariki ya kabiri iri mbere y’iya mbere."
+    "backwards": "Itariki ya kabiri iri mbere y'iya mbere."
   },
   "actions": {
     "print": "Capa",
@@ -44,12 +44,12 @@
   },
   "runs": {
     "title": "Raporo zakozwe mbere",
-    "description": "Raporo zose zakozwe, n’ibyo zari zirimo. Raporo irashobora kongera gukorwa uhereye hano.",
-    "caption": "Raporo zakozwe mbere, iy’ubu iri imbere",
+    "description": "Raporo zose zakozwe, n'ibyo zari zirimo. Raporo irashobora kongera gukorwa uhereye hano.",
+    "caption": "Raporo zakozwe mbere, iy'ubu iri imbere",
     "download": "Ongera ukore",
     "page": "Urupapuro {{page}} kuri {{total}}",
     "emptyTitle": "Nta raporo irakorwa",
-    "emptyBody": "Hitamo raporo n’igihe hejuru, hanyuma ukore dosiye. Izandikwa hano.",
+    "emptyBody": "Hitamo raporo n'igihe hejuru, hanyuma ukore dosiye. Izandikwa hano.",
     "columns": {
       "report": "Raporo",
       "format": "Dosiye",

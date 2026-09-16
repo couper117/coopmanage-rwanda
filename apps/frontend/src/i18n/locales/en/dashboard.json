@@ -34,7 +34,7 @@
     "rating": {
       "GOOD": "Good",
       "WATCH": "Watch",
-      "ATTENTION": "Needs attention"
+      "ATTENTION": "Attention"
     },
     "headline": {
       "GOOD": "Nothing needs your attention today.",
@@ -68,7 +68,7 @@
     "go": "Open",
     "severity": {
       "WARNING": "Soon",
-      "CRITICAL": "Urgent"
+      "CRITICAL": "Today"
     },
     "item": {
       "negativeBalance": "The balance is {{balance}} — the cooperative owes more than it holds.",

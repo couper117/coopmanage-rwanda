@@ -150,13 +150,23 @@ async function productForMovement(
   db: Prisma.TransactionClient,
   cooperativeId: string,
   productId: string,
-): Promise<{ id: string; unitId: string; name: string; sku: string; minStockLevel: Money | null }> {
+): Promise<{
+  id: string
+  unitId: string
+  name: string
+  /** Null where the cooperative gave no Kinyarwanda name; the audit entry falls back to `name`. */
+  nameRw: string | null
+  sku: string
+  minStockLevel: Money | null
+}> {
   const product = await db.product.findFirst({
     where: { id: productId, cooperativeId },
     select: {
       id: true,
       unitId: true,
       name: true,
+      // The Kinyarwanda name comes along so every movement's audit entry can record both.
+      nameRw: true,
       sku: true,
       isActive: true,
       trackInventory: true,
@@ -182,6 +192,7 @@ async function productForMovement(
     id: product.id,
     unitId: product.unitId,
     name: product.name,
+    nameRw: product.nameRw,
     sku: product.sku,
     minStockLevel: product.minStockLevel,
   }
@@ -308,6 +319,7 @@ export async function receiveStock(
         messageParams: {
           quantity: toWire(quantity, 3),
           product: product.name,
+          productRw: product.nameRw ?? product.name,
           reference: movement.reference,
         },
         after: {
@@ -368,6 +380,7 @@ export async function issueStock(ctx: RequestContext, input: IssueInput): Promis
         messageParams: {
           quantity: toWire(quantity, 3),
           product: product.name,
+          productRw: product.nameRw ?? product.name,
           reference: movement.reference,
         },
         after: { type: 'ISSUE', quantity: toWire(quantity, 3), warehouseId: input.warehouseId },
@@ -449,6 +462,7 @@ export async function adjustStock(
         messageKey: 'audit.inventory.adjusted',
         messageParams: {
           product: product.name,
+          productRw: product.nameRw ?? product.name,
           from: toWire(onRecord, 3),
           to: toWire(counted, 3),
           reference: movement.reference,
@@ -539,6 +553,7 @@ export async function transferStock(
         messageParams: {
           quantity: toWire(quantity, 3),
           product: product.name,
+          productRw: product.nameRw ?? product.name,
           from: from.name,
           to: to.name,
         },
@@ -634,7 +649,7 @@ export async function reverseMovement(
       financeTransactionId: true,
       counterpartyTransactionId: true,
       reversedBy: { select: { id: true } },
-      product: { select: { name: true } },
+      product: { select: { name: true, nameRw: true } },
     },
   })
   if (!original) throw AppError.notFound()
@@ -730,7 +745,11 @@ export async function reverseMovement(
         entityType: 'InventoryTransaction',
         entityId: original.id,
         messageKey: 'audit.inventory.reversed',
-        messageParams: { reference: original.reference, product: original.product.name },
+        messageParams: {
+          reference: original.reference,
+          product: original.product.name,
+          productRw: original.product.nameRw ?? original.product.name,
+        },
         before: { reference: original.reference, quantity: toWire(original.quantity, 3) },
         after: { reversals: written.map((row) => row.reference).join(', '), reason },
       },

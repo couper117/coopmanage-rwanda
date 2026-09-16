@@ -90,6 +90,6 @@ export function renderReportCsv(report: ReportDocument): string {
 
   // A byte order mark, written as an escape so it is visible in the source rather than as an
   // invisible character somebody deletes by accident. Excel on Windows needs it to read the
-  // Kinyarwanda characters as UTF-8; without it `imigabane y’abanyamuryango` arrives as mojibake.
+  // Kinyarwanda characters as UTF-8; without it `imigabane y'abanyamuryango` arrives as mojibake.
   return `\ufeff${lines.join('\r\n')}\r\n`
 }

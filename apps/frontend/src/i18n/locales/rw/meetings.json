@@ -109,7 +109,6 @@
     "attendanceCaption": "Abari mu nama",
     "decisionsTitle": "Ibyemezo n'ibikorwa",
     "decisionsEmpty": "Nta cyemezo cyanditswe.",
-    "decisionsCaption": "Ibyo inama yemeje",
     "documentsTitle": "Inyandiko",
     "documentsEmpty": "Nta nyandiko yashyinguwe kuri iyi nama.",
     "minutes": "Inyandikomvugo",
@@ -149,7 +148,8 @@
     "presentCount": "Abitabiriye {{present}} kuri {{total}} b'abanyamuryango",
     "save": "Bika abitabiriye",
     "saving": "Kubika…",
-    "guestsPresent": "hiyongereyeho abashyitsi {{count}}"
+    "guestsPresent": "hiyongereyeho abashyitsi {{count}}",
+    "guestsPresent_one": "hiyongereyeho umushyitsi umwe"
   },
   "decisionForm": {
     "title": "Andika icyemezo",
@@ -189,10 +189,7 @@
     "body": "Hitamo inyandiko isanzwe ibitse kuri iyi koperative. Niba itariho, banza uyishyiremo.",
     "document": "Inyandiko",
     "noDocuments": "Nta nyandiko ihari yo gushyiraho.",
-    "confirm": "Shyiraho",
-    "detachTitle": "Kuraho inyandikomvugo?",
-    "detachBody": "Inyandiko iguma mu bubiko bwa koperative; gusa isano n'iyi nama irakurwaho.",
-    "detachConfirm": "Kuraho"
+    "confirm": "Shyiraho"
   },
   "notice": {
     "scheduled": "{{reference}} yateganyijwe.",

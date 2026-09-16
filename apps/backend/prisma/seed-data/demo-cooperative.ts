@@ -44,7 +44,7 @@ export const DEMO_STAFF: DemoStaffSeed[] = [
     fullName: 'Claudine Uwimana',
     phone: '+250 788 300 413',
     roleKey: 'MANAGER',
-    jobTitle: 'Umuyobozi w’amakoperative',
+    jobTitle: "Umuyobozi w'amakoperative",
     locale: 'RW',
   },
   {
@@ -76,7 +76,7 @@ export const DEMO_STAFF: DemoStaffSeed[] = [
     fullName: 'Aline Ingabire',
     phone: '+250 788 300 417',
     roleKey: 'VIEWER',
-    jobTitle: 'Ugenzuzi w’imari',
+    jobTitle: "Ugenzuzi w'imari",
     locale: 'EN',
   },
 ]

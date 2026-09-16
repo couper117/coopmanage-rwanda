@@ -62,6 +62,7 @@
     "grant": "Allow, as an exception",
     "deny": "Refuse, as an exception",
     "effectFor": "Exception for: {{permission}}",
-    "save": "Save {{count}} change(s)"
+    "save": "Save {{count}} changes",
+    "save_one": "Save one change"
   }
 }

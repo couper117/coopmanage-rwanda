@@ -60,6 +60,14 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
+
+      # Its own step, ahead of the suite, because this is the one failure whose cause should be
+      # readable without opening a test report: a key added in English and not in Kinyarwanda, a
+      # placeholder renamed in one language, a string left as a copy of the English, or a count
+      # without a singular form. The frontend suite runs the same checks; this names them.
+      - name: Check the translations
+        run: npm run check:translations
+
       - run: npm run test
       - run: npm run build
 

@@ -1050,12 +1050,24 @@ async function memberSections(
 /** The few parameters worth printing next to an action, in the order they read best. */
 const DETAIL_KEYS = ['reference', 'name', 'member', 'product', 'code', 'category', 'buyer'] as const
 
-function detailOf(params: unknown): string | null {
+/**
+ * The detail column, in the reader's language.
+ *
+ * An audit entry records the names it was made with, and where a cooperative gave a name in both
+ * languages it records both — see `AuditInput`. A Kinyarwanda page prints the Kinyarwanda one, for
+ * the same reason a Kinyarwanda report prints a product's `nameRw`: an English expense category in
+ * the middle of a Kinyarwanda page is a page somebody has to have translated for them.
+ *
+ * Entries written before that convention carry only the English name, which is then what they get.
+ * That is the right answer for a trail: it prints what was recorded.
+ */
+function detailOf(params: unknown, locale: Locale): string | null {
   if (params === null || typeof params !== 'object') return null
   const record = params as Record<string, unknown>
   const parts: string[] = []
   for (const key of DETAIL_KEYS) {
-    const value = record[key]
+    const translated = locale === 'RW' ? record[`${key}Rw`] : undefined
+    const value = typeof translated === 'string' && translated.length > 0 ? translated : record[key]
     if (typeof value === 'string' && value.length > 0) parts.push(value)
   }
   return parts.length > 0 ? parts.join(' · ') : null
@@ -1097,7 +1109,7 @@ async function activityTable(build: Build): Promise<Section> {
       who: row.actorLabel,
       // In words, never as `finance.transaction.voided`: this page is filed and read by auditors.
       what: auditActionLabel(build.locale, row.action),
-      detail: detailOf(row.messageParams),
+      detail: detailOf(row.messageParams, build.locale),
     })),
     total > rows.length ? { truncatedFrom: total } : {},
   )

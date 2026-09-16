@@ -122,7 +122,7 @@
     "locationSection": "Where they live",
     "membershipSection": "Their membership",
     "created": "{{name}} was added to the register as {{code}}.",
-    "updated": "{{name}}’s details were saved."
+    "updated": "{{name}}'s details were saved."
   },
   "fields": {
     "firstName": "First name",
@@ -242,7 +242,7 @@
     "emptyTitle": "No contributions recorded",
     "emptyBody": "When this member pays a fee, savings or a levy, record it here so the books match the cash.",
     "withheld": "Your role does not cover contributions, so this list is not shown.",
-    "loadFailed": "We could not load this member’s contributions.",
+    "loadFailed": "We could not load this member's contributions.",
     "type": {
       "MEMBERSHIP_FEE": "Membership fee",
       "SAVINGS": "Savings",
@@ -275,7 +275,7 @@
     "emptyTitle": "No shares recorded",
     "emptyBody": "This member holds no shares yet. A share purchase is recorded from the shares screen.",
     "withheld": "Your role does not cover shares, so this list is not shown.",
-    "loadFailed": "We could not load this member’s shares.",
+    "loadFailed": "We could not load this member's shares.",
     "type": {
       "PURCHASE": "Bought",
       "TRANSFER_IN": "Received",
@@ -331,7 +331,7 @@
   },
   "contributionDialog": {
     "title": "Record a contribution",
-    "description": "For {{name}}, {{code}}. The money is written into the cooperative’s books at the same time.",
+    "description": "For {{name}}, {{code}}. The money is written into the cooperative's books at the same time.",
     "submit": "Record the contribution",
     "restate": "This records {{amount}} received from {{name}}.",
     "recorded": "{{amount}} was recorded for {{name}}, reference {{reference}}.",

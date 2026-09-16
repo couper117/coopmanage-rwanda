@@ -109,7 +109,6 @@
     "attendanceCaption": "Who was at the meeting",
     "decisionsTitle": "Decisions and actions",
     "decisionsEmpty": "No decision has been recorded.",
-    "decisionsCaption": "What the meeting decided",
     "documentsTitle": "Papers",
     "documentsEmpty": "No paper has been filed against this meeting.",
     "minutes": "Minutes",
@@ -149,7 +148,8 @@
     "presentCount": "{{present}} present of {{total}} members",
     "save": "Save the attendance",
     "saving": "Saving…",
-    "guestsPresent": "plus {{count}} guests"
+    "guestsPresent": "plus {{count}} guests",
+    "guestsPresent_one": "plus one guest"
   },
   "decisionForm": {
     "title": "Record a decision",
@@ -189,10 +189,7 @@
     "body": "Choose a document already filed for this cooperative. Upload it first if it is not there yet.",
     "document": "Document",
     "noDocuments": "No document is available to attach.",
-    "confirm": "Attach it",
-    "detachTitle": "Detach the minutes?",
-    "detachBody": "The document stays in the cooperative's files; only the link to this meeting is removed.",
-    "detachConfirm": "Detach it"
+    "confirm": "Attach it"
   },
   "notice": {
     "scheduled": "{{reference}} was scheduled.",

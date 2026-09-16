@@ -103,7 +103,8 @@ export async function postTransaction(
 
   const category = await db.financeCategory.findFirst({
     where: { id: input.categoryId, cooperativeId, kind: input.kind, isActive: true },
-    select: { id: true, name: true },
+    // The Kinyarwanda name comes along so the audit entry can record both — see `AuditInput`.
+    select: { id: true, name: true, nameRw: true },
   })
   if (!category) {
     throw AppError.validationFailed([
@@ -147,6 +148,7 @@ export async function postTransaction(
         reference: row.reference,
         amount: toWire(row.amount),
         category: category.name,
+        categoryRw: category.nameRw ?? category.name,
       },
       after: {
         reference: row.reference,
@@ -1052,7 +1054,11 @@ export async function createCategory(
       messageKey: 'audit.finance.categoryCreated',
       // The kind is sent as a translation key, in the audit namespace rather than the finance
       // one, so an audit sentence does not depend on a screen's own strings being loaded.
-      messageParams: { name: input.name, kind: `audit.finance.kind.${input.kind}` },
+      messageParams: {
+        name: input.name,
+        nameRw: input.nameRw ?? input.name,
+        kind: `audit.finance.kind.${input.kind}`,
+      },
       after: { kind: input.kind, name: input.name, nameRw: input.nameRw ?? null },
     },
   )
@@ -1107,7 +1113,10 @@ export async function updateCategory(
       entityType: 'FinanceCategory',
       entityId: id,
       messageKey: 'audit.finance.categoryUpdated',
-      messageParams: { name: input.name ?? before.name },
+      messageParams: {
+        name: input.name ?? before.name,
+        nameRw: input.nameRw ?? before.nameRw ?? input.name ?? before.name,
+      },
       before: { name: before.name, nameRw: before.nameRw, isActive: before.isActive },
       after: {
         name: input.name ?? before.name,

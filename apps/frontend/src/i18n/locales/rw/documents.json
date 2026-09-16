@@ -51,7 +51,7 @@
   },
   "actions": {
     "upload": "Ongeraho inyandiko",
-    "download": "Kuramo",
+    "download": "Gufata idosiye",
     "preview": "Fungura",
     "edit": "Hindura amakuru",
     "archive": "Bika mu bubiko",
@@ -63,17 +63,13 @@
     "description": "Idosiye igenzurwa mbere yo kubikwa: izina ryayo, ubwoko ivuga ko ari bwo, n'ibiyirimo bigomba kuba bihuje.",
     "file": "Idosiye",
     "fileHint": "Kugeza kuri MB {{maxMb}}. Byemewe: {{extensions}}.",
-    "chooseFile": "Hitamo idosiye",
     "titleLabel": "Iyi nyandiko ni iki",
     "titlePlaceholder": "Icyemezo cy'iyandikwa, 2019",
     "categoryLabel": "Ubwoko",
     "descriptionLabel": "Ibyandikwa",
     "visibilityLabel": "Ninde wemerewe kuyireba",
     "visibilityHint": "Inyandiko ifite aho igarukira ireba wowe gusa n'ubika inyandiko za koperative.",
-    "memberLabel": "Ireba umunyamuryango",
     "noMember": "Ntireba umunyamuryango",
-    "meetingLabel": "Ireba inama",
-    "noMeeting": "Ntireba inama",
     "tagsLabel": "Ibimenyetso",
     "tagsHint": "Bitandukanye n'akitso. Kugeza ku icumi.",
     "tagsPlaceholder": "ubutaka, icyemezo, 2026",
@@ -102,7 +98,6 @@
     "checksum": "Ikimenyetso cy'ubusugire",
     "checksumHint": "SHA-256 y'idosiye nk'uko yashyizwemo, ku buryo kopi ishobora kugenzurwa.",
     "uploadedBy": "Yashyinguwe na",
-    "uploadedAt": "Yashyinguwe ku",
     "member": "Umunyamuryango",
     "meeting": "Inama",
     "tags": "Ibimenyetso",
@@ -110,7 +105,7 @@
     "archived": "Yabitswe ku {{when}}",
     "archivedBecause": "Yabitswe: {{reason}}",
     "nothingRecorded": "Nta kintu cyanditswe",
-    "previewUnavailable": "Ubu bwoko bw'idosiye ntibushobora kwerekanwa hano. Iyikuremo usome."
+    "previewUnavailable": "Ubu bwoko bw'idosiye ntibushobora kwerekanwa hano. Ifate kuri mudasobwa usome."
   },
   "notice": {
     "uploaded": "{{title}} yongewemo.",

@@ -62,6 +62,7 @@
     "grant": "Mwemerere, nk'ikidasanzwe",
     "deny": "Mwangire, nk'ikidasanzwe",
     "effectFor": "Ikidasanzwe kuri: {{permission}}",
-    "save": "Bika impinduka {{count}}"
+    "save": "Bika impinduka {{count}}",
+    "save_one": "Bika impinduka imwe"
   }
 }

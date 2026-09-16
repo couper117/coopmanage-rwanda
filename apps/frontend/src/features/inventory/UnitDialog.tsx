@@ -197,6 +197,8 @@ export function UnitDialog({
             <Input
               autoComplete="off"
               disabled={unit !== null}
+              // Not a translatable string: the key is an uppercase ASCII identifier the cooperative
+              // types itself, and this is an example of the shape rather than a word to read.
               placeholder="SACK_50KG"
               {...register('key')}
             />

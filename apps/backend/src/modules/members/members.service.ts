@@ -661,7 +661,11 @@ export async function memberTimeline(
         status: 'POSTED',
         reversalOfId: null,
       },
-      select: { amount: true, occurredAt: true, category: { select: { name: true } } },
+      select: {
+        amount: true,
+        occurredAt: true,
+        category: { select: { name: true, nameRw: true } },
+      },
       orderBy: { occurredAt: 'desc' },
       take: limit,
     })
@@ -670,7 +674,10 @@ export async function memberTimeline(
         at: row.occurredAt.toISOString(),
         kind: 'PAYMENT',
         messageKey: 'timeline.payment',
-        messageParams: { category: row.category.name },
+        messageParams: {
+          category: row.category.name,
+          categoryRw: row.category.nameRw ?? row.category.name,
+        },
         amount: toWire(row.amount),
       })
     }

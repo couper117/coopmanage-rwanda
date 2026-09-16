@@ -529,6 +529,8 @@ describe('in Kinyarwanda', () => {
     expect(screen.getAllByText('Inyandiko').length).toBeGreaterThan(0)
     expect(screen.getByText('Ongeraho inyandiko')).toBeTruthy()
     expect(screen.getAllByText('Iyandikwa').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Kuramo').length).toBeGreaterThan(0)
+    // Download is "Gufata idosiye", deliberately not the Export word: "Kuramo" and "Gukuramo" are
+    // the same word to a reader, and one retrieves a stored file while the other makes a new one.
+    expect(screen.getAllByText('Gufata idosiye').length).toBeGreaterThan(0)
   })
 })

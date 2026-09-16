@@ -1087,7 +1087,7 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
     data: {
       cooperativeId,
       reference: `MTG-${held.getUTCFullYear()}-000001`,
-      title: 'Inteko rusange y’igihembwe',
+      title: "Inteko rusange y'igihembwe",
       type: 'GENERAL_ASSEMBLY',
       scheduledFor: held,
       endsAt: new Date(held.getTime() + 3 * 60 * 60 * 1000),
@@ -1097,13 +1097,13 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
       createdById: (await staffUserId(secretary.id)) ?? null,
       agenda: {
         create: [
-          { position: 1, title: 'Ifungura n’ikurikirana ry’abitabiriye' },
+          { position: 1, title: "Ifungura n'ikurikirana ry'abitabiriye" },
           {
             position: 2,
-            title: 'Raporo y’imari y’igihembwe',
+            title: "Raporo y'imari y'igihembwe",
             presenterStaffId: manager.id,
           },
-          { position: 3, title: 'Umwuma w’ibigori wa kabiri' },
+          { position: 3, title: "Umwuma w'ibigori wa kabiri" },
         ],
       },
       attendees: {
@@ -1116,10 +1116,10 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
             checkedInAt: index % 4 === 3 ? null : held,
           })),
           {
-            guestName: 'Umukozi w’akarere ushinzwe amakoperative',
+            guestName: "Umukozi w'akarere ushinzwe amakoperative",
             status: 'PRESENT' as const,
             checkedInAt: held,
-            note: 'Yitabiriye nk’umugenzuzi',
+            note: "Yitabiriye nk'umugenzuzi",
           },
         ],
       },
@@ -1134,8 +1134,8 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
       {
         meetingId: assembly.id,
         agendaItemId: dryerItem?.id ?? null,
-        title: 'Kugura umwuma wa kabiri w’ibigori mbere y’isarura',
-        description: 'Guhera ku bwizigame bwa koperative, hatanzwe amasezerano abiri y’ibiciro.',
+        title: "Kugura umwuma wa kabiri w'ibigori mbere y'isarura",
+        description: "Guhera ku bwizigame bwa koperative, hatanzwe amasezerano abiri y'ibiciro.",
         decisionType: 'RESOLUTION',
         votesFor: Math.max(1, Math.floor(members.length * 0.7)),
         votesAgainst: 2,
@@ -1144,7 +1144,7 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
       },
       {
         meetingId: assembly.id,
-        title: 'Gusana igisenge cy’ububiko',
+        title: "Gusana igisenge cy'ububiko",
         decisionType: 'ACTION',
         dueOn: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 2, 1)),
         responsibleStaffId: manager.id,
@@ -1157,7 +1157,7 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
     data: {
       cooperativeId,
       reference: `MTG-${next.getUTCFullYear()}-000002`,
-      title: 'Inama y’ubuyobozi',
+      title: "Inama y'ubuyobozi",
       type: 'BOARD',
       scheduledFor: next,
       location: 'Inzu ya koperative, Muhoza',
@@ -1165,7 +1165,7 @@ async function seedDemoMeetings(cooperativeId: string): Promise<void> {
       createdById: (await staffUserId(secretary.id)) ?? null,
       agenda: {
         create: [
-          { position: 1, title: 'Ikurikirana ry’ibyemezo byashize' },
+          { position: 1, title: "Ikurikirana ry'ibyemezo byashize" },
           { position: 2, title: 'Gutegura isarura' },
         ],
       },
@@ -1212,17 +1212,17 @@ async function seedDemoDocuments(cooperativeId: string): Promise<void> {
 
   const papers = [
     {
-      title: 'Icyemezo cy’iyandikwa rya koperative',
+      title: "Icyemezo cy'iyandikwa rya koperative",
       category: 'REGISTRATION' as const,
       fileName: 'icyemezo-cyiyandikwa.pdf',
-      body: 'Icyemezo cy’iyandikwa rya koperative — RCA',
+      body: "Icyemezo cy'iyandikwa rya koperative — RCA",
       meetingId: null,
     },
     {
-      title: 'Inyandikomvugo y’inteko rusange',
+      title: "Inyandikomvugo y'inteko rusange",
       category: 'MEETING_MINUTES' as const,
       fileName: 'inyandikomvugo-inteko-rusange.pdf',
-      body: 'Inyandikomvugo y’inteko rusange y’igihembwe',
+      body: "Inyandikomvugo y'inteko rusange y'igihembwe",
       meetingId: meeting?.id ?? null,
     },
   ]
@@ -1268,7 +1268,7 @@ async function seedDemoDocuments(cooperativeId: string): Promise<void> {
  *
  * Only two characters need it and both are Kinyarwanda punctuation: the right single quotation
  * mark in `cy'iyandikwa` and the em dash. Writing the string's UTF-8 bytes instead — which the
- * first version of this did — turned `Icyemezo cy’iyandikwa` into `Icyemezo cy iyandikwa` in the
+ * first version of this did — turned `Icyemezo cy'iyandikwa` into `Icyemezo cy iyandikwa` in the
  * rendered page, because the viewer dropped the bytes it could not map.
  */
 function winAnsi(text: string): string {

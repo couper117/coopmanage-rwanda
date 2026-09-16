@@ -137,7 +137,7 @@ this table, it is added here first and then used.
 | Activate                    | Gusubizaho             |                                                                                                   |
 | Confirm                     | Kwemeza                |                                                                                                   |
 | Export                      | Gukuramo               |                                                                                                   |
-| Download                    | Gufata kuri mudasobwa  |                                                                                                   |
+| Download                    | Gufata idosiye         | On a control. _Gufata kuri mudasobwa_ inside a sentence — see §8                                  |
 | Upload                      | Kohereza               |                                                                                                   |
 | Print                       | Gucapa                 |                                                                                                   |
 | Login                       | Kwinjira               |                                                                                                   |
@@ -158,11 +158,28 @@ this table, it is added here first and then used.
 
 ## 7. Health indicators
 
+The cooperative's rating on the dashboard. Written sentence-cased on the badge — _Byiza_, _Witonde_,
+_Byihutirwa_ — because every other badge in the interface is.
+
 | English   | Kinyarwanda |
 | --------- | ----------- |
 | GOOD      | BYIZA       |
 | WATCH     | WITONDE     |
 | ATTENTION | BYIHUTIRWA  |
+
+### The severity of a line in the attention list
+
+A different question from the rating, and deliberately a different pair of words: the rating says
+how the cooperative stands, the severity says **when the work has to happen**.
+
+| English | Kinyarwanda |
+| ------- | ----------- |
+| Today   | Uyu munsi   |
+| Soon    | Vuba        |
+
+They were "Urgent" and "Watch" until Phase 11, when _Watch_ turned out to be the rating's own word
+sitting three lines above it on the same page. One word with two meanings side by side is a defect
+whichever language it is in.
 
 ## 8. Pitfalls to avoid
 
@@ -199,6 +216,34 @@ this table, it is added here first and then used.
   and its first version printed `Icyemezo cy iyandikwa` — the apostrophe in _cy'iyandikwa_ silently
   dropped, because the UTF-8 bytes of `'` mean nothing to a standard-encoded Helvetica. Kinyarwanda
   punctuation is not decoration; it changes the word.
+- **One apostrophe character, U+0027.** Kinyarwanda marks elision with it — _n'umuryango_,
+  _cy'iyandikwa_ — so it is part of the word, not typography. Twenty-two strings had picked up the
+  typographic `’` instead, which means a search, a sort or a diff treats the same word as two. The
+  translation check enforces the straight apostrophe in both languages.
+- **Archiving has one word, and _gushyingura_ is not it.** _Gushyingura_ is to bury. A cooperative
+  was archived with it while a document was archived with _kubika mu bubiko_, which is the term
+  fixed above. A reader cannot be expected to work out that burying a cooperative and filing a
+  document are the same action.
+- **Filters are cleared, not erased.** _Gusiba_ means to erase and describes nothing this product
+  does, not even to a filter: use _gukuraho_.
+- **"Download" and "Export" must not share a stem.** _Kuramo_ and _Gukuramo_ are the same word to a
+  reader, and one retrieves the cooperative's own stored file while the other produces a new one.
+  Download is _Gufata idosiye_ on a control; the fuller _Gufata kuri mudasobwa_ belongs in a
+  sentence, where there is room for it. The first version of this table had only the long form,
+  which stacked a document row's three action buttons into three lines in Kinyarwanda and two in
+  English — the kind of thing only a screen shows you.
+- **A term reviewed against a screen may change, and then this table changes first.** That is what
+  Phase 11 is for. Every change above was made here before it was made in a translation file.
+- **A name the cooperative gave in two languages is recorded in both.** An audit entry stores the
+  names it was written with, so the trail survives a rename; storing only the English one would
+  make a Kinyarwanda cooperative's own expense category read in English on its activity log and on
+  the activity report its auditors are handed, for ever. A parameter `xRw` is the Kinyarwanda
+  rendering of `x`, and the reader is shown the one that matches the page. Entries written before
+  this carry only the English name, which is then what they show: a trail reports what was
+  recorded, not what it might have said.
+- **A proper noun is not translated, and neither is a name somebody typed.** A buyer called
+  "Musanze District Produce Buyer" is called that on a Kinyarwanda page too, because that is the
+  buyer's name.
 - Prefer the everyday word over the formal or academic one. The reader is a cooperative secretary in
   a rural district office, not a ministry economist.
 - Kinyarwanda strings run 20–40 % longer than English. Every layout is checked in Kinyarwanda before

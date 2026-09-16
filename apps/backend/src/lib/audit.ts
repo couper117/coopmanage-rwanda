@@ -65,6 +65,19 @@ export interface AuditInput {
   entityId?: string | null
   /** Translation key for the sentence shown in the audit screen. */
   messageKey: string
+  /**
+   * Values for that sentence, recorded as they were at the time.
+   *
+   * **A parameter named `xRw` is the Kinyarwanda rendering of `x`.** A cooperative names its own
+   * products and its own expense categories in both languages, and an entry that recorded only the
+   * English one would read in English on a Kinyarwanda screen for ever — on the activity log, and
+   * on the activity report an auditor is handed on paper. So the writer records both and the reader
+   * picks; the English name remains the fallback, which is also what every entry written before
+   * this convention has.
+   *
+   * Only for names a cooperative gave in two languages. A member's name, a reference and a
+   * warehouse's name are recorded once because that is all there is of them.
+   */
   messageParams?: MessageParams
   before?: Snapshot | null
   after?: Snapshot | null

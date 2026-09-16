@@ -288,8 +288,8 @@ function layoutOf(doc: Doc, report: ReportDocument, section: TableSection): Cell
 /**
  * The widest single word, which is the narrowest a column can be without breaking one in half.
  *
- * The member register proved this necessary: `Inomero y’umunyamuryango` is a long heading, its
- * column was given a share by weight, and pdfkit split the word as `Inomero y’umun` / `yamuryango`.
+ * The member register proved this necessary: `Inomero y'umunyamuryango` is a long heading, its
+ * column was given a share by weight, and pdfkit split the word as `Inomero y'umun` / `yamuryango`.
  * A wrapped heading is fine; a word cut in two on a sheet a cooperative files is not.
  */
 function widestWord(doc: Doc, text: string): number {
@@ -311,7 +311,7 @@ function widestWord(doc: Doc, text: string): number {
  * The order matters, and the register report is the proof. An earlier version handed each column
  * its full demand as soon as the page could afford it, which starved whichever column was settled
  * last: the member-code column was left 67 points for a heading needing 102, and pdfkit cut
- * `Inomero y’umunyamuryango` into `Inomero y’umun` and `yamuryango` on a sheet a cooperative
+ * `Inomero y'umunyamuryango` into `Inomero y'umun` and `yamuryango` on a sheet a cooperative
  * files. Reserving the minimums first cannot do that, because a column is never given less than
  * its longest word while the page has room for every column's.
  *

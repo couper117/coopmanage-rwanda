@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 10 complete.** Phase 11 is next.
+Status: **Phase 11 complete.** Phase 12 is next.
 
 ---
 
@@ -594,7 +594,7 @@ what a screen reader gets is the figures rather than a row of decorative shapes.
 
 ---
 
-### Phase 11 — Kinyarwanda completion
+### Phase 11 — Kinyarwanda completion ✅
 
 - Every namespace complete, reviewed by hand against the glossary, not machine-translated
 - Terminology consistent across screens, reports and notifications
@@ -603,6 +603,62 @@ what a screen reader gets is the figures rather than a row of decorative shapes.
 
 **Exit:** a full pass through every screen in Kinyarwanda finds no English string, no truncated
 label and no awkward phrasing.
+
+**Met.** 2,356 keys across twenty namespaces in both languages, reviewed against
+`docs/glossary.md` a namespace at a time. The parity and terminology rules now live in one place,
+`scripts/translations/check.mjs`, which the frontend suite imports and CI runs as its own named
+step — so a failure says which key and why, without anybody opening a test report.
+
+Nothing was machine-translated, and the sweep found **no English string anywhere in the
+translations**. What it did find was worth the pass:
+
+- **Four strings interpolated `{{count}}` with no singular form**, so one of anything read as a
+  plural. One of them was literally `Save {{count}} change(s)` — the crutch that plurals exist to
+  remove. The checker now fails a `{{count}}` without a `_one` beside it, in both languages.
+- **"Archive" had two words.** A cooperative was archived with _gushyingura_, to bury, while a
+  document was archived with _kubika mu bubiko_. A reader cannot be expected to work out that
+  burying a cooperative and filing a document are the same action.
+- **"Download" and "Export" shared a stem.** _Kuramo_ and _Gukuramo_ are the same word to a reader,
+  and one retrieves the cooperative's own stored file while the other makes a new one. The
+  glossary's long form, _gufata kuri mudasobwa_, turned out to stack a document row's three action
+  buttons three deep in Kinyarwanda against two in English — the kind of thing only a screen shows
+  you — so the control says _gufata idosiye_ and the sentence keeps the fuller phrase.
+- **Twenty-two strings carried the wrong apostrophe.** Kinyarwanda marks elision with it —
+  _n'umuryango_ — so it is part of the word, and a curly `’` makes the same word two words to any
+  search, sort or diff. It had spread beyond the locale files into the shared report labels printed
+  on paper and into the seeded names that become rows in a cooperative's database. One character
+  everywhere now, enforced across the locale files and the fourteen source files that carry
+  Kinyarwanda.
+- **Eleven keys nothing used.** Among them the confirmation dialog for detaching a meeting's
+  minutes — written, never wired up, and by the design system's own rule it should not exist:
+  detaching is reversible, and a dialog on every harmless action trains people to dismiss dialogs
+  without reading them. Swept, along with strings for a connection state the product does not
+  distinguish; Phase 13 will add what offline resilience actually needs rather than inherit a guess.
+- **Phase 10's own dashboard had drifted from the glossary** in three places, all fixed: the health
+  ratings are the terms fixed in Phase 0 (BYIZA / WITONDE / BYIHUTIRWA), a sale is _igurisha_ and
+  not _ikigurishijwe_, and the minimum stock level is _urugero ntarengwa_ as it is everywhere in
+  inventory.
+
+**The one finding that needed code, not words.** A Kinyarwanda activity report printed the
+cooperative's own expense categories in English — "Sale of produce" — because an audit entry
+recorded the name it was written with, and only the English one. A cooperative names its categories
+and its products in both languages, so the entry now records both: a parameter `xRw` is the
+Kinyarwanda rendering of `x`, and the reader is shown the one matching the page they are on. Checked
+against the running system: one entry, `EX-2026-000049`, reads "Seeds and seedlings" in English and
+"Imbuto" in Kinyarwanda. Entries written before the convention carry only the English name, which is
+then what they show — a trail reports what was recorded.
+
+**Layout at every breakpoint** is tested rather than eyeballed: `apps/frontend/test/kinyarwanda.test.tsx`
+renders the dashboard and the member register in Kinyarwanda at 360, 768 and 1440, and reads the
+whole document back looking for an English word or an unresolved key. jsdom has no layout engine, so
+that cannot prove nothing overflows; it does prove that the shape each width chooses still renders,
+still carries the same words, and still leaves no key on screen. The static side is checked too: the
+longest control label in Kinyarwanda is 24 characters, table headings wrap inside their cells rather
+than pushing a table sideways, and the least important columns are held back to the widest layout.
+
+One caveat worth recording: a database seeded before this phase keeps the old apostrophe in four
+demonstration rows, because the seed deliberately leaves a cooperative's own content alone once it
+exists. A database seeded from empty gets the settled spelling.
 
 ---
 

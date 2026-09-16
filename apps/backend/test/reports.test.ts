@@ -505,6 +505,24 @@ describe('the other six reports', () => {
     }
   })
 
+  it("prints the cooperative's own Kinyarwanda names in the Kinyarwanda activity report", async () => {
+    // The fixture's income category was created with both names: "Sale of produce" and
+    // "Kugurisha umusaruro". An audit entry records both, and the page prints the one that matches
+    // the language it is in — an English expense category in the middle of a Kinyarwanda page is a
+    // page somebody has to have translated for them.
+    const rw = (await preview(manager, 'activity', { ...PERIOD, locale: 'RW' }).expect(200)).body
+      .data as Doc
+    const rwDetails = (sectionOf(rw, 'activity').rows ?? []).map((row) => row.detail ?? '')
+    expect(rwDetails.some((detail) => detail.includes('Kugurisha umusaruro'))).toBe(true)
+    expect(rwDetails.some((detail) => detail.includes('Sale of produce'))).toBe(false)
+
+    // And the English page is unchanged, which is the other half of the same rule.
+    const en = (await preview(manager, 'activity').expect(200)).body.data as Doc
+    const enDetails = (sectionOf(en, 'activity').rows ?? []).map((row) => row.detail ?? '')
+    expect(enDetails.some((detail) => detail.includes('Sale of produce'))).toBe(true)
+    expect(enDetails.some((detail) => detail.includes('Kugurisha umusaruro'))).toBe(false)
+  })
+
   it('prints the minutes report, counting quorum and naming unfiled minutes', async () => {
     // A meeting inside the period, with a quorum it did not meet and no minutes filed — which is
     // exactly the pair of gaps this report exists to surface at the next assembly.
@@ -675,7 +693,9 @@ describe('the PDF', () => {
     ).body as Buffer
     const text = pdfText(pdf)
 
-    expect(text).toContain('Raporo y’ukwezi ya koperative')
+    // The straight apostrophe, U+0027: Kinyarwanda elision is one character across this product,
+    // and a PDF that printed a different one from the screen would be a different word on paper.
+    expect(text).toContain("Raporo y'ukwezi ya koperative")
     expect(text).toContain('Abanyamuryango')
     // The month is Nzeri, not September: a report half in English is a report a Kinyarwanda
     // speaker has to have translated for them.
