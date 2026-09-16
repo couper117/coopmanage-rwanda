@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { buildPageMeta, sendCollection, sendData } from '../../lib/envelope.js'
+import { withIdempotency } from '../../lib/idempotency.js'
 import { requireContext } from '../../middleware/requirePermission.js'
 import {
   createMember,
@@ -103,16 +104,39 @@ export async function getMemberShares(req: Request, res: Response): Promise<void
   sendData(res, await listMemberShares(requireContext(req), id))
 }
 
+/**
+ * The four handlers below carry an idempotency key, and they are here for the same reason the
+ * finance ledger's are.
+ *
+ * A member's contribution and a share purchase are **money**: a contribution posts an income entry
+ * into the cooperative's books and a purchase does the same. A treasurer on a district-office
+ * connection who presses Record twice because the page hung would otherwise leave the books
+ * holding the same 7,500 francs twice, and somebody has to work out afterwards which of two
+ * identical entries is real. Voiding is the same problem mirrored: two reversals of one
+ * contribution take the total below where it started.
+ *
+ * Phase 13's third bullet asks for the `IdempotencyKey` table to be honoured across finance,
+ * inventory and sales. It already was. These four were the gap, because a contribution is recorded
+ * on the members screen and reads as a membership action rather than a financial one.
+ */
 export async function postMemberShare(req: Request, res: Response): Promise<void> {
+  const ctx = requireContext(req)
   const { id } = req.validated?.params as { id: string }
   const input = req.validated?.body as RecordShareInput
-  sendData(res, await recordShare(requireContext(req), id, input), 201)
+  const result = await withIdempotency(req, ctx, 'POST /members/:id/shares', 201, () =>
+    recordShare(ctx, id, input),
+  )
+  sendData(res, result.data, result.status)
 }
 
 export async function postMemberContribution(req: Request, res: Response): Promise<void> {
+  const ctx = requireContext(req)
   const { id } = req.validated?.params as { id: string }
   const input = req.validated?.body as RecordContributionInput
-  sendData(res, await recordContribution(requireContext(req), id, input), 201)
+  const result = await withIdempotency(req, ctx, 'POST /members/:id/contributions', 201, () =>
+    recordContribution(ctx, id, input),
+  )
+  sendData(res, result.data, result.status)
 }
 
 export async function getContributions(req: Request, res: Response): Promise<void> {
@@ -139,13 +163,25 @@ export async function getMemberContributions(req: Request, res: Response): Promi
 }
 
 export async function postVoidContribution(req: Request, res: Response): Promise<void> {
+  const ctx = requireContext(req)
   const { id } = req.validated?.params as { id: string }
   const { reason } = (req.validated?.body ?? {}) as { reason?: string | null }
-  sendData(res, await voidContribution(requireContext(req), id, reason ?? null))
+  const result = await withIdempotency(req, ctx, 'POST /contributions/:id/void', 200, () =>
+    voidContribution(ctx, id, reason ?? null),
+  )
+  sendData(res, result.data, result.status)
 }
 
 export async function postVoidShare(req: Request, res: Response): Promise<void> {
+  const ctx = requireContext(req)
   const { id, shareId } = req.validated?.params as { id: string; shareId: string }
   const { reason } = (req.validated?.body ?? {}) as { reason?: string | null }
-  sendData(res, await voidShare(requireContext(req), id, shareId, reason ?? null))
+  const result = await withIdempotency(
+    req,
+    ctx,
+    'POST /members/:id/shares/:shareId/void',
+    200,
+    () => voidShare(ctx, id, shareId, reason ?? null),
+  )
+  sendData(res, result.data, result.status)
 }

@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { clearAllCaches } from '@/app/persistCache'
+import { clearAllDrafts } from '@/hooks/useFormDraft'
 import { useAuthStore } from '@/stores/authStore'
 import { logout } from './auth.api'
 
@@ -26,8 +28,12 @@ export function useSignOut(): { signOut: () => Promise<void>; pending: boolean }
     } finally {
       signedOut()
       // Cached answers belong to the person who was signed in. The next user on a shared office
-      // computer must not see them.
+      // computer must not see them — in memory, and on the disk, where Phase 13 started keeping a
+      // copy so a reload during an outage is not a blank afternoon.
       queryClient.clear()
+      clearAllCaches()
+      // A half-typed member registration is as much the previous person's as their cached figures.
+      clearAllDrafts()
       setPending(false)
       await navigate('/login', { replace: true })
     }

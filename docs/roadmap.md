@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 12 complete.** Phase 13 is next.
+Status: **Phase 13 complete.** Phase 14 is next.
 
 ---
 
@@ -725,7 +725,7 @@ as well as sending, because a reminder about an unpaid contribution names the me
 
 ---
 
-### Phase 13 — Offline resilience
+### Phase 13 — Offline resilience ✅
 
 - Connection indicator; persisted query cache; form drafts
 - Retry only for `GET` and for mutations carrying an idempotency key
@@ -733,6 +733,54 @@ as well as sending, because a reminder about an unpaid contribution names the me
 
 **Exit:** with the network disabled mid-form, no input is lost and no duplicate financial record is
 created when the connection returns.
+
+**Met**, both halves, and the second was checked against the running system: a contribution of
+5,000 francs presented twice with one retry key produced **one** contribution and **one** income
+row, and cancelling it twice with one key wrote **one** reversal (`EX-2026-000050`). The
+demonstration cooperative's books are where they started.
+
+**The retry rule is four lines long, and deliberately.** A request is repeated only if it is a
+`GET` or it carries an idempotency key. A read changes nothing; a keyed write is safe because the
+server recognises the key and returns the first attempt's answer. A mutation _without_ a key could
+be a contribution of 7,500 francs, and there is no cleverness available — either the server can
+recognise a repeat or the client must not make one. The retries live in the API client rather than
+in TanStack Query, because that is where the key is: a policy written at the query layer would have
+to guess, and guessing wrong on that question writes duplicate money.
+
+**The gap in the third bullet was not where it says.** Finance, inventory and sales already
+honoured the key. The member money endpoints did not — recording a contribution, recording a share
+movement, and cancelling either — because a contribution is recorded on the members screen and
+reads as a membership action rather than a financial one. It posts an income entry into the
+cooperative's books all the same. Four handlers now carry it.
+
+**Three states, not two.** `navigator.onLine` is not enough in this setting: a district office's
+wifi is up and its link to the outside is down, and the browser reports "online" throughout. So the
+indicator shows _connected_, _cannot reach the server_ — the commoner failure, where what is on the
+screen is still good — and _no connection_, where nothing will work and the answer is to write it
+on paper. The state is set by what actually happened to the last request, and a 422 counts as
+reachable: telling somebody their network is broken when their form is would be worse than saying
+nothing.
+
+**Drafts are offered, never applied.** What was typed into the sale form and a new member's
+registration is kept on the device and announced on the next open — "you were in the middle of
+this" — with a button to take it up and a button to throw it away. A form that quietly fills itself
+with yesterday's half-typed entry is worse than an empty one, because somebody submits it without
+reading, and a sale with the wrong buyer on it is harder to undo than a sale that had to be typed
+twice. Drafts are scoped to the cooperative and the record, expire after a day, and are cleared on
+sign-out.
+
+**Nothing is queued for later.** No financial write waits for a connection to come back. An
+unrecorded sale stays unrecorded and visible, which is the honest state: a queue of pending writes
+would be a second source of truth about the cooperative's money, and the one thing worse than a
+sale that has to be retyped is a sale a cooperative thinks was recorded.
+
+**The persisted cache, and its cost.** The query cache is written to `localStorage` under a key
+naming the signed-in user and the cooperative, so a reload during an outage comes back with the
+member register and this month's figures rather than a blank afternoon. That is a cooperative's own
+data on the disk of the computer it was already being read on, and it is not the access token,
+which stays in memory. It is scoped to the reader, discarded after a day, busted by each build, and
+cleared on sign-out — every key, not only the current one, because a shared office computer has to
+be left clean. `docs/security.md` §9 records the decision.
 
 ---
 

@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { TooltipProvider } from '@/components/ui'
+import { PersistedCache } from './PersistedCache'
 import { RouteErrorBoundary } from './RouteErrorBoundary'
 import { queryClient } from './queryClient'
 
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={300}>
-        <RouteErrorBoundary>{children}</RouteErrorBoundary>
+        <PersistedCache>
+          <RouteErrorBoundary>{children}</RouteErrorBoundary>
+        </PersistedCache>
       </TooltipProvider>
     </QueryClientProvider>
   )

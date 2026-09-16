@@ -160,6 +160,43 @@ a translated sentence and the request id, never a stack trace. National identity
 only when supplied, are masked in list responses, and appear in full only on the member detail
 screen to a user holding `members:update`.
 
+### What is written to the browser's storage, and what is not (Phase 13)
+
+Three things are kept on the device, and the list is exhaustive:
+
+| Kept                                               | Why                                                                                                       |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| The language, the sidebar state, the table density | Preferences. Nothing about the cooperative.                                                               |
+| The query cache                                    | A reload during an outage comes back with the figures the reader last saw, rather than a blank afternoon. |
+| Form drafts                                        | What was typed into a sale or a new member's registration, so a reload does not throw an afternoon away.  |
+
+**The access token is not among them**, and neither is the refresh token: the first lives in memory
+and the second in an `HttpOnly` cookie, for the reasons §3 gives. Persisting the cache does not
+weaken that — a cache is data the reader was already looking at on that screen, not a credential
+that would let somebody fetch more.
+
+The cost is real and worth stating plainly: on a shared office computer, a cooperative's member
+register and this month's figures are on the disk after the browser is closed. Four things bound it.
+
+- **Scoped to the reader.** The storage key names the signed-in user and the cooperative they were
+  working in, so one person's cache cannot hydrate into another's session and one cooperative's
+  figures cannot appear on another's screens.
+- **Cleared on sign-out.** Every key, not only the current one, along with every form draft. A
+  cooperative that signs out has left nothing behind.
+- **Expires after a day.** Older than that and showing it would mislead rather than help.
+- **Busted by each build.** A deployment that changes the shape of a response cannot hydrate
+  yesterday's shape into today's screens.
+
+A cooperative that judges even that too much on a particular machine has the same answer as for any
+browser storage: sign out. That is the action the guarantee is attached to.
+
+**Nothing is queued for later.** No financial write waits for a connection. An unrecorded entry
+stays unrecorded and visible, because a queue of pending writes would be a second source of truth
+about a cooperative's money — and the one thing worse than an entry that has to be retyped is an
+entry a cooperative believes was recorded.
+
+---
+
 ## 10. Secrets
 
 No secret is committed. `.env` is gitignored, `.env.example` carries placeholders, and a

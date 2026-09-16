@@ -4,6 +4,9 @@ import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { isRwandanPhone, RWANDA_PROVINCES, type Province } from '@coopmanage/shared'
+import { DraftNotice } from '@/components/DraftNotice'
+import { useFormDraft } from '@/hooks/useFormDraft'
+import { useAuthStore } from '@/stores/authStore'
 import {
   Alert,
   Button,
@@ -201,6 +204,7 @@ export function MemberFormDialog({
   const create = useCreateMember()
   const update = useUpdateMember()
   const editing = member !== null
+  const cooperativeId = useAuthStore((state) => state.activeCooperativeId)
 
   const defaults = useMemo(() => (member ? valuesFrom(member) : emptyValues()), [member])
 
@@ -210,7 +214,21 @@ export function MemberFormDialog({
     // On blur and again on submit, never on every keystroke.
     mode: 'onBlur',
   })
-  const { register, handleSubmit, reset, formState, control } = form
+  const { register, handleSubmit, reset, formState, control, getValues } = form
+
+  /**
+   * What was typed, kept on this device until the member is saved.
+   *
+   * A registration is taken at a desk with the person standing there, and the connection in a
+   * district office drops mid-form often enough that losing it is a real cost — the member has to
+   * be asked their national identity number twice. Only a new registration is kept: an edit
+   * already has the record behind it, so nothing is unrecoverable.
+   */
+  const draft = useFormDraft<FormValues>({
+    cooperativeId,
+    form: 'member',
+    enabled: open && !editing,
+  })
 
   /**
    * Opening the dialog starts from a clean sheet: the fields as they should be, and no error left
@@ -230,6 +248,16 @@ export function MemberFormDialog({
 
   // `Select` is a controlled native select, so the chosen value has to come back to it; the
   // registration alone supplies `onChange` but no `value`.
+  // Saved as it is typed. `useWatch` with no name subscribes to the whole form, which is what a
+  // draft needs; the alternative is a `watch()` in render, which re-renders on every keystroke
+  // whether or not anything reads the value.
+  const watched = useWatch({ control })
+  useEffect(() => {
+    if (!open || editing) return
+    void watched
+    draft.save(getValues())
+  }, [watched, open, editing, draft, getValues])
+
   const gender = useWatch({ control, name: 'gender' })
   const province = useWatch({ control, name: 'province' })
   const position = useWatch({ control, name: 'position' })
@@ -251,7 +279,13 @@ export function MemberFormDialog({
         { onSuccess: (saved) => done(saved, 'updated') },
       )
     } else {
-      create.mutate(toInput(values, false), { onSuccess: (saved) => done(saved, 'created') })
+      create.mutate(toInput(values, false), {
+        onSuccess: (saved) => {
+          // Registered, so there is nothing left to be in the middle of.
+          draft.clear()
+          done(saved, 'created')
+        },
+      })
     }
   })
 
@@ -307,6 +341,18 @@ export function MemberFormDialog({
         onSubmit={(event) => void submit(event)}
       >
         {described ? <Alert tone="danger">{described.message}</Alert> : null}
+
+        {draft.offered ? (
+          <DraftNotice
+            onRestore={() => {
+              // `reset` rather than field-by-field: it puts the whole set back and clears the
+              // validation state that belonged to the empty form.
+              reset(draft.offered ?? undefined)
+              draft.dismiss()
+            }}
+            onDiscard={draft.clear}
+          />
+        ) : null}
 
         <fieldset className="flex flex-col gap-4">
           <legend className="mb-2 text-sm font-semibold text-ink">

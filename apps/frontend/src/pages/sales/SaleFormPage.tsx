@@ -1,9 +1,12 @@
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { formatMoney, formatQuantity } from '@coopmanage/shared'
+import { DraftNotice } from '@/components/DraftNotice'
 import { PageHeader } from '@/components/PageHeader'
+import { useFormDraft } from '@/hooks/useFormDraft'
+import { useAuthStore } from '@/stores/authStore'
 import {
   Alert,
   Button,
@@ -118,6 +121,23 @@ function emptyLine(): LineDraft {
   return { key: `line-${nextKey}`, product: null, quantity: '', unitPrice: '', note: '' }
 }
 
+/**
+ * Exactly what the reader typed, and nothing derived from it.
+ *
+ * The product on a line is stored as the whole chosen option rather than as an id, because the
+ * form shows the name and the unit and a restored draft has to show them too — looking them up
+ * again would mean a request, which is the one thing that is not available when a draft matters.
+ */
+interface SaleDraft {
+  buyer: SearchOption | null
+  storeChoice: string
+  saleDate: string
+  note: string
+  discount: string
+  tax: string
+  lines: LineDraft[]
+}
+
 export function SaleFormPage() {
   const { t } = useTranslation(['sales', 'common'])
   const { id } = useParams<{ id: string }>()
@@ -180,6 +200,7 @@ function SaleForm({ existing }: { existing: SaleDetail | null }) {
   const pending = create.isPending || update.isPending
 
   const warehouses = useWarehouses()
+  const cooperativeId = useAuthStore((state) => state.activeCooperativeId)
 
   const [buyer, setBuyer] = useState<SearchOption | null>(
     existing === null ? null : { value: existing.buyerId, label: existing.buyerName },
@@ -232,6 +253,44 @@ function SaleForm({ existing }: { existing: SaleDetail | null }) {
   })
 
   const [problems, setProblems] = useState<Problems>(NO_PROBLEMS)
+
+  /**
+   * What was typed, kept on this device until the sale is recorded.
+   *
+   * This is the longest form in the product — eleven lines of produce is an ordinary afternoon —
+   * and it is filled in on the connection this product is used over. A reload halfway through used
+   * to mean typing it all again, which is the loss Phase 13 exists to stop.
+   *
+   * Only what the reader typed is stored: the buyer they chose, the store, the date, the lines and
+   * the figures. Nothing is queued and nothing is sent later. An unrecorded sale stays unrecorded
+   * and visible, which is the honest state — a queue of financial writes waiting for a connection
+   * would be a second source of truth about the cooperative's money.
+   */
+  const draft = useFormDraft<SaleDraft>({
+    cooperativeId,
+    form: 'sale',
+    recordId: existing?.id,
+  })
+
+  // Saved as it is typed rather than on a timer, so what is stored is always what is on screen.
+  // `localStorage` is synchronous and this payload is a few hundred bytes; a keystroke can afford
+  // it, and a debounce would mean the last thing typed is the thing lost.
+  useEffect(() => {
+    draft.save({ buyer, storeChoice, saleDate, note, discount, tax, lines })
+  }, [draft, buyer, storeChoice, saleDate, note, discount, tax, lines])
+
+  function restoreDraft(): void {
+    const stored = draft.offered
+    if (!stored) return
+    setBuyer(stored.buyer)
+    setStoreChoice(stored.storeChoice)
+    setSaleDate(stored.saleDate)
+    setNote(stored.note)
+    setDiscount(stored.discount)
+    setTax(stored.tax)
+    setLines(stored.lines)
+    draft.dismiss()
+  }
 
   const failed = create.error ?? update.error
   const described = failed ? describeError(failed) : null
@@ -333,7 +392,11 @@ function SaleForm({ existing }: { existing: SaleDetail | null }) {
         ...(note.trim() ? { note: note.trim() } : {}),
       }
       create.mutate(input, {
-        onSuccess: (result) => void navigate(`/sales/${result.id}`),
+        onSuccess: (result) => {
+          // Recorded, so there is nothing left to be in the middle of.
+          draft.clear()
+          void navigate(`/sales/${result.id}`)
+        },
       })
       return
     }
@@ -352,7 +415,12 @@ function SaleForm({ existing }: { existing: SaleDetail | null }) {
     }
     update.mutate(
       { id: existing.id, changes },
-      { onSuccess: () => void navigate(`/sales/${existing.id}`) },
+      {
+        onSuccess: () => {
+          draft.clear()
+          void navigate(`/sales/${existing.id}`)
+        },
+      },
     )
   }
 
@@ -383,6 +451,8 @@ function SaleForm({ existing }: { existing: SaleDetail | null }) {
           existing === null ? t('sales:form.newDescription') : t('sales:form.editDescription')
         }
       />
+
+      {draft.offered ? <DraftNotice onRestore={restoreDraft} onDiscard={draft.clear} /> : null}
 
       <form
         id="sale-form"

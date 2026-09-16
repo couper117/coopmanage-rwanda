@@ -9,6 +9,7 @@ import type {
 import { HEADERS } from '@coopmanage/shared'
 import { currentLanguage } from '@/i18n'
 import { authState } from '@/stores/authStore'
+import { connectionState } from '@/stores/connectionStore'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
@@ -168,14 +169,43 @@ async function refreshAccessToken(): Promise<boolean> {
   return refreshInFlight
 }
 
-async function send(
+/**
+ * Whether this request may be sent again after a failure that reached nothing.
+ *
+ * The rule Phase 13 states, and it is a short rule for a reason: **a `GET`, or a mutation carrying
+ * an idempotency key.** Everything else is sent once and reported.
+ *
+ * A `GET` changes nothing, so a repeat costs a little traffic. A mutation carrying a key is safe
+ * because the server recognises the key and returns the first attempt's answer instead of doing
+ * the work twice — which is what the `IdempotencyKey` table is for. A mutation *without* a key
+ * could be a contribution of 7,500 francs, and replaying it is exactly how a cooperative's books
+ * come to hold the same money twice. There is no cleverness available here: either the server can
+ * recognise a repeat or the client must not make one.
+ */
+function isSafeToRepeat(options: RequestOptions): boolean {
+  const method = options.method ?? 'GET'
+  if (method === 'GET') return true
+  return options.idempotencyKey !== undefined
+}
+
+/** How many attempts a safely-repeatable request gets, and the wait before each retry. */
+const RETRY_DELAYS_MS = [400, 1200] as const
+
+/** Statuses worth another attempt: the network was there, and the far end was not ready. */
+const TRANSIENT_STATUSES = new Set([502, 503, 504])
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function sendOnce(
   path: string,
   options: RequestOptions,
   headers: Record<string, string>,
 ): Promise<Response> {
   const { method = 'GET', body, signal, query } = options
   try {
-    return await fetch(buildUrl(path, query), {
+    const response = await fetch(buildUrl(path, query), {
       method,
       headers,
       credentials: 'include',
@@ -187,11 +217,52 @@ async function send(
         : { body: body instanceof FormData ? body : JSON.stringify(body) }),
       ...(signal ? { signal } : {}),
     })
+    // The server answered, whatever it said. That is what "reachable" means, and a 422 is as much
+    // an answer as a 200.
+    connectionState.reached()
+    return response
   } catch (error) {
     // An abort is the caller's own decision, not a failure to report to the user.
     if (error instanceof DOMException && error.name === 'AbortError') throw error
+    // Nothing came back at all: the indicator should stop claiming a connection.
+    connectionState.unreachable()
     throw ApiError.network()
   }
+}
+
+/**
+ * Sends the request, repeating it only where a repeat cannot do harm.
+ *
+ * The retries are here rather than in TanStack Query because this is where the idempotency key
+ * is: a retry policy written at the query layer would have to guess whether a mutation carries
+ * one, and guessing wrong on that question writes duplicate money.
+ */
+async function send(
+  path: string,
+  options: RequestOptions,
+  headers: Record<string, string>,
+): Promise<Response> {
+  const repeatable = isSafeToRepeat(options)
+  const attempts = repeatable ? RETRY_DELAYS_MS.length + 1 : 1
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (attempt > 0) await wait(RETRY_DELAYS_MS[attempt - 1] ?? 0)
+    const lastAttempt = attempt === attempts - 1
+
+    try {
+      const response = await sendOnce(path, options, headers)
+      // A gateway that is restarting answers 503 for a few seconds. On a repeatable request that
+      // is worth waiting out rather than reporting as a failure the reader has to act on.
+      if (!TRANSIENT_STATUSES.has(response.status) || lastAttempt) return response
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error
+      if (lastAttempt) throw error
+    }
+  }
+
+  // Unreachable: the last attempt above either returns or throws. Thrown rather than returned so a
+  // future change to the bounds cannot turn it into an undefined response.
+  throw ApiError.network()
 }
 
 /**

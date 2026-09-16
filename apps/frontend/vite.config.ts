@@ -3,8 +3,22 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
-export default defineConfig({
+/**
+ * Identifies this build, so the persisted query cache discards what a new deployment cannot be
+ * trusted to read.
+ *
+ * A timestamp rather than a git hash: it needs no git in the build image, it always changes when a
+ * build happens, and nothing reads it for anything but equality. In development it is not defined
+ * at all, which is what lets a hot-reloaded session keep its cache instead of clearing it on every
+ * save. `src/app/persistCache.ts` is the other half.
+ */
+const BUILD_ID = new Date().toISOString()
+
+export default defineConfig(({ command }) => ({
   plugins: [react(), tailwindcss()],
+  ...(command === 'build'
+    ? { define: { 'import.meta.env.VITE_BUILD_ID': JSON.stringify(BUILD_ID) } }
+    : {}),
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
@@ -80,4 +94,4 @@ export default defineConfig({
     globals: true,
     css: false,
   },
-})
+}))

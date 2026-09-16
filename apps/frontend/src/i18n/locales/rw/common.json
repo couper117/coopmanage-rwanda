@@ -30,6 +30,9 @@
   "connection": {
     "online": "Muri sisitemu",
     "offline": "Nta murandasi",
+    "offlineHelp": "Iyi mudasobwa nta murandasi ifite na busa. Nta kintu kibikwa kugeza ugarutse — byandike ku rupapuro.",
+    "unreachable": "Ntiturageza kuri seriveri",
+    "unreachableHelp": "Umurandasi urakora ariko seriveri ntisubiza. Ibiri ku mashini biracyari byiza, kandi kugerageza ubutaha bishobora kugenda neza.",
     "checking": "Turareba umurandasi"
   },
   "language": {
@@ -41,5 +44,12 @@
   "currency": {
     "code": "RWF"
   },
-  "demoData": "Amakuru y'urugero"
+  "demoData": "Amakuru y'urugero",
+  "draft": {
+    "title": "Hari ibyo wari mu rwego rwo kwandika",
+    "body": "Ibyo wari wanditse byabitswe ubwo iyi paji ifunze. Byikomereze, cyangwa ubijugunye utangire bundi bushya.",
+    "restore": "Bikomereze",
+    "discard": "Bijugunye",
+    "kept": "Bibitswe kuri iyi mudasobwa kugeza ubyanditse."
+  }
 }

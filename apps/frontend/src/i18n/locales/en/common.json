@@ -30,6 +30,9 @@
   "connection": {
     "online": "Connected",
     "offline": "No connection",
+    "offlineHelp": "This device has no network at all. Nothing can be saved until it comes back — write it down.",
+    "unreachable": "Cannot reach the server",
+    "unreachableHelp": "The network is working but the server is not answering. What is on the screen is still good, and the next attempt may well succeed.",
     "checking": "Checking connection"
   },
   "language": {
@@ -41,5 +44,12 @@
   "currency": {
     "code": "RWF"
   },
-  "demoData": "Demonstration data"
+  "demoData": "Demonstration data",
+  "draft": {
+    "title": "You were in the middle of this",
+    "body": "What you had typed was kept when this screen last closed. Take it up, or throw it away and start again.",
+    "restore": "Take it up",
+    "discard": "Throw it away",
+    "kept": "Kept on this device until you record it."
+  }
 }

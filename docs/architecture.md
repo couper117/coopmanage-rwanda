@@ -325,7 +325,7 @@ cookies, national identity numbers and file contents out of the logs permanently
 
 ---
 
-## 12. Offline resilience (design intent, built in Phase 13)
+## 12. Offline resilience (built in Phase 13)
 
 V1 is **offline-tolerant, not offline-first**. Concretely:
 
@@ -340,6 +340,29 @@ Queued offline _writes_ are explicitly out of scope for V1. Replaying a queue of
 transactions without a server-side deduplication contract is how systems create duplicate money,
 and the idempotency table plus reversal-only accounting are the foundations that a later
 offline-first phase would build on.
+
+### As built
+
+Three details differ from the sketch above, and each is worth knowing.
+
+**The retries are in the API client, not in TanStack Query.** The rule is "a `GET`, or a mutation
+carrying an idempotency key", and the key is a header the client sets. A retry policy written at
+the query layer would have to guess whether a mutation carries one; guessing wrong on that question
+writes duplicate money. `isSafeToRepeat` in `lib/apiClient.ts` is the whole decision, and two
+attempts with 400 ms and 1.2 s of backoff is the whole policy — plus 502, 503 and 504, which mean
+the network was there and the far end was not ready.
+
+**The connection has three states, not two.** `navigator.onLine` reports "online" while a district
+office's link to the outside is down, so the state is decided by what happened to the last request:
+the client reports every success and every failure to reach the server into `connectionStore`, and
+the browser's own flag is used only for the thing it is reliable about — telling you there is no
+network at all. A 422 counts as reachable, because it is an answer.
+
+**Drafts are offered, not restored.** `useFormDraft` stores what was typed and reports what it
+found; the form announces it and the reader decides. A form that quietly fills itself with
+yesterday's half-typed entry gets submitted unread, which is worse than an empty one. Drafts are
+scoped to the cooperative and the record, expire after a day, and are cleared on sign-out along with
+the persisted cache — `docs/security.md` §9 lists everything kept on the device and why.
 
 ---
 

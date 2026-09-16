@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { HEADERS } from '@coopmanage/shared'
@@ -432,6 +433,69 @@ describe('contributions', () => {
     // without the other would leave the books short with nothing to show why.
     expect(contribution.financeTransactionId).not.toBeNull()
     expect(contribution.amount.toString()).toBe('5000')
+  })
+
+  it('records one contribution for a repeated retry key', async () => {
+    // The half of Phase 13's exit criterion that could cost a cooperative money. A treasurer on a
+    // district-office connection presses Record, the page hangs, they press it again — and the
+    // books must not end up holding the same 5,000 francs twice.
+    const member = await addMember({ firstName: 'Pressed', lastName: 'Twice' })
+    const key = randomUUID()
+    const body = {
+      type: 'MEMBERSHIP_FEE' as const,
+      amount: '5000',
+      method: 'CASH' as const,
+      categoryId: incomeCategoryId,
+      note: `Idempotent contribution ${key}`,
+    }
+
+    const first = await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .set(HEADERS.idempotencyKey, key)
+      .send(body)
+      .expect(201)
+    const second = await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .set(HEADERS.idempotencyKey, key)
+      .send(body)
+      .expect(201)
+
+    // The same receipt back, not a second one.
+    expect(second.body.data.id).toBe(first.body.data.id)
+    expect(second.body.data.reference).toBe(first.body.data.reference)
+
+    const contributions = await prisma.contribution.count({ where: { memberId: member.id } })
+    expect(contributions).toBe(1)
+
+    // And one income row in the books, which is the figure a cooperative would have had to
+    // reconcile by hand.
+    const entries = await prisma.financeTransaction.count({
+      where: { cooperativeId: cooperative.id, memberId: member.id },
+    })
+    expect(entries).toBe(1)
+  })
+
+  it('cancels a contribution once for a repeated retry key', async () => {
+    const member = await addMember({ firstName: 'Cancelled', lastName: 'Once' })
+    const recorded = await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .send({ type: 'SAVINGS', amount: '3000', method: 'CASH', categoryId: incomeCategoryId })
+      .expect(201)
+
+    const key = randomUUID()
+    const id = recorded.body.data.id as string
+    await as(accountant, 'post', `/contributions/${id}/void`)
+      .set(HEADERS.idempotencyKey, key)
+      .send({ reason: 'Recorded against the wrong member' })
+      .expect(200)
+    await as(accountant, 'post', `/contributions/${id}/void`)
+      .set(HEADERS.idempotencyKey, key)
+      .send({ reason: 'Recorded against the wrong member' })
+      .expect(200)
+
+    // Two reversals of one contribution would take the cooperative's total below where it started,
+    // which is the same defect as a duplicate entry with the sign flipped.
+    const reversals = await prisma.financeTransaction.count({
+      where: { cooperativeId: cooperative.id, memberId: member.id, kind: 'EXPENSE' },
+    })
+    expect(reversals).toBe(1)
   })
 
   it('carries the amount as a string, never as a JSON number', async () => {
