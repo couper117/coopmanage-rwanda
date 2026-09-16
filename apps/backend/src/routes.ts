@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { adminRouter } from './modules/admin/admin.routes.js'
+import { announcementsRouter } from './modules/announcements/announcements.routes.js'
 import { auditRouter } from './modules/audit/audit.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { catalogueRouter } from './modules/catalogue/catalogue.routes.js'
@@ -11,9 +12,11 @@ import { healthRouter } from './modules/health/health.routes.js'
 import { inventoryRouter } from './modules/inventory/inventory.routes.js'
 import { meetingsRouter } from './modules/meetings/meetings.routes.js'
 import { membersRouter } from './modules/members/members.routes.js'
+import { notificationsRouter } from './modules/notifications/notifications.routes.js'
 import { referenceRouter } from './modules/reference/reference.routes.js'
 import { reportsRouter } from './modules/reports/reports.routes.js'
 import { salesRouter } from './modules/sales/sales.routes.js'
+import { smsRouter } from './modules/sms/sms.routes.js'
 import { staffRouter } from './modules/staff/staff.routes.js'
 
 /**
@@ -30,6 +33,9 @@ apiRouter.use('/audit', auditRouter)
 apiRouter.use('/reports', reportsRouter)
 apiRouter.use('/documents', documentsRouter)
 apiRouter.use('/meetings', meetingsRouter)
+apiRouter.use('/notifications', notificationsRouter)
+apiRouter.use('/announcements', announcementsRouter)
+apiRouter.use('/sms', smsRouter)
 apiRouter.use('/admin', adminRouter)
 // Mounted at the root because their paths are already fully qualified: /cooperatives/current,
 // /settings/:key, /staff, /roles, /permissions.

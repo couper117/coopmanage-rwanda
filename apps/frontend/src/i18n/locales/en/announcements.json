@@ -1,0 +1,140 @@
+{
+  "title": "Announcements",
+  "description": "What the cooperative tells its members, and the record of what was sent.",
+  "tableCaption": "The cooperative's announcements, with their audience, state and how many messages each one sent.",
+  "columns": {
+    "title": "Announcement",
+    "audience": "For",
+    "status": "State",
+    "messages": "Messages",
+    "actions": "Actions"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "ARCHIVED": "Withdrawn"
+  },
+  "audience": {
+    "ALL_MEMBERS": "Every member",
+    "ACTIVE_MEMBERS": "Active members",
+    "STAFF": "Staff only"
+  },
+  "actions": {
+    "add": "Write an announcement",
+    "publish": "Publish",
+    "send": "Send again",
+    "archive": "Withdraw",
+    "messages": "Messages sent"
+  },
+  "filters": {
+    "search": "Search",
+    "searchPlaceholder": "Words in the title or the message",
+    "status": "State",
+    "anyStatus": "Every state"
+  },
+  "empty": {
+    "title": "No announcements yet",
+    "body": "Write one to tell the members about a meeting, a price or a delivery date. Most members are reached by SMS rather than by opening this."
+  },
+  "fields": {
+    "title": "Title",
+    "titleRw": "Title in Kinyarwanda",
+    "body": "Message",
+    "bodyHint": "What the members will read. Keep it short: it is carried by SMS.",
+    "bodyRw": "Message in Kinyarwanda",
+    "bodyRwHint": "Where you write one, this is what the members receive.",
+    "audience": "Who it is for",
+    "audienceHint": "Members are reached by SMS. A staff announcement is read here in the application."
+  },
+  "form": {
+    "addTitle": "Write an announcement",
+    "addDescription": "It is saved as a draft. Nothing is sent until you publish it.",
+    "editTitle": "Change the draft",
+    "editDescription": "Only a draft can be changed. Once published, the record has to say what was sent.",
+    "submit": "Save the draft",
+    "cost_one": "{{characters}} characters, one message per member.",
+    "cost": "{{characters}} characters, {{count}} messages per member."
+  },
+  "publish": {
+    "title": "Publish this announcement?",
+    "body": "Publishing puts it on the cooperative's record. Sending it by SMS is a separate decision.",
+    "confirm": "Publish it",
+    "confirmAndSend": "Publish and send",
+    "members": "Members in the audience",
+    "reachable": "Have a phone number",
+    "withoutPhone_one": "One member has no phone number and will not receive the message. Somebody will have to tell them.",
+    "withoutPhone": "{{count}} members have no phone number and will not receive the message. Somebody will have to tell them.",
+    "cost_one": "One message each, so {{messages}} in total.",
+    "cost": "{{count}} messages each, so {{messages}} in total.",
+    "unicode": "The text uses characters that make every message shorter and so more expensive.",
+    "sendSms": "Send it to the members by SMS",
+    "sendSmsHint": "Each message costs the cooperative. Leave this off to publish without sending.",
+    "staffOnly": "This announcement is for the staff, so it is read here and no messages are sent.",
+    "mockTitle": "Messages are recorded, not delivered",
+    "mockBody": "No SMS gateway is connected yet. Everything you send is written to the message log with its number and its text, and nothing reaches a telephone.",
+    "report": {
+      "sent": "Sent",
+      "failed": "Refused",
+      "failedBody_one": "One message was refused. The log says which member and why.",
+      "failedBody": "{{count}} messages were refused. The log says which members and why.",
+      "alreadySent_one": "One member had already been sent this announcement, so it was not sent again.",
+      "alreadySent": "{{count}} members had already been sent this announcement, so it was not sent again.",
+      "withoutPhone_one": "One member has no phone number and was not sent anything.",
+      "withoutPhone": "{{count}} members have no phone number and were not sent anything.",
+      "mockBody": "These messages were recorded and not delivered, because no SMS gateway is connected yet."
+    }
+  },
+  "archive": {
+    "title": "Withdraw this announcement?",
+    "body": "It leaves the notice board and stays in the cooperative's record with the reason you give.",
+    "bodySent_one": "It has already been sent to one member, who cannot be un-told. It leaves the notice board and stays in the record with the reason you give.",
+    "bodySent": "It has already been sent to {{count}} members, who cannot be un-told. It leaves the notice board and stays in the record with the reason you give.",
+    "reason": "Why it is being withdrawn",
+    "reasonPlaceholder": "The date changed again",
+    "keep": "Keep it published",
+    "confirm": "Withdraw it"
+  },
+  "provider": {
+    "mockTitle": "Messages are recorded, not delivered",
+    "mockBody": "No SMS gateway is connected yet. Announcements you send are written to the message log and nothing reaches a telephone."
+  },
+  "notice": {
+    "drafted": "{{title}} was saved as a draft.",
+    "saved": "{{title}} was saved.",
+    "published": "{{title}} was published.",
+    "archived": "{{title}} was withdrawn."
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}}"
+  },
+  "messages": {
+    "title": "Messages sent",
+    "description": "Every message the cooperative has sent its members, with who it went to and what happened.",
+    "caption": "Messages sent, with the member, the number, the text and the outcome.",
+    "back": "Back to announcements",
+    "noMember": "Not a member",
+    "adHoc": "Sent on its own",
+    "columns": {
+      "member": "To",
+      "body": "Message",
+      "status": "Outcome",
+      "announcement": "Announcement",
+      "sentAt": "When"
+    },
+    "status": {
+      "QUEUED": "Waiting",
+      "SENT": "Sent",
+      "FAILED": "Refused"
+    },
+    "filters": {
+      "status": "Outcome",
+      "anyStatus": "Every outcome",
+      "announcement": "One announcement",
+      "clearAnnouncement": "Show every announcement"
+    },
+    "empty": {
+      "title": "Nothing has been sent yet",
+      "body": "Publish an announcement to the members and every message appears here with its outcome."
+    }
+  }
+}

@@ -252,7 +252,15 @@ async function notifyReady(
         severity: 'INFO',
         messageKey: 'notifications.report.ready',
         messageParams: {
-          report: `report.${report.type}`,
+          /**
+           * The interface's own key for the report's name, not the one the printed labels use.
+           *
+           * `report.financial` is a key in the shared label bundle the server prints reports with;
+           * it names no i18n namespace, so a notification carrying it would have shown
+           * "report.financial" to a reader once Phase 12 gave notifications a screen. The
+           * interface resolves `reports.type.financial`.
+           */
+          report: `reports.type.${report.type}`,
           period: report.periodLabel,
         },
         entityType: 'ReportRun',

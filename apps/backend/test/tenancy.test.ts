@@ -52,6 +52,8 @@ interface Tenant {
   documentId: string
   meetingId: string
   decisionId: string
+  announcementId: string
+  notificationId: string
 }
 
 let a: Tenant
@@ -184,6 +186,27 @@ async function buildTenant(name: string): Promise<Tenant> {
     .send({ from: '2026-09-01', to: '2026-09-30', format: 'csv' })
     .expect(200)
 
+  // An announcement of this cooperative's own, left as a draft so the sweep can try to publish it
+  // — which is the request that would send this cooperative's message to its members from another
+  // cooperative's session.
+  const announcement = await call('post', '/announcements')
+    .send({ title: `Notice from ${name}`, body: 'Something for the members of this cooperative.' })
+    .expect(201)
+
+  // A notification is written by whichever module noticed something rather than by an endpoint, so
+  // this one is written directly. Addressed to the whole cooperative, which is the case that has
+  // to be scoped: a row with no user on it must still never be reachable from another tenant.
+  const notification = await prisma.notification.create({
+    data: {
+      cooperativeId: cooperative.id,
+      type: 'SYSTEM',
+      severity: 'INFO',
+      messageKey: 'notifications.system.test',
+      dedupeKey: `tenancy-sweep:${cooperative.id}`,
+    },
+    select: { id: true },
+  })
+
   return {
     cooperative,
     manager,
@@ -204,6 +227,8 @@ async function buildTenant(name: string): Promise<Tenant> {
     documentId: document.body.data.id as string,
     meetingId: meeting.body.data.id as string,
     decisionId: (decision.body.data.decisions as { id: string }[])[0]?.id as string,
+    announcementId: announcement.body.data.id as string,
+    notificationId: notification.id,
   }
 }
 
@@ -296,6 +321,14 @@ function foreignIdentifiers(): Record<string, { id: string; body?: object }> {
     '/meetings/:id/agenda': { id: b.meetingId, body: { items: [{ title: 'Added from away' }] } },
     '/meetings/:id/attendance': { id: b.meetingId, body: { entries: [] } },
     '/meetings/:id/decisions': { id: b.meetingId, body: { title: 'Decided from away' } },
+    '/announcements/:id': { id: b.announcementId, body: { title: 'Renamed from away' } },
+    '/announcements/:id/audience': { id: b.announcementId },
+    // The one that would matter most: publishing another cooperative's announcement would send
+    // their message to their members from a session that has no business doing either.
+    '/announcements/:id/publish': { id: b.announcementId, body: { sendSms: false } },
+    '/announcements/:id/archive': { id: b.announcementId, body: { reason: 'archived from away' } },
+    '/notifications/:id/read': { id: b.notificationId, body: {} },
+    '/notifications/:id/dismiss': { id: b.notificationId, body: {} },
   }
 }
 

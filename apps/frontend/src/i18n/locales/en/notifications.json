@@ -1,6 +1,53 @@
 {
+  "title": "Notifications",
+  "description": "What the cooperative has been told, and what still needs doing.",
+  "bell": {
+    "none": "Notifications, nothing waiting",
+    "withCount_one": "Notifications, one waiting",
+    "withCount": "Notifications, {{count}} waiting"
+  },
+  "actions": {
+    "readAll": "Mark all as read",
+    "seeAll": "See all notifications",
+    "open": "Open",
+    "dismiss": "Dismiss"
+  },
+  "empty": {
+    "title": "Nothing is waiting",
+    "body": "Warnings about stock, finished reports and meeting reminders appear here as they happen."
+  },
+  "type": {
+    "LOW_STOCK": "Stock running low",
+    "MEETING_REMINDER": "Meeting",
+    "REPORT_READY": "Report ready",
+    "MEMBER_INCOMPLETE": "Member details",
+    "DOCUMENT": "Document",
+    "TASK": "Action to take",
+    "SYSTEM": "System"
+  },
+  "severity": {
+    "INFO": "For information",
+    "WARNING": "Worth watching",
+    "CRITICAL": "Urgent"
+  },
+  "filters": {
+    "type": "Kind",
+    "anyType": "Every kind",
+    "severity": "How urgent",
+    "anySeverity": "Any",
+    "state": "State",
+    "stateAll": "Read and unread",
+    "stateUnread": "Unread only",
+    "stateDismissed": "Dismissed"
+  },
+  "pagination": {
+    "summary": "Showing {{from}} to {{to}} of {{total}}"
+  },
   "lowStock": {
     "low": "{{product}} is down to {{quantity}} {{unit}}, below the {{minimum}} you asked to be warned about",
     "empty": "{{product}} has run out. The store holds none at all, against a minimum of {{minimum}} {{unit}}"
+  },
+  "report": {
+    "ready": "{{report}} for {{period}} is ready to read"
   }
 }

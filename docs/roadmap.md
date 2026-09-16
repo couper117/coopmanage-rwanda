@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 11 complete.** Phase 12 is next.
+Status: **Phase 12 complete.** Phase 13 is next.
 
 ---
 
@@ -662,7 +662,7 @@ exists. A database seeded from empty gets the settled spelling.
 
 ---
 
-### Phase 12 — Notifications, announcements, SMS
+### Phase 12 — Notifications, announcements, SMS ✅
 
 - Notification centre with categories, dedupe, actions, read state
 - Announcements: draft, publish, audience, history
@@ -671,6 +671,57 @@ exists. A database seeded from empty gets the settled spelling.
 
 **Exit:** development runs with no SMS credentials; sending to fifty members produces fifty logged
 messages and no duplicates; provider replacement touches exactly one file.
+
+**Met**, and checked against the running system with the demonstration cooperative's 120 members.
+`.env` holds no SMS variable of any kind and the process starts; the live provider reports itself as
+`mock` with `delivers: false`. An announcement written in both languages was published to all
+members: **80 sent, 0 failed, 40 reported as having no telephone**, and the database says 80
+recipients with 0 duplicated. Publishing it again with a fresh idempotency key sent nothing and
+answered `alreadySent: 80`. What went out was the Kinyarwanda text — a member reading an SMS is not
+choosing a language in an interface — and withdrawing the announcement afterwards kept all 80
+messages in the log.
+
+Five decisions worth recording.
+
+- **The mock records and does not deliver, and says so on every screen that sends.** A provider
+  that claimed to deliver would let a cooperative believe its members were told, which is worse
+  than having no SMS at all. One number ending `000000` fails on purpose, so staff can see what a
+  partial send looks like before it happens for real.
+- **No duplicates is a property of the database, not of careful code.**
+  `(cooperative_id, dedupe_key)` is unique and the key names the announcement and the member. The
+  row is claimed _before_ the provider is called, so a crash in between leaves a QUEUED row
+  somebody can see rather than a delivered message with no record.
+- **A member with no telephone is not a failure.** A phone number is never required of a member, so
+  40 of 120 is the ordinary case: those members are counted and reported separately and written to
+  no log at all. A log full of failures for people who never had a number would bury the one
+  failure that matters.
+- **A published announcement's text can never change.** It can be edited freely as a draft and not
+  at all afterwards, because once it has gone to eighty telephones the record has to say what was
+  sent. A correction is a new announcement.
+- **A shared notification read by anybody is read.** The row carries one `read_at`, deliberately: a
+  cooperative office is five people and a low-stock warning is one piece of work. A notification
+  addressed to one person is private to them and unreachable by anybody else, which the tenancy
+  sweep now checks.
+
+Three defects this phase surfaced, all fixed.
+
+- **The report-ready notification carried a key nothing could resolve.** It sent
+  `report.financial`, which is the key the _printed_ labels use and names no interface namespace —
+  so the first reader of the new notification centre would have been shown "report.financial". It
+  now sends `reports.type.financial`.
+- **A new namespace array on every render is a render loop.** `useTranslation` takes the array in
+  its dependencies, so building it inline in the call re-ran its effect, set state and rendered
+  again. Hoisted to a module constant in the bell and on the dashboard.
+- **A portalled Radix popover cannot be tested in this environment.** A bare `Popover` never
+  settles under jsdom — its measuring loop keeps the test alive until the timeout — so the bell is
+  built the way `SearchSelect` and the global search box are: a plain absolutely positioned panel.
+  That was already the house pattern for two other reasons, and this is the third.
+  `docs/ui-system.md` §11 records it.
+
+The message log is deliberately not a navigation item. It belongs to the announcements it records —
+reached from a notice's message count or the button beside the list — because sending messages is
+how an announcement is delivered rather than a thing done on its own. `sms:send` guards reading it
+as well as sending, because a reminder about an unpaid contribution names the member and the amount.
 
 ---
 

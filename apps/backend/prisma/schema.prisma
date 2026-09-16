@@ -149,32 +149,35 @@ model User {
   createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  refreshSessions      RefreshSession[]
-  passwordResetTokens  PasswordResetToken[]
-  staff                CooperativeStaff[]        @relation("StaffUser")
-  invitedStaff         CooperativeStaff[]        @relation("StaffInviter")
-  grantedOverrides     StaffPermissionOverride[]
-  auditEntries         AuditLog[]
-  updatedCoopSettings  CooperativeSetting[]
-  updatedSysSettings   SystemSetting[]
-  membersCreated       Member[]                  @relation("MemberCreatedBy")
-  membersUpdated       Member[]                  @relation("MemberUpdatedBy")
-  sharesCreated        MemberShare[]             @relation("ShareCreatedBy")
-  sharesVoided         MemberShare[]             @relation("ShareVoidedBy")
-  contributionsCreated Contribution[]            @relation("ContributionCreatedBy")
-  contributionsVoided  Contribution[]            @relation("ContributionVoidedBy")
-  financeCreated       FinanceTransaction[]      @relation("FinanceCreatedBy")
-  financeVoided        FinanceTransaction[]      @relation("FinanceVoidedBy")
-  idempotencyKeys      IdempotencyKey[]
-  productsCreated      Product[]                 @relation("ProductCreatedBy")
-  buyersCreated        Buyer[]                   @relation("BuyerCreatedBy")
-  salesCreated         Sale[]                    @relation("SaleCreatedBy")
-  reportsGenerated     ReportRun[]               @relation("ReportGeneratedBy")
-  documentsUploaded    Document[]                @relation("DocumentUploadedBy")
-  documentsArchived    Document[]                @relation("DocumentArchivedBy")
-  meetingsCreated      Meeting[]                 @relation("MeetingCreatedBy")
-  inventoryCreated     InventoryTransaction[]    @relation("InventoryCreatedBy")
-  notifications        Notification[]
+  refreshSessions        RefreshSession[]
+  passwordResetTokens    PasswordResetToken[]
+  staff                  CooperativeStaff[]        @relation("StaffUser")
+  invitedStaff           CooperativeStaff[]        @relation("StaffInviter")
+  grantedOverrides       StaffPermissionOverride[]
+  auditEntries           AuditLog[]
+  updatedCoopSettings    CooperativeSetting[]
+  updatedSysSettings     SystemSetting[]
+  membersCreated         Member[]                  @relation("MemberCreatedBy")
+  membersUpdated         Member[]                  @relation("MemberUpdatedBy")
+  sharesCreated          MemberShare[]             @relation("ShareCreatedBy")
+  sharesVoided           MemberShare[]             @relation("ShareVoidedBy")
+  contributionsCreated   Contribution[]            @relation("ContributionCreatedBy")
+  contributionsVoided    Contribution[]            @relation("ContributionVoidedBy")
+  financeCreated         FinanceTransaction[]      @relation("FinanceCreatedBy")
+  financeVoided          FinanceTransaction[]      @relation("FinanceVoidedBy")
+  idempotencyKeys        IdempotencyKey[]
+  productsCreated        Product[]                 @relation("ProductCreatedBy")
+  buyersCreated          Buyer[]                   @relation("BuyerCreatedBy")
+  salesCreated           Sale[]                    @relation("SaleCreatedBy")
+  reportsGenerated       ReportRun[]               @relation("ReportGeneratedBy")
+  documentsUploaded      Document[]                @relation("DocumentUploadedBy")
+  documentsArchived      Document[]                @relation("DocumentArchivedBy")
+  meetingsCreated        Meeting[]                 @relation("MeetingCreatedBy")
+  inventoryCreated       InventoryTransaction[]    @relation("InventoryCreatedBy")
+  notifications          Notification[]
+  announcementsWritten   Announcement[]            @relation("AnnouncementAuthor")
+  announcementsPublished Announcement[]            @relation("AnnouncementPublisher")
+  smsSent                SmsMessage[]              @relation("SmsSender")
 
   @@index([status])
   @@map("users")
@@ -272,6 +275,8 @@ model Cooperative {
   reportRuns          ReportRun[]
   documents           Document[]
   meetings            Meeting[]
+  announcements       Announcement[]
+  smsMessages         SmsMessage[]
 
   @@index([status])
   @@map("cooperatives")
@@ -548,6 +553,7 @@ model Member {
   financeTransactions FinanceTransaction[]
   documents           Document[]
   meetingAttendance   MeetingAttendee[]
+  smsMessages         SmsMessage[]
 
   @@unique([cooperativeId, memberCode])
   @@index([cooperativeId, status])
@@ -1394,4 +1400,116 @@ model MeetingDecision {
   @@index([meetingId])
   @@index([responsibleStaffId, status])
   @@map("meeting_decisions")
+}
+
+// ---------------------------------------------------------------------------
+// M12 — announcements and SMS
+// ---------------------------------------------------------------------------
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("announcement_status")
+}
+
+/// Who an announcement is for.
+///
+/// The distinction that matters is not a permission but a delivery route. `STAFF` is read in the
+/// application by the people who work there. The two member audiences reach people who mostly do
+/// not have a smartphone, so publishing to them can also send an SMS — which is the whole reason
+/// this module exists rather than a notice on a screen nobody's members will ever open.
+enum AnnouncementAudience {
+  ALL_MEMBERS
+  ACTIVE_MEMBERS
+  STAFF
+
+  @@map("announcement_audience")
+}
+
+/// A message a cooperative writes once and sends to the people it is for.
+///
+/// Bilingual by construction: `title`/`body` and their `*_rw` counterparts, because a cooperative
+/// writing to its members writes in Kinyarwanda and a district office reading the same
+/// announcement may want the English. Only one pair is required; the other is optional, so nobody
+/// is made to write twice to send a single sentence.
+///
+/// Never deleted. A published announcement is part of what the cooperative told its members, which
+/// is exactly the kind of record a committee is later asked about, so it is archived with a reason.
+model Announcement {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId String               @map("cooperative_id") @db.Uuid
+  title         String
+  titleRw       String?              @map("title_rw")
+  body          String
+  bodyRw        String?              @map("body_rw")
+  audience      AnnouncementAudience @default(ACTIVE_MEMBERS)
+  status        AnnouncementStatus   @default(DRAFT)
+  /// Set once, when it is published. A published announcement's text can no longer change.
+  publishedAt   DateTime?            @map("published_at") @db.Timestamptz(3)
+  publishedById String?              @map("published_by_id") @db.Uuid
+  archivedAt    DateTime?            @map("archived_at") @db.Timestamptz(3)
+  archiveReason String?              @map("archive_reason")
+  createdById   String               @map("created_by_id") @db.Uuid
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cooperative Cooperative  @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  createdBy   User         @relation("AnnouncementAuthor", fields: [createdById], references: [id], onDelete: Restrict)
+  publishedBy User?        @relation("AnnouncementPublisher", fields: [publishedById], references: [id], onDelete: Restrict)
+  messages    SmsMessage[]
+
+  @@index([cooperativeId, status, createdAt(sort: Desc)])
+  @@index([cooperativeId, publishedAt(sort: Desc)])
+  @@map("announcements")
+}
+
+enum SmsStatus {
+  QUEUED
+  SENT
+  FAILED
+
+  @@map("sms_status")
+}
+
+/// Every message this application has asked a provider to send.
+///
+/// The log is the product, not a debugging aid. A cooperative that tells fifty members a meeting
+/// has moved needs to be able to say afterwards which fifty were told, at what number, and which
+/// ones failed — a claim nobody can make from a provider's dashboard they do not have access to.
+///
+/// `to_phone` and `body` are **snapshots**. A member's number changes and an announcement is
+/// archived; what was sent stays what was sent.
+///
+/// `dedupe_key` is unique per cooperative and is what makes "fifty messages, no duplicates" a
+/// property of the database rather than of the code that happened to run. For an announcement it
+/// names the announcement and the member, so publishing twice cannot send twice.
+model SmsMessage {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cooperativeId     String    @map("cooperative_id") @db.Uuid
+  announcementId    String?   @map("announcement_id") @db.Uuid
+  memberId          String?   @map("member_id") @db.Uuid
+  toPhone           String    @map("to_phone")
+  body              String
+  status            SmsStatus @default(QUEUED)
+  /// Which driver handled it, so a log read a year later says who was asked.
+  provider          String
+  providerMessageId String?   @map("provider_message_id")
+  failureReason     String?   @map("failure_reason")
+  dedupeKey         String    @map("dedupe_key")
+  sentAt            DateTime? @map("sent_at") @db.Timestamptz(3)
+  createdById       String?   @map("created_by_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  cooperative  Cooperative   @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  announcement Announcement? @relation(fields: [announcementId], references: [id], onDelete: Restrict)
+  member       Member?       @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  createdBy    User?         @relation("SmsSender", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([cooperativeId, dedupeKey])
+  @@index([cooperativeId, createdAt(sort: Desc)])
+  @@index([announcementId])
+  @@index([memberId])
+  @@map("sms_messages")
 }

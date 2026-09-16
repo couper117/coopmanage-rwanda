@@ -102,20 +102,25 @@ morning cannot, and neither can anyone else until the window passes. A limit tha
 cooperative out of its own records is not security, it is an outage.
 
 Limits apply to the whole API rather than being opted into per route, so an endpoint added later is
-covered without anyone remembering to enable it. The limit follows the request method; an endpoint
+covered without anyone remembering to enable it. The two sending limits are the exception, and for a
+reason worth stating: they are keyed on the **cooperative** rather than on the caller, because one
+request can carry five hundred messages and the bill lands on the cooperative. A per-caller limit
+would let a session spend thousands of messages in a minute. Keying on the cooperative means the
+limiter has to run after the tenant is resolved, which is why those two routes apply it themselves. The limit follows the request method; an endpoint
 needing something tighter adds its own on top. Liveness is exempt, because a hosting platform polls
 it continuously and it touches nothing. Readiness is **not** exempt, because it opens a database
 connection and an anonymous caller must not be able to drive unbounded queries against the pool.
 
-| Scope                        | Limit                                                |
-| ---------------------------- | ---------------------------------------------------- |
-| `POST /auth/login`           | 5 per 15 min per email, 60 per 15 min per IP         |
-| `POST /auth/forgot-password` | 3 per hour per email, 30 per hour per IP             |
-| Mutating endpoints           | 60 per minute per user                               |
-| Read endpoints               | 300 per minute per user                              |
-| File upload                  | 20 per hour per user                                 |
-| `POST /assistant/ask`        | 20 per hour per user and 200 per day per cooperative |
-| `POST /sms/send`             | 10 per hour per cooperative                          |
+| Scope                             | Limit                                                |
+| --------------------------------- | ---------------------------------------------------- |
+| `POST /auth/login`                | 5 per 15 min per email, 60 per 15 min per IP         |
+| `POST /auth/forgot-password`      | 3 per hour per email, 30 per hour per IP             |
+| Mutating endpoints                | 60 per minute per user                               |
+| Read endpoints                    | 300 per minute per user                              |
+| File upload                       | 20 per hour per user                                 |
+| `POST /assistant/ask`             | 20 per hour per user and 200 per day per cooperative |
+| `POST /sms/send`                  | 10 per hour per cooperative                          |
+| `POST /announcements/:id/publish` | 10 per hour per cooperative                          |
 
 ### Safe retries
 
@@ -496,20 +501,25 @@ of a member, a member of staff or a guest.
 
 ### Dashboard, search, notifications — Phases 10 and 12
 
-| Method | Path                         | Permission                                          |
-| ------ | ---------------------------- | --------------------------------------------------- |
-| GET    | `/dashboard`                 | `dashboard:view` (blocks filtered per permission)   |
-| GET    | `/search?q=`                 | `search:use` (each resource per its own permission) |
-| GET    | `/notifications`             | `notifications:view`                                |
-| POST   | `/notifications/:id/read`    | `notifications:view`                                |
-| POST   | `/notifications/read-all`    | `notifications:view`                                |
-| POST   | `/notifications/:id/dismiss` | `notifications:view`                                |
-| GET    | `/announcements`             | `announcements:view`                                |
-| POST   | `/announcements`             | `announcements:manage`                              |
-| POST   | `/announcements/:id/publish` | `announcements:manage`                              |
-| POST   | `/announcements/:id/archive` | `announcements:manage`                              |
-| POST   | `/sms/send`                  | `sms:send`                                          |
-| GET    | `/sms/messages`              | `sms:send`                                          |
+| Method | Path                          | Permission                                          |
+| ------ | ----------------------------- | --------------------------------------------------- |
+| GET    | `/dashboard`                  | `dashboard:view` (blocks filtered per permission)   |
+| GET    | `/search?q=`                  | `search:use` (each resource per its own permission) |
+| GET    | `/notifications`              | `notifications:view`                                |
+| GET    | `/notifications/summary`      | `notifications:view` (what the bell draws)          |
+| POST   | `/notifications/:id/read`     | `notifications:view`                                |
+| POST   | `/notifications/read-all`     | `notifications:view`                                |
+| POST   | `/notifications/:id/dismiss`  | `notifications:view`                                |
+| GET    | `/announcements`              | `announcements:view`                                |
+| GET    | `/announcements/:id`          | `announcements:view`                                |
+| POST   | `/announcements`              | `announcements:manage`                              |
+| PATCH  | `/announcements/:id`          | `announcements:manage` (a draft only)               |
+| GET    | `/announcements/:id/audience` | `announcements:manage` (reach and cost, before)     |
+| POST   | `/announcements/:id/publish`  | `announcements:manage` (`Idempotency-Key`)          |
+| POST   | `/announcements/:id/archive`  | `announcements:manage`                              |
+| POST   | `/sms/send`                   | `sms:send` (`Idempotency-Key` **required**)         |
+| GET    | `/sms/messages`               | `sms:send`                                          |
+| GET    | `/sms/provider`               | `sms:send` (which driver, and whether it delivers)  |
 
 **One dashboard endpoint, not four.** This table listed `/dashboard/summary`, `/activity`,
 `/attention` and `/health` separately. There is one `GET /dashboard`, and it returns the tiles, the
@@ -535,6 +545,28 @@ way to learn that a member or a restricted document exists without being allowed
 that were not searched come back in `withheld`. `q` is at least two characters: one letter matches
 most of a register. At most five hits of each kind are returned, with `truncated` saying when there
 were more, so one noisy resource cannot crowd out the rest.
+
+**The bell has its own endpoint.** `GET /notifications` is the paged centre;
+`GET /notifications/summary` is the counts by category plus the newest five unread. The bell is on
+every screen and asks repeatedly while the centre is opened now and then, so giving the bell the
+whole list would make the commonest request the most expensive one. It is the same reasoning as the
+one-request dashboard, applied the other way round.
+
+**`Idempotency-Key` is required on `POST /sms/send`,** and on no other endpoint in this API. A
+duplicate anywhere else writes a row a cooperative can void; here it puts a second message on a
+member's telephone, which cannot be taken back. A request without the header is refused with 422
+rather than sent. `POST /announcements/:id/publish` accepts one for the same reason but does not
+demand it, because the message log's own dedupe key already makes a repeat harmless — the header is
+what makes the _answer_ the same, so a secretary whose first attempt appeared to hang is not told
+"0 sent, 78 already sent".
+
+**`GET /announcements/:id/audience` exists to be asked before anything is sent.** It answers how
+many members are in the audience, how many of them have a telephone, what one message costs in
+segments, and whether the live provider delivers at all. A cooperative told those numbers afterwards
+has already spent the money — and a phone number is never required of a member, so "40 of 120 cannot
+be reached" is the ordinary answer rather than an error.
+
+`docs/announcements-and-sms.md` is the reference for all of it.
 
 ### Audit, assistant, platform administration — Phases 2, 14, 3
 

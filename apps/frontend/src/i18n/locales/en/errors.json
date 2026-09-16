@@ -104,5 +104,10 @@
     "cancelled": "That sale was cancelled. Record a new one rather than confirming this.",
     "noLines": "This sale has no lines, so there is nothing to confirm.",
     "paymentNeedsConfirmed": "Payment is recorded against a confirmed sale. Confirm it first."
+  },
+  "announcements": {
+    "notADraft": "This announcement has been published, so its text cannot change. Withdraw it and write a new one.",
+    "archived": "This announcement has been withdrawn. Write a new one.",
+    "alreadyArchived": "This announcement has already been withdrawn."
   }
 }

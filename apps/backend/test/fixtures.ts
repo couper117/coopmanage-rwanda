@@ -234,6 +234,10 @@ export async function cleanupFixtures(): Promise<void> {
   await prisma.productCategory.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
   await prisma.warehouse.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
   await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  // A message names its announcement, its member and the user who sent it with RESTRICT, so both
+  // tables go before the members and the accounts do.
+  await prisma.smsMessage.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
+  await prisma.announcement.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
   await prisma.unitOfMeasure.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
 
   // Members and money, in dependency order. Every reference in the M4 tables is RESTRICT, because

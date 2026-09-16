@@ -37,6 +37,12 @@ import { toI18nKey, translateParams } from '@/lib/messageKey'
  * no money on it and says so, so nobody mistakes a missing tile for a cooperative with no money.
  */
 
+/**
+ * Hoisted for the same reason the bell's list is: `useTranslation` takes the array in its
+ * dependencies, and a new one on every render re-runs its effect, sets state and renders again.
+ */
+const ACTIVITY_NAMESPACES = ['dashboard', ...AUDIT_MESSAGE_NAMESPACES]
+
 const HEALTH_TONE: Readonly<Record<HealthRating, BadgeTone>> = {
   GOOD: 'success',
   WATCH: 'warning',
@@ -351,7 +357,7 @@ function LowStockPanel({ rows }: { rows: LowStockRow[] }) {
  * own place: nothing above it waits, and no reader is ever shown a translation key.
  */
 function ActivityPanel({ entries }: { entries: ActivityEntry[] }) {
-  const { t, i18n } = useTranslation(['dashboard', ...AUDIT_MESSAGE_NAMESPACES])
+  const { t, i18n } = useTranslation(ACTIVITY_NAMESPACES)
   const ready = useLazyNamespaces(AUDIT_MESSAGE_NAMESPACES)
 
   /**

@@ -1,6 +1,53 @@
 {
+  "title": "Amamenyesha",
+  "description": "Ibyo koperative yamenyeshejwe, n'ibisabwa gukorwa.",
+  "bell": {
+    "none": "Amamenyesha, nta kintu gitegereje",
+    "withCount_one": "Amamenyesha, hari kimwe gitegereje",
+    "withCount": "Amamenyesha, hari {{count}} bitegereje"
+  },
+  "actions": {
+    "readAll": "Shyira byose nk'ibyasomwe",
+    "seeAll": "Reba amamenyesha yose",
+    "open": "Fungura",
+    "dismiss": "Kuraho"
+  },
+  "empty": {
+    "title": "Nta kintu gitegereje",
+    "body": "Imenyesha ku bubiko bugeze hasi, raporo zarangiye n'inama zegereje bizagaragara hano uko bibaye."
+  },
+  "type": {
+    "LOW_STOCK": "Ububiko bugeze hasi",
+    "MEETING_REMINDER": "Inama",
+    "REPORT_READY": "Raporo yarangiye",
+    "MEMBER_INCOMPLETE": "Amakuru y'umunyamuryango",
+    "DOCUMENT": "Inyandiko",
+    "TASK": "Igikorwa gisabwa",
+    "SYSTEM": "Sisitemu"
+  },
+  "severity": {
+    "INFO": "Kumenyesha gusa",
+    "WARNING": "Bikwiye kwitonderwa",
+    "CRITICAL": "Byihutirwa"
+  },
+  "filters": {
+    "type": "Ubwoko",
+    "anyType": "Ubwoko bwose",
+    "severity": "Urugero rw'ubwihutirwe",
+    "anySeverity": "Urwose",
+    "state": "Imiterere",
+    "stateAll": "Ibyasomwe n'ibitasomwe",
+    "stateUnread": "Ibitasomwe gusa",
+    "stateDismissed": "Ibyakuweho"
+  },
+  "pagination": {
+    "summary": "Hagaragara {{from}} kugeza {{to}} kuri {{total}}"
+  },
   "lowStock": {
     "low": "{{product}} yagabanutse igera kuri {{quantity}} {{unit}}, munsi ya {{minimum}} wasabye kumenyeshwa",
     "empty": "{{product}} yashize burundu. Ububiko ntacyo bufite, ku gipimo ntarengwa cya {{minimum}} {{unit}}"
+  },
+  "report": {
+    "ready": "{{report}} yo mu {{period}} irashobora gusomwa"
   }
 }

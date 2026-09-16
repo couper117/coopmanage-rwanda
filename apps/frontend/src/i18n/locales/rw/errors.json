@@ -104,5 +104,10 @@
     "cancelled": "Iryo gurisha ryahagaritswe. Andika irindi aho kwemeza iri.",
     "noLines": "Iri gurisha nta murongo rifite, nta cyo kwemeza.",
     "paymentNeedsConfirmed": "Ubwishyu bwandikwa ku igurisha ryemejwe. Ryemeze mbere."
+  },
+  "announcements": {
+    "notADraft": "Iri tangazo ryatangajwe, inyandiko yaryo ntishobora guhinduka. Rikureho hanyuma wandike irindi.",
+    "archived": "Iri tangazo ryakuweho. Andika irindi.",
+    "alreadyArchived": "Iri tangazo ryamaze gukurwaho."
   }
 }

@@ -1,0 +1,140 @@
+{
+  "title": "Amatangazo",
+  "description": "Ibyo koperative ibwira abanyamuryango bayo, n'inyandiko y'ibyoherejwe.",
+  "tableCaption": "Amatangazo ya koperative, abo agenewe, imiterere yayo n'umubare w'ubutumwa buri rimwe ryohereje.",
+  "columns": {
+    "title": "Itangazo",
+    "audience": "Rigenewe",
+    "status": "Imiterere",
+    "messages": "Ubutumwa",
+    "actions": "Ibikorwa"
+  },
+  "status": {
+    "DRAFT": "Umushinga",
+    "PUBLISHED": "Ryatangajwe",
+    "ARCHIVED": "Ryakuweho"
+  },
+  "audience": {
+    "ALL_MEMBERS": "Abanyamuryango bose",
+    "ACTIVE_MEMBERS": "Abanyamuryango bakora",
+    "STAFF": "Abakozi gusa"
+  },
+  "actions": {
+    "add": "Andika itangazo",
+    "publish": "Tangaza",
+    "send": "Ongera wohereze",
+    "archive": "Kuraho",
+    "messages": "Ubutumwa bwoherejwe"
+  },
+  "filters": {
+    "search": "Shakisha",
+    "searchPlaceholder": "Amagambo ari mu izina cyangwa mu butumwa",
+    "status": "Imiterere",
+    "anyStatus": "Imiterere yose"
+  },
+  "empty": {
+    "title": "Nta tangazo rihari",
+    "body": "Andika rimwe umenyeshe abanyamuryango inama, igiciro cyangwa itariki y'itanga. Abenshi bagerwaho kuri SMS aho kuza gufungura iyi paji."
+  },
+  "fields": {
+    "title": "Izina",
+    "titleRw": "Izina mu Kinyarwanda",
+    "body": "Ubutumwa",
+    "bodyHint": "Ibyo abanyamuryango bazasoma. Bigire bigufi: bitwarwa na SMS.",
+    "bodyRw": "Ubutumwa mu Kinyarwanda",
+    "bodyRwHint": "Iyo wabwanditse, ni bwo abanyamuryango bahabwa.",
+    "audience": "Abo rigenewe",
+    "audienceHint": "Abanyamuryango bagerwaho kuri SMS. Itangazo ry'abakozi risomwa hano muri sisitemu."
+  },
+  "form": {
+    "addTitle": "Andika itangazo",
+    "addDescription": "Ribikwa nk'umushinga. Nta kintu kigenda mbere yo kuritangaza.",
+    "editTitle": "Hindura umushinga",
+    "editDescription": "Umushinga gusa ushobora guhinduka. Nyuma yo kutangaza, inyandiko igomba kuvuga ibyoherejwe.",
+    "submit": "Bika umushinga",
+    "cost_one": "Inyuguti {{characters}}, ubutumwa bumwe kuri buri munyamuryango.",
+    "cost": "Inyuguti {{characters}}, ubutumwa {{count}} kuri buri munyamuryango."
+  },
+  "publish": {
+    "title": "Utangaza iri tangazo?",
+    "body": "Kutangaza rishyira mu nyandiko za koperative. Kohereza kuri SMS ni icyemezo cyihariye.",
+    "confirm": "Tangaza",
+    "confirmAndSend": "Tangaza kandi wohereze",
+    "members": "Abanyamuryango rigenewe",
+    "reachable": "Bafite nimero ya telefone",
+    "withoutPhone_one": "Umunyamuryango umwe nta nimero ya telefone afite, ntazabona ubu butumwa. Hari uzamubwira.",
+    "withoutPhone": "Abanyamuryango {{count}} nta nimero ya telefone bafite, ntibazabona ubu butumwa. Hari uzababwira.",
+    "cost_one": "Ubutumwa bumwe kuri buri wese, bityo {{messages}} muri rusange.",
+    "cost": "Ubutumwa {{count}} kuri buri wese, bityo {{messages}} muri rusange.",
+    "unicode": "Inyandiko irimo inyuguti zigabanya ubunini bwa buri butumwa, bityo bihenda kurushaho.",
+    "sendSms": "Bwohereze abanyamuryango kuri SMS",
+    "sendSmsHint": "Buri butumwa bugira igiciro koperative yishyura. Bisige bidakora utangaze udohereje.",
+    "staffOnly": "Iri tangazo rigenewe abakozi, bityo risomwa hano kandi nta butumwa bwoherezwa.",
+    "mockTitle": "Ubutumwa bwandikwa, ntibutangwa",
+    "mockBody": "Nta muyoboro wa SMS urahuzwa. Ibyo wohereza byose byandikwa mu nyandiko y'ubutumwa n'inimero n'inyandiko yabyo, ntacyo kigera kuri telefone.",
+    "report": {
+      "sent": "Bwoherejwe",
+      "failed": "Bwanzwe",
+      "failedBody_one": "Ubutumwa bumwe bwanzwe. Inyandiko ivuga uwo munyamuryango n'impamvu.",
+      "failedBody": "Ubutumwa {{count}} bwanzwe. Inyandiko ivuga abo banyamuryango n'impamvu.",
+      "alreadySent_one": "Umunyamuryango umwe yari yamaze koherezwa iri tangazo, ntiryongeye kohereza.",
+      "alreadySent": "Abanyamuryango {{count}} bari bamaze koherezwa iri tangazo, ntiryongeye kohereza.",
+      "withoutPhone_one": "Umunyamuryango umwe nta nimero ya telefone afite, nta kintu yoherejwe.",
+      "withoutPhone": "Abanyamuryango {{count}} nta nimero ya telefone bafite, nta kintu boherejwe.",
+      "mockBody": "Ubu butumwa bwandikwe ntibutangwa, kuko nta muyoboro wa SMS urahuzwa."
+    }
+  },
+  "archive": {
+    "title": "Ukuraho iri tangazo?",
+    "body": "Rivamo ku rutonde rukoreshwa rigume mu nyandiko za koperative n'impamvu utanga.",
+    "bodySent_one": "Ryamaze koherezwa umunyamuryango umwe, utakwibagizwa. Rivamo ku rutonde rukoreshwa rigume mu nyandiko n'impamvu utanga.",
+    "bodySent": "Ryamaze koherezwa abanyamuryango {{count}}, batakwibagizwa. Rivamo ku rutonde rukoreshwa rigume mu nyandiko n'impamvu utanga.",
+    "reason": "Impamvu rikurwaho",
+    "reasonPlaceholder": "Itariki yongeye guhinduka",
+    "keep": "Rigume ritangajwe",
+    "confirm": "Rikureho"
+  },
+  "provider": {
+    "mockTitle": "Ubutumwa bwandikwa, ntibutangwa",
+    "mockBody": "Nta muyoboro wa SMS urahuzwa. Amatangazo wohereza yandikwa mu nyandiko y'ubutumwa kandi ntacyo kigera kuri telefone."
+  },
+  "notice": {
+    "drafted": "{{title}} ryabitswe nk'umushinga.",
+    "saved": "{{title}} ryabitswe.",
+    "published": "{{title}} ryatangajwe.",
+    "archived": "{{title}} ryakuweho."
+  },
+  "pagination": {
+    "summary": "Hagaragara {{from}} kugeza {{to}} kuri {{total}}"
+  },
+  "messages": {
+    "title": "Ubutumwa bwoherejwe",
+    "description": "Ubutumwa bwose koperative yoherereje abanyamuryango bayo, abo bwagiye n'ibyabaye.",
+    "caption": "Ubutumwa bwoherejwe, n'umunyamuryango, nimero, inyandiko n'icyavuyemo.",
+    "back": "Subira ku matangazo",
+    "noMember": "Ntari umunyamuryango",
+    "adHoc": "Bwoherejwe ubwabwo",
+    "columns": {
+      "member": "Bwagiye kuri",
+      "body": "Ubutumwa",
+      "status": "Icyavuyemo",
+      "announcement": "Itangazo",
+      "sentAt": "Igihe"
+    },
+    "status": {
+      "QUEUED": "Butegereje",
+      "SENT": "Bwoherejwe",
+      "FAILED": "Bwanzwe"
+    },
+    "filters": {
+      "status": "Icyavuyemo",
+      "anyStatus": "Ibyavuyemo byose",
+      "announcement": "Itangazo rimwe",
+      "clearAnnouncement": "Erekana amatangazo yose"
+    },
+    "empty": {
+      "title": "Nta kintu cyoherejwe",
+      "body": "Tangaza itangazo ku banyamuryango, buri butumwa buzagaragara hano n'icyavuyemo."
+    }
+  }
+}

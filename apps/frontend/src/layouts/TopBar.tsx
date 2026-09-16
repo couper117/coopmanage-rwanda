@@ -4,6 +4,7 @@ import { ConnectionIndicator } from '@/components/ConnectionIndicator'
 import { CooperativeSwitcher } from '@/components/CooperativeSwitcher'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { UserMenu } from '@/components/UserMenu'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { GlobalSearch } from '@/features/dashboard/GlobalSearch'
 import { useActiveMembership, usePermission } from '@/features/auth/useSession'
 import { useUiStore } from '@/stores/uiStore'
@@ -14,6 +15,7 @@ export function TopBar() {
   const membership = useActiveMembership()
   // Enforced on the server as well; this only decides whether the box is there to type in.
   const canSearch = usePermission('search:use')
+  const canSeeNotifications = usePermission('notifications:view')
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
@@ -39,6 +41,7 @@ export function TopBar() {
 
       <div className="flex items-center gap-1.5">
         <ConnectionIndicator />
+        {membership && canSeeNotifications ? <NotificationBell /> : null}
         <LanguageSwitcher />
         <UserMenu />
       </div>

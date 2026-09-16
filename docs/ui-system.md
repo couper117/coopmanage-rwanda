@@ -230,6 +230,26 @@ styled entirely by our own tokens. One icon library: **lucide-react**, 16 px in 
 | `PermissionGate`                                                                                     | Renders children only when the permission is held                                                                                                                                                          |
 | `ConnectionIndicator`                                                                                | Online, reconnecting or offline, with plain-language text                                                                                                                                                  |
 
+### Overlays: dialogs are portalled, panels attached to a control are not
+
+A `Dialog` is modal, takes focus and belongs in a portal. Anything that hangs off a control — the
+member picker, the global search results, the notification bell's panel — is an absolutely
+positioned element inside a `relative` wrapper, closed by a pointer-down outside it and by Escape.
+
+Three reasons, accumulated rather than designed:
+
+1. A portal inside a dialog is where focus handling goes wrong.
+2. On the phones this product is used on, a list that escapes its container ends up half off the
+   screen.
+3. **A portalled popper cannot be tested in this environment at all.** A bare
+   `@radix-ui/react-popover` never settles under jsdom — its measuring loop keeps a test alive until
+   the timeout — so a control built on one is a control nobody can write a test for, which is a
+   control that quietly breaks. Found in Phase 12 while building the bell, after the third reason
+   cost an hour of looking for a fault in our own code.
+
+`DropdownMenu` is the exception still in use, for the three small menus in the top bar. It is a
+popper too and carries the same limitation, which is why no test opens one.
+
 ### Money formatting
 
 Rwandan francs have no circulating subunit, so amounts display as whole francs with thousands

@@ -496,17 +496,43 @@ Neither table has a delete path in the application. A document is archived; a me
 
 ---
 
-## 11. Communication (Notification in M6, the rest in M10)
+## 11. Communication (Notification in M6, announcements and SMS in M12)
 
-- **Announcement**: `id`, `cooperative_id`, `title`, `body`, `audience` enum(ALL_MEMBERS, STAFF,
-  SELECTED_MEMBERS), `status` enum(DRAFT, PUBLISHED, ARCHIVED), `published_at`, `expires_at`,
-  `sent_via_sms` boolean, `created_by_id`, timestamps.
-- **AnnouncementRecipient**: `id`, `announcement_id` CASCADE, `member_id` RESTRICT.
-  Unique (announcement_id, member_id).
-- **SmsMessage**: `id`, `cooperative_id`, `provider`, `to_phone`, `member_id` null, `body`,
-  `status` enum(QUEUED, SENT, DELIVERED, FAILED), `provider_message_id` null, `error_message` null,
-  `segments` int, `cost_amount` numeric(14,2) null, `announcement_id` null, `meeting_id` null,
-  `sent_by_id`, `created_at`, `sent_at`. Index (cooperative_id, created_at), (status).
+- **Announcement** (M12): `id`, `cooperative_id` CASCADE, `title`, `title_rw` null, `body`,
+  `body_rw` null, `audience` enum(ALL_MEMBERS, ACTIVE_MEMBERS, STAFF), `status` enum(DRAFT,
+  PUBLISHED, ARCHIVED), `published_at` null, `published_by_id` null RESTRICT, `archived_at` null,
+  `archive_reason` null, `created_by_id` RESTRICT, timestamps.
+  Index (cooperative_id, status, created_at desc), (cooperative_id, published_at desc).
+  Check constraints: title and body not blank, a Kinyarwanda version not blank where given, a
+  published row has both a publisher and a time, and an archived row has a reason.
+- **SmsMessage** (M12): `id`, `cooperative_id` CASCADE, `announcement_id` null RESTRICT, `member_id`
+  null RESTRICT, `to_phone`, `body`, `status` enum(QUEUED, SENT, FAILED), `provider`,
+  `provider_message_id` null, `failure_reason` null, **`dedupe_key`** text, `sent_at` null,
+  `created_by_id` null SET NULL, `created_at`.
+  **Unique (cooperative_id, dedupe_key)** — this is what makes "eighty messages, no duplicates" a
+  property of the database rather than of the code that happened to run.
+  Index (cooperative_id, created_at desc), (announcement_id), (member_id).
+  Check constraints: the number matches the canonical `+2507XXXXXXXX` the phone module produces,
+  the body and provider are not blank, and the status agrees with the timestamps — SENT has a time,
+  FAILED has a reason, QUEUED has neither.
+
+### What M12 built differently from this plan, and why
+
+- **No `AnnouncementRecipient` table.** The message log _is_ the record of who was reached. A
+  separate recipients table would say who was _intended_, and the two would drift the first time a
+  member's number failed — leaving a cooperative with two answers to "who was told?".
+- **No `expires_at` and no `sent_via_sms` on the announcement.** Nothing reads an expiry, and
+  whether it was sent is answered by counting its messages, which cannot disagree with itself.
+  A boolean beside the log would be a second source of truth for the same fact.
+- **No `SELECTED_MEMBERS` audience.** Sending to named members is `POST /sms/send`, which is a
+  different act with a different record: an announcement is a notice the cooperative made, and a
+  message to four people is not. `ACTIVE_MEMBERS` was added instead, because "every member" and
+  "every member who is still active" are the two audiences a cooperative actually asks for.
+- **No `segments` or `cost_amount` columns.** Both are functions of the body, which is stored, so a
+  column could only ever disagree with it. `smsSegments` in the shared package is the one
+  implementation, used by the screen that quotes the price and the server that caps the length.
+- **No `DELIVERED` status.** Nothing can set it: delivery is a gateway callback and there is no
+  gateway. A state the application can never reach would be a state a screen has to explain.
 - **Notification** (M6, because the Phase 6 low-stock scan is the first thing that writes one):
   `id`, `cooperative_id`, `user_id` null (null = every staff member of the
   cooperative), `type` enum(LOW_STOCK, MEETING_REMINDER, REPORT_READY, MEMBER_INCOMPLETE, DOCUMENT,
@@ -618,16 +644,22 @@ implies a different phase is wrong.
 
 | Migration | Phase | Tables created                                                                                                                            |
 | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| M1        | 1     | `Permission`, `Role`, `RolePermission`, `CooperativeType`                                                                                 |
-| M2        | 2     | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog`, `UnitOfMeasure` |
-| M3        | 3     | `CooperativeSetting`, `SystemSetting`                                                                                                     |
+| M1 ✅     | 1     | `Permission`, `Role`, `RolePermission`, `CooperativeType`                                                                                 |
+| M2 ✅     | 2     | `User`, `RefreshSession`, `PasswordResetToken`, `Cooperative`, `CooperativeStaff`, `StaffPermissionOverride`, `AuditLog`, `UnitOfMeasure` |
+| M3 ✅     | 3     | `CooperativeSetting`, `SystemSetting`                                                                                                     |
 | M4 ✅     | 4     | `Member`, `MemberShare`, `Contribution`, `FinanceCategory`, `FinanceTransaction`, `IdempotencyKey`                                        |
 | M6 ✅     | 6     | `ProductCategory`, `Product`, `Warehouse`, `StockLevel`, `InventoryTransaction`, `Notification`                                           |
 | M7 ✅     | 7     | `Buyer`, `Sale`, `SaleItem`                                                                                                               |
-| M8        | 8     | `ReportRun`                                                                                                                               |
-| M9        | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
-| M10       | 12    | `Announcement`, `AnnouncementRecipient`, `SmsMessage`                                                                                     |
-| M11       | 14    | `AssistantConversation`, `AssistantMessage`                                                                                               |
+| M8 ✅     | 8     | `ReportRun`                                                                                                                               |
+| M9 ✅     | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
+| M12 ✅    | 12    | `Announcement`, `SmsMessage`                                                                                                              |
+| M13       | 14    | `AssistantConversation`, `AssistantMessage`                                                                                               |
+
+The migration numbers follow the phase rather than a running count: the announcements and SMS
+migration is **M12**, not M10, because it lands in Phase 12 and a name that disagrees with its phase
+is a name somebody has to decode. `AnnouncementRecipient` was dropped from the plan — the message
+log is the record of who was reached, and a recipients table would say who was intended. The
+reasoning is above, in section 11.
 
 **Columns that point forward are added later, not created early.** A few tables carry optional links
 to tables that a later migration creates: `FinanceTransaction` (M4) links to `Buyer` and `Sale`

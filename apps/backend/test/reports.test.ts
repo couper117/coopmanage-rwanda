@@ -802,7 +802,10 @@ describe('report runs', () => {
     // about everyone else's reports is how a cooperative learns to ignore its notifications.
     expect(notification?.userId).toBe(manager.id)
     expect(notification?.messageKey).toBe('notifications.report.ready')
-    expect(notification?.messageParams).toMatchObject({ report: 'report.sales' })
+    // The interface's own key for the report's name, not the printed labels' key: a notification
+    // carrying `report.sales` would have shown that text to a reader, because it names no i18n
+    // namespace. Phase 12 gave notifications a screen, which is when that surfaced.
+    expect(notification?.messageParams).toMatchObject({ report: 'reports.type.sales' })
     expect(notification?.actionUrl).toBe(`/reports/runs/${runId}`)
   })
 

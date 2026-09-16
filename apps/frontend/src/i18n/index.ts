@@ -55,6 +55,7 @@ export const CORE_NAMESPACES = [
  * its keys for a moment and then corrects itself.
  */
 export const FEATURE_NAMESPACES = [
+  'announcements',
   'members',
   'finance',
   'inventory',
@@ -84,6 +85,7 @@ export type FeatureNamespace = (typeof FEATURE_NAMESPACES)[number]
  */
 export const AUDIT_MESSAGE_NAMESPACES = [
   'audit',
+  'announcements',
   'members',
   'finance',
   'inventory',
@@ -138,6 +140,7 @@ const LOADERS: Readonly<
   Record<Language, Readonly<Record<FeatureNamespace, () => Promise<unknown>>>>
 > = {
   en: {
+    announcements: () => import('./locales/en/announcements.json'),
     members: () => import('./locales/en/members.json'),
     finance: () => import('./locales/en/finance.json'),
     inventory: () => import('./locales/en/inventory.json'),
@@ -152,6 +155,7 @@ const LOADERS: Readonly<
     profile: () => import('./locales/en/profile.json'),
   },
   rw: {
+    announcements: () => import('./locales/rw/announcements.json'),
     members: () => import('./locales/rw/members.json'),
     finance: () => import('./locales/rw/finance.json'),
     inventory: () => import('./locales/rw/inventory.json'),

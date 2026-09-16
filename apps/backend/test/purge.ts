@@ -60,6 +60,9 @@ export async function purgeTestData(): Promise<PurgeReport> {
       })
       await prisma.document.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
       await prisma.meeting.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
+      // A message names its announcement and its member with RESTRICT, so it goes before either.
+      await prisma.smsMessage.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
+      await prisma.announcement.deleteMany({ where: { cooperativeId: { in: staffCooperatives } } })
     }
 
     await prisma.staffPermissionOverride.deleteMany({
@@ -136,6 +139,23 @@ export async function purgeTestData(): Promise<PurgeReport> {
     })
     await prisma.meeting.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
 
+    // Messages name their announcement, their member and the user who sent them with RESTRICT,
+    // so they go before all three; the announcement names its author and publisher the same way.
+    await prisma.smsMessage.deleteMany({
+      where: {
+        OR: [{ cooperativeId: { in: cooperativeIds } }, { createdById: { in: userIds } }],
+      },
+    })
+    await prisma.announcement.deleteMany({
+      where: {
+        OR: [
+          { cooperativeId: { in: cooperativeIds } },
+          { createdById: { in: userIds } },
+          { publishedById: { in: userIds } },
+        ],
+      },
+    })
+
     await prisma.notification.deleteMany({ where: { cooperativeId: { in: cooperativeIds } } })
     // Report runs name the user who produced them with RESTRICT, so they go before the accounts
     // do. The cooperative cascade would take them too, but only for a cooperative that is being
@@ -181,6 +201,7 @@ export async function purgeTestData(): Promise<PurgeReport> {
         where: { memberId: { in: memberIds } },
         data: { reversalOfId: null },
       })
+      await prisma.smsMessage.deleteMany({ where: { memberId: { in: memberIds } } })
       await prisma.memberShare.deleteMany({ where: { memberId: { in: memberIds } } })
       await prisma.contribution.deleteMany({ where: { memberId: { in: memberIds } } })
       await prisma.financeTransaction.deleteMany({ where: { memberId: { in: memberIds } } })

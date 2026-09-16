@@ -104,3 +104,39 @@ export function methodRateLimiter(req: Request, res: Response, next: NextFunctio
     req.method === 'GET' || req.method === 'HEAD' ? readLimiter : writeLimiter
   limiter(req, res, next)
 }
+
+/**
+ * Sending, limited per cooperative rather than per address.
+ *
+ * `docs/security.md` §8 commits to this and the reason is money: one `POST /sms/send` carries up to
+ * five hundred members, and the ordinary write limit would let a cooperative's session spend
+ * thousands of messages in a minute — by a loop somebody wrote, by a script, or by a stolen token.
+ *
+ * Keyed on the **cooperative**, not the IP, because a cooperative's whole office shares one public
+ * address and because the cost lands on the cooperative. It therefore has to run after
+ * `resolveCooperative`, which is why it is applied on the route rather than app-wide.
+ *
+ * Ten sends an hour is the figure `docs/api.md` §1 commits to: far above ordinary use — a
+ * cooperative publishes a handful of notices a day — and far below a bill anybody would notice too
+ * late.
+ */
+function byCooperative(options: { windowMs: number; limit: number }): RateLimitRequestHandler {
+  return rateLimit({
+    windowMs: options.windowMs,
+    limit: options.limit,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    skip: () => isTest,
+    keyGenerator: (req) => req.ctx?.cooperative?.id ?? 'no-cooperative',
+    handler: (_req, _res, next) => {
+      next(AppError.rateLimited())
+    },
+  })
+}
+
+export const SMS_SEND_LIMIT = { perHour: 10 } as const
+
+export const smsSendLimiter = byCooperative({
+  windowMs: 60 * MINUTE,
+  limit: SMS_SEND_LIMIT.perHour,
+})

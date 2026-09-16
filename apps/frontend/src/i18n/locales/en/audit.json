@@ -80,5 +80,13 @@
     "cancelled": "Sale {{reference}} for {{total}} RWF was cancelled",
     "paymentRecorded": "{{amount}} RWF was received for sale {{reference}}, entry {{entry}}",
     "receiptIssued": "A receipt for sale {{reference}} was produced"
+  },
+  "announcement": {
+    "created": "{{title}} was drafted",
+    "updated": "The draft {{title}} was changed",
+    "published": "{{title}} was published to {{audience}}",
+    "sent_one": "{{title}} was sent to one member by SMS",
+    "sent": "{{title}} was sent to {{count}} members by SMS",
+    "archived": "{{title}} was withdrawn: {{reason}}"
   }
 }

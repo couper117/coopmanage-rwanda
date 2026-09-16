@@ -48,8 +48,16 @@ export function FormField({
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={id} className="text-sm font-medium text-ink">
         {label}
+        {/*
+          A real space, not only the margin. The margin separates the words on screen; without the
+          space the accessible name is "Office phone(optional)", which a screen reader can run
+          together into one word.
+        */}
         {optional ? (
-          <span className="ml-1 font-normal text-ink-muted">({t('common:state.optional')})</span>
+          <>
+            {' '}
+            <span className="font-normal text-ink-muted">({t('common:state.optional')})</span>
+          </>
         ) : null}
       </label>
       {control}

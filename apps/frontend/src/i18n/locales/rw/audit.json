@@ -80,5 +80,13 @@
     "cancelled": "Igurisha {{reference}} rya {{total}} RWF ryahagaritswe",
     "paymentRecorded": "{{amount}} RWF yakiriwe ku igurisha {{reference}}, icyanditswe {{entry}}",
     "receiptIssued": "Inyemezabwishyu y'igurisha {{reference}} yakozwe"
+  },
+  "announcement": {
+    "created": "{{title}} ryanditswe nk'umushinga",
+    "updated": "Umushinga {{title}} wahinduwe",
+    "published": "{{title}} ryatangarijwe {{audience}}",
+    "sent_one": "{{title}} ryoherejwe umunyamuryango umwe kuri SMS",
+    "sent": "{{title}} ryoherejwe abanyamuryango {{count}} kuri SMS",
+    "archived": "{{title}} ryakuweho: {{reason}}"
   }
 }

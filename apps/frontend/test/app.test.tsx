@@ -108,11 +108,12 @@ describe('application shell', () => {
     // A module reached before its phase says so and names the phase, rather than showing an
     // empty screen that reads as a fault. Once a module is built its placeholder disappears on
     // its own, because the pending route set is derived from the real routes — so this names a
-    // module still well ahead, and moves on when that phase lands.
-    renderApp('/announcements')
-    expect(screen.getByRole('heading', { level: 1, name: 'Announcements' })).toBeInTheDocument()
-    expect(screen.getByText('Announcements is not available yet')).toBeInTheDocument()
-    expect(screen.getByText(/arrives in phase 12/i)).toBeInTheDocument()
+    // module still ahead, and moves on when that phase lands. It was Announcements until Phase 12
+    // built them.
+    renderApp('/assistant')
+    expect(screen.getByRole('heading', { level: 1, name: 'Ask CoopManage' })).toBeInTheDocument()
+    expect(screen.getByText('Ask CoopManage is not available yet')).toBeInTheDocument()
+    expect(screen.getByText(/arrives in phase 14/i)).toBeInTheDocument()
   })
 
   it('shows a real not-found page for an unknown route', () => {
@@ -138,10 +139,10 @@ describe('language switching', () => {
 
   it('translates the pending module page too', async () => {
     await changeLanguage('rw')
-    // The same module the English test uses, and for the same reason: a module still well ahead,
-    // so this does not have to move every time a phase lands.
-    renderApp('/announcements')
-    expect(screen.getByRole('heading', { level: 1, name: 'Amatangazo' })).toBeInTheDocument()
+    // The same module the English test uses, and for the same reason: a module still ahead, so
+    // this does not have to move every time a phase lands.
+    renderApp('/assistant')
+    expect(screen.getByRole('heading', { level: 1, name: 'Baza CoopManage' })).toBeInTheDocument()
     expect(screen.getByText(/ntiraboneka/i)).toBeInTheDocument()
   })
 

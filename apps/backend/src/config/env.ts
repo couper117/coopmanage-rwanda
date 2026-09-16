@@ -64,6 +64,21 @@ const envSchema = z
     /** The cap on one uploaded file. 10 MB covers a scanned certificate and a long PDF. */
     MAX_UPLOAD_MB: z.coerce.number().int().min(1).max(100).default(10),
 
+    /**
+     * Which SMS provider carries a cooperative's announcements.
+     *
+     * One value today, and it needs no credentials: `mock` records every message with its body and
+     * its number and delivers none of them. That is a Phase 12 exit criterion — development runs
+     * with no SMS credentials — and a gateway lands with the account it needs rather than as an
+     * adapter written against nothing and never run.
+     */
+    SMS_PROVIDER: z.enum(['mock']).default('mock'),
+    /**
+     * The name a cooperative's messages appear to come from, where the gateway supports one.
+     * Optional: most Rwandan gateways assign a short code, and a made-up sender is worse than none.
+     */
+    SMS_SENDER_ID: z.string().trim().min(1).max(11).optional(),
+
     SEED_DEMO: booleanFromString.default(false),
     // Defaults to on outside production and off in production. Setting it explicitly wins,
     // which is what docs/api.md section 4 promises.

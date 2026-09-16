@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { ModulePendingPage } from '@/pages/ModulePendingPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { adminRoutes } from '@/features/admin/adminRoutes'
+import { announcementRoutes } from '@/features/announcements/announcementRoutes'
 import { financeRoutes } from '@/features/finance/financeRoutes'
 import { documentRoutes } from '@/features/documents/documentRoutes'
 import { inventoryRoutes } from '@/features/inventory/inventoryRoutes'
@@ -33,6 +34,17 @@ const AuditLogPage = lazy(async () => {
   await loadNamespaces(AUDIT_MESSAGE_NAMESPACES)
   return { default: (await import('@/pages/AuditLogPage')).AuditLogPage }
 })
+/**
+ * The notification centre.
+ *
+ * Its strings are the audit namespaces, because a notification quotes whichever module raised it —
+ * the same reason the activity log loads them, recorded in `AUDIT_MESSAGE_NAMESPACES`.
+ */
+const NotificationsPage = lazy(async () => {
+  await loadNamespaces(AUDIT_MESSAGE_NAMESPACES)
+  return { default: (await import('@/pages/NotificationsPage')).NotificationsPage }
+})
+
 const ProfilePage = lazy(async () => {
   await loadNamespaces(['profile'])
   return { default: (await import('@/pages/ProfilePage')).ProfilePage }
@@ -91,6 +103,7 @@ const BUILT_PATHS = new Set(
     ...reportRoutes,
     ...documentRoutes,
     ...meetingRoutes,
+    ...announcementRoutes,
   ]
     .map((route) => route.path)
     .filter((path): path is string => path !== undefined)
@@ -178,7 +191,16 @@ export const routes: RouteObject[] = [
       ...reportRoutes,
       ...documentRoutes,
       ...meetingRoutes,
+      ...announcementRoutes,
       ...adminRoutes,
+      {
+        path: 'notifications',
+        element: (
+          <RequirePermission permission="notifications:view">
+            <NotificationsPage />
+          </RequirePermission>
+        ),
+      },
       {
         path: 'settings/audit',
         element: (
