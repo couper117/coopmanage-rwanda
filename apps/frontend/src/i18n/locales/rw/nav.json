@@ -32,5 +32,13 @@
   },
   "switchCooperative": "Hindura koperative",
   "yourCooperatives": "Koperative zawe",
-  "noCooperative": "Nta koperative yatoranyijwe"
+  "noCooperative": "Nta koperative yatoranyijwe",
+  "shortcuts": {
+    "title": "Imikoreshereze ya klaviye",
+    "description": "Buri nzira ni urufunguzo rumwe gusa. Nta na rumwe rukora igihe uri kwandika mu kazu.",
+    "search": "Shakisha",
+    "help": "Erekana uru rutonde",
+    "close": "Funga idirishya cyangwa urutonde",
+    "goTo": "Jya ku rupapuro"
+  }
 }

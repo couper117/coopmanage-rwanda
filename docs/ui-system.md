@@ -1,7 +1,7 @@
 # CoopManage Rwanda — Design System
 
-Status: **Phase 0 baseline.** Implemented as Tailwind tokens and primitives in Phase 1, refined in
-Phase 16.
+Status: **Phase 16 reviewed.** Implemented as Tailwind tokens and primitives in Phase 1; reviewed
+page by page in Phase 16, with §8, §9 and §12 recording what that pass found and changed.
 
 ---
 
@@ -102,9 +102,16 @@ grouped into "Other".
 
 ### Dark mode
 
-Light mode is the product. A dark theme is scoped as optional polish in Phase 16: tokens are already
-structured so a `[data-theme="dark"]` block redefines them with no component changes. It ships only
-if it can be done properly, including charts, print and status colours.
+Light mode is the product. A dark theme was scoped as optional polish in Phase 16: tokens are
+structured so a `[data-theme="dark"]` block redefines them with no component changes, and it was to
+ship only if it could be done properly, including charts, print and status colours.
+
+**Decision, Phase 16: not shipped.** Doing it properly means a second contrast pass over every
+token pair in §2, the ten chart series in §10, the status badges and the print stylesheet, and a
+preference control with its own strings in two languages — a phase's worth of work for a product
+used in daylight offices, whose users have not asked for it. Half a dark theme is worse than none:
+a light table inside a dark shell is exactly the inconsistency Phase 16 exists to remove. The
+token structure stays, so the decision can be reversed without touching a component.
 
 ---
 
@@ -217,7 +224,7 @@ styled entirely by our own tokens. One icon library: **lucide-react**, 16 px in 
 | `StatTile`                                                                                           | Label, figure, optional comparison with direction word plus arrow, optional sparkline. No icon in a coloured circle                                                                                        |
 | `Badge`                                                                                              | `neutral`, `success`, `warning`, `danger`, `info`, `accent`. Text plus a 6 px dot, so meaning never rests on colour                                                                                        |
 | `Alert`                                                                                              | Inline, four semantic variants, optional action                                                                                                                                                            |
-| `Dialog`                                                                                             | Radix, focus trapped, Escape closes, labelled by its title, 480 / 640 / 800 px widths                                                                                                                      |
+| `Dialog`                                                                                             | Radix, focus trapped, Escape closes, labelled by its title, 480 / 640 / 800 px widths. Opens on its first field (or Cancel), returns focus to whatever opened it — §9                                      |
 | `ConfirmDialog`                                                                                      | Titled question, consequence sentence, typed confirmation for high-value financial actions                                                                                                                 |
 | `Drawer`                                                                                             | Right-side panel for record detail without losing list context                                                                                                                                             |
 | `Toast`                                                                                              | Bottom-right, four seconds, action link, screen-reader live region                                                                                                                                         |
@@ -313,6 +320,15 @@ Every list, panel and page defines four states, and none of them is a blank scre
 Error copy names the action and the remedy: "We could not save this expense. Check your connection
 and try again." Never a bare status code.
 
+**A load that fails is `components/LoadError.tsx`**, which is the fourth row of the table written
+once: the described error and the "Try again" button wired to the query's own `refetch`. The Phase
+16 review found nine screens that had written the error state by hand and left the button out —
+the audit log, meetings, contributions, buyers, a buyer's profile, a meeting's detail, documents,
+the sale form and reports — so the pattern is now a component and a screen has nothing to remember.
+A module with its own error vocabulary passes its describer as `describe`. The component is for a
+**load**; a mutation that fails keeps its form on screen with the message above it, and the submit
+button is the retry.
+
 Confirmation is reserved for actions that are hard to undo. Deactivating a member, voiding a
 transaction, cancelling a confirmed sale and archiving a document are confirmed. Saving a draft or
 applying a filter is not. Financial confirmations restate the amount: "Confirm expense of
@@ -322,8 +338,19 @@ applying a filter is not. Financial confirmations restate the amount: "Confirm e
 
 ## 9. Accessibility
 
-Targeting WCAG 2.1 AA, checked with axe in the component test suite and by keyboard walkthrough at
-the end of every phase.
+Targeting WCAG 2.1 AA, checked with axe in the test suite and by keyboard walkthrough.
+
+**What is automated.** `test/axe.test.tsx` runs axe-core over 24 screens as a manager sees them —
+each in whichever state the stubbed network produces, so error states are checked too — and over
+the two dialogs a test can open, and fails on any violation of the WCAG 2 A/AA rules or axe's
+landmark and heading checks. The contrast rule is off there, because jsdom has no layout; the
+palette's ratios are stated in §2. A control case proves the gate bites. `test/keyboard.test.tsx`
+walks the critical flows with Tab, Enter, Space and Escape and never a click: signing in, the skip
+link, registering a member from opening the form to focus coming back, and the shortcuts below.
+
+**What is not.** Whether a control's name is the right name, and whether the page makes sense read
+aloud in order, is a person's judgement: a walkthrough with VoiceOver of the same flows before a
+release, recorded in the release notes.
 
 - Body text meets 4.5:1 and large text 3:1 against its background. Every token pair in this document
   has been chosen against that threshold.
@@ -332,14 +359,29 @@ the end of every phase.
   which is an addition to the ring, never a replacement for it.
 - Semantic HTML: real `<table>`, `<th scope>`, `<button>`, `<nav>`, `<main>`, one `<h1>` per page and
   no skipped heading levels.
-- Dialogs trap focus, close on Escape, restore focus to the trigger and are labelled by their title.
+- Dialogs trap focus, close on Escape and are labelled by their title. On open, focus goes to the
+  first field — or to the first footer button, which is Cancel, for a confirmation — rather than to
+  the close cross, which is where Radix's default put it. On close, focus returns to whatever
+  opened the dialog. Radix returns it to its own trigger component, and every dialog here is opened
+  from state by an ordinary button, so the `Dialog` primitive remembers the opener itself; before
+  Phase 16 focus fell to the page body and a keyboard user closing a form started again from the
+  top. If the opener has gone — a row whose record was just voided — focus goes to the content
+  landmark.
 - Form controls have real labels; errors are announced through `aria-live` and linked by
   `aria-describedby`.
 - Status is never conveyed by colour alone: badges pair a dot with a word, charts label series
   directly, and financial direction is shown with a sign.
-- A skip link precedes the sidebar. Icon-only controls carry `aria-label`.
-- Keyboard shortcuts: `/` focuses search, `g` then a letter navigates, `n` opens the new-record menu,
-  `?` lists the shortcuts. All are discoverable and none conflicts with a screen reader.
+- A skip link precedes the sidebar and focuses the `<main>` landmark directly (it carries
+  `tabindex="-1"`), so the next Tab lands in the content in every browser rather than only in those
+  that move the focus start point on fragment navigation. Icon-only controls carry `aria-label`.
+- Keyboard shortcuts: `/` focuses search, `g` then a letter goes to a screen, `?` lists the
+  shortcuts. The letter is the item's `shortcut` in `app/navigation.ts`, unique across the list and
+  asserted so by a test; only screens the reader can see are reachable, from the same
+  `useVisibleNavigation` hook that draws the sidebar, so a shortcut is never a way around a hidden
+  item. Every shortcut is a plain key with no modifier and yields to a field or a dialog that has
+  focus, so none conflicts with a screen reader's or the browser's own. `n` for a new-record menu
+  was in the Phase 0 list and is not built: there is no such menu, and each screen's own primary
+  action is one Tab from its heading.
 
 ---
 
@@ -490,8 +532,9 @@ second and a half.
 
 Dependencies are grouped by when they are needed rather than by package: React and the router
 together, Radix together, and **zod with react-hook-form**, which are the largest dependency here
-and are needed only by screens with a form. First load is 243 kB gzipped; each screen after it costs
-5–8 kB.
+and are needed only by screens with a form. First load is 263 kB gzipped after Phase 16 (the
+shortcuts, their dialog and `LoadError` are in the shell), and no screen after it costs more than
+8 kB: the stock overview and a member's profile, at 7.6 kB each, are the largest.
 
 ---
 

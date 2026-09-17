@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -312,7 +313,7 @@ export function MeetingsPage() {
       </Panel>
 
       {meetings.isError ? (
-        <Alert tone="danger">{describeError(meetings.error).message}</Alert>
+        <LoadError error={meetings.error} onRetry={meetings.refetch} describe={describeError} />
       ) : null}
 
       {scheduling ? (

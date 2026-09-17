@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 15 complete.** Phase 16 is next.
+Status: **Phase 16 complete.** Phase 17 is next.
 
 ---
 
@@ -879,7 +879,7 @@ Not a penetration test. It was a structured pass by the author against a written
 
 ---
 
-### Phase 16 — UX polish
+### Phase 16 — UX polish ✅
 
 Page-by-page review for consistency, spacing, typography, empty, loading and error states, mobile
 layout, accessibility and form usability. Remove anything that looks generated. Optional dark theme
@@ -892,6 +892,32 @@ gzipped in one chunk at the end of Phase 4, and every phase adds to it.
 **Exit:** axe reports no violations; a full keyboard walkthrough of every critical flow succeeds;
 the interface is internally consistent screen to screen; no route pulls down markedly more than it
 needs.
+
+**Met.** axe-core runs in the suite over 24 screens and two open dialogs and reports nothing
+(`test/axe.test.tsx`, with a control case proving it would). The critical flows are walked by
+keyboard alone in `test/keyboard.test.tsx`. Code splitting was done in Phase 10; the first load is
+263 kB gzipped and no screen after it costs more than 8 kB, checked from a production build.
+`ui-system.md` §8, §9 and §12 record what changed.
+
+The page-by-page review found the interface consistent in its tokens, spacing and typography — no
+screen had strayed from the design system — and inconsistent in its **states**. Nine screens had
+written their load-error state by hand and left out "Try again", which §8 mandates; the state is
+now one component, `LoadError`, and a screen has nothing to remember.
+
+The keyboard walkthrough found two things that had passed every previous phase because no test had
+ever pressed a key. **Closing any dialog dropped focus on the page body**: Radix returns focus to
+its own trigger component, and every dialog in the product is opened from state by an ordinary
+button, so there was none to return to. A keyboard user who closed a form started again from the
+top of the page. The `Dialog` primitive now remembers its opener, and opens on its first field
+rather than on the close cross. **The skip link relied on fragment navigation** to move the focus
+start point, which not every browser does; it now focuses the landmark directly.
+
+Two of the four shortcuts §9 had promised since Phase 0 did not exist. `g` then a letter and `?`
+are now built, from the same visible-navigation hook as the sidebar so a shortcut can never reach a
+hidden screen, and listed in a dialog in both languages. `n` is struck from the specification with
+the reason.
+
+The optional dark theme is not shipped; §2 records the decision and why.
 
 ---
 

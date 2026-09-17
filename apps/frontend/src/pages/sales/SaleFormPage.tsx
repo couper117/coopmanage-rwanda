@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { formatMoney, formatQuantity } from '@coopmanage/shared'
 import { DraftNotice } from '@/components/DraftNotice'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import { useFormDraft } from '@/hooks/useFormDraft'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -159,9 +160,12 @@ export function SaleFormPage() {
     return (
       <div className="flex flex-col gap-4">
         <BackLink to="/sales" label={t('sales:form.backToSales')} />
-        <Alert tone="danger" title={t('sales:form.loadFailed')}>
-          {describeError(sale.error).message}
-        </Alert>
+        <LoadError
+          error={sale.error}
+          onRetry={sale.refetch}
+          describe={describeError}
+          title={t('sales:form.loadFailed')}
+        />
       </div>
     )
   }

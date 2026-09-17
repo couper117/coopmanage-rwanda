@@ -3,6 +3,7 @@ import { Download, FileText, Printer } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Button,
@@ -228,9 +229,9 @@ export function ReportsPage() {
       ) : null}
 
       {preview.isError ? (
-        <Alert tone="danger" className="print:hidden">
-          {describeError(preview.error).message}
-        </Alert>
+        <div className="print:hidden">
+          <LoadError error={preview.error} onRetry={preview.refetch} />
+        </div>
       ) : null}
 
       {preview.data ? <ReportView report={preview.data} /> : null}

@@ -2,6 +2,7 @@ import { Archive, Download, FileText, Pencil, RotateCcw, Upload } from 'lucide-r
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -392,9 +393,7 @@ export function DocumentsPage() {
         ) : null}
       </Panel>
 
-      {documents.isError ? (
-        <Alert tone="danger">{describeError(documents.error).message}</Alert>
-      ) : null}
+      {documents.isError ? <LoadError error={documents.error} onRetry={documents.refetch} /> : null}
 
       {/*
         Each dialog is mounted only while it is open. That makes opening one a fresh mount, so its

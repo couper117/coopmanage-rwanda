@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -215,7 +216,7 @@ export function ContributionsPage() {
         </Alert>
       ) : null}
 
-      {list.isError ? <Alert tone="danger">{describeError(list.error).message}</Alert> : null}
+      {list.isError ? <LoadError error={list.error} onRetry={list.refetch} /> : null}
 
       <Panel>
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-4 py-3">

@@ -32,5 +32,13 @@
   },
   "switchCooperative": "Switch cooperative",
   "yourCooperatives": "Your cooperatives",
-  "noCooperative": "No cooperative selected"
+  "noCooperative": "No cooperative selected",
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "description": "Every shortcut is a plain key. None applies while you are typing in a field.",
+    "search": "Search",
+    "help": "Show this list",
+    "close": "Close a dialog or list",
+    "goTo": "Go to a screen"
+  }
 }

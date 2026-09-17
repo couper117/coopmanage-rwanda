@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -68,7 +69,13 @@ export function BuyerProfilePage() {
   }
 
   if (buyer.isError || !buyer.data) {
-    return <Alert tone="danger">{t('sales:buyerProfile.loadFailed')}</Alert>
+    return (
+      <LoadError
+        error={buyer.error}
+        onRetry={buyer.refetch}
+        title={t('sales:buyerProfile.loadFailed')}
+      />
+    )
   }
 
   const row = buyer.data
@@ -242,7 +249,9 @@ export function BuyerProfilePage() {
         )}
       </Panel>
 
-      {summary.isError ? <Alert tone="danger">{describeError(summary.error).message}</Alert> : null}
+      {summary.isError ? (
+        <LoadError error={summary.error} onRetry={summary.refetch} describe={describeError} />
+      ) : null}
 
       <BuyerDialog open={editing} onOpenChange={setEditing} buyer={row} onDone={setNotice} />
     </div>

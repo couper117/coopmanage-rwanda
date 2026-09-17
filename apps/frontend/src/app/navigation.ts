@@ -37,6 +37,11 @@ export interface NavItem {
   module?: ModuleKey
   /** The phase that delivers the screen. Until then the route shows an honest status page. */
   availableFromPhase: number
+  /**
+   * The letter that reaches the screen after `g`, for a keyboard user. One letter, unique across
+   * every item, and only offered for items the reader can see — `useKeyboardShortcuts` explains.
+   */
+  shortcut?: string
 }
 
 export interface NavGroup {
@@ -58,6 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: LayoutDashboard,
         permission: 'dashboard:view',
         availableFromPhase: 1,
+        shortcut: 'd',
       },
       {
         key: 'assistant',
@@ -66,6 +72,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: MessageCircleQuestion,
         permission: 'assistant:use',
         availableFromPhase: 14,
+        shortcut: 'a',
       },
       {
         key: 'reports',
@@ -74,6 +81,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Gauge,
         permission: 'reports:view',
         availableFromPhase: 8,
+        shortcut: 'r',
       },
     ],
   },
@@ -87,6 +95,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Users,
         permission: 'members:view',
         availableFromPhase: 4,
+        shortcut: 'm',
       },
       {
         key: 'contributions',
@@ -95,6 +104,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Coins,
         permission: 'contributions:view',
         availableFromPhase: 4,
+        shortcut: 'c',
       },
       {
         key: 'meetings',
@@ -103,6 +113,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: ClipboardList,
         permission: 'meetings:view',
         availableFromPhase: 9,
+        shortcut: 'e',
       },
       {
         key: 'documents',
@@ -111,6 +122,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: FileText,
         permission: 'documents:view',
         availableFromPhase: 9,
+        shortcut: 'o',
       },
       {
         key: 'announcements',
@@ -119,6 +131,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Megaphone,
         permission: 'announcements:view',
         availableFromPhase: 12,
+        shortcut: 'n',
       },
     ],
   },
@@ -132,6 +145,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Boxes,
         permission: 'inventory:view',
         availableFromPhase: 6,
+        shortcut: 'i',
       },
       {
         key: 'products',
@@ -140,6 +154,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Package,
         permission: 'products:view',
         availableFromPhase: 6,
+        shortcut: 'p',
       },
       {
         key: 'sales',
@@ -148,6 +163,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: ShoppingCart,
         permission: 'sales:view',
         availableFromPhase: 7,
+        shortcut: 's',
       },
       {
         key: 'buyers',
@@ -156,6 +172,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Handshake,
         permission: 'buyers:view',
         availableFromPhase: 7,
+        shortcut: 'b',
       },
     ],
   },
@@ -169,6 +186,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Coins,
         permission: 'finance:view',
         availableFromPhase: 5,
+        shortcut: 'f',
       },
     ],
   },
@@ -181,6 +199,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: UsersRound,
         permission: 'staff:view',
         availableFromPhase: 3,
+        shortcut: 'u',
       },
       {
         key: 'settings',
@@ -188,6 +207,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: Settings,
         permission: 'cooperative:view',
         availableFromPhase: 3,
+        shortcut: 'k',
       },
       {
         key: 'preferences',
@@ -195,6 +215,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: SlidersHorizontal,
         permission: 'cooperative:view',
         availableFromPhase: 3,
+        shortcut: 'y',
       },
       {
         key: 'audit',
@@ -202,6 +223,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: ScrollText,
         permission: 'audit:view',
         availableFromPhase: 2,
+        shortcut: 'l',
       },
     ],
   },

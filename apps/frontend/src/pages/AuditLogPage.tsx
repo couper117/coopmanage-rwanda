@@ -3,9 +3,9 @@ import { ScrollText } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { AuditEntry } from '@coopmanage/shared'
 import { PageHeader } from '@/components/PageHeader'
-import { Alert, Button, EmptyState, Panel, SkeletonText } from '@/components/ui'
+import { LoadError } from '@/components/LoadError'
+import { Button, EmptyState, Panel, SkeletonText } from '@/components/ui'
 import { fetchAuditPage } from '@/features/audit/audit.api'
-import { useApiError } from '@/hooks/useApiErrorMessage'
 import { useAuthStore } from '@/stores/authStore'
 import { toI18nKey, translateParams } from '@/lib/messageKey'
 
@@ -15,7 +15,6 @@ import { toI18nKey, translateParams } from '@/lib/messageKey'
  */
 export function AuditLogPage() {
   const { t, i18n } = useTranslation(['audit', 'common'])
-  const describeError = useApiError()
   const cooperativeId = useAuthStore((state) => state.activeCooperativeId)
 
   const query = useInfiniteQuery({
@@ -31,7 +30,7 @@ export function AuditLogPage() {
     <>
       <PageHeader title={t('audit:title')} description={t('audit:description')} />
 
-      {query.isError ? <Alert tone="danger">{describeError(query.error).message}</Alert> : null}
+      {query.isError ? <LoadError error={query.error} onRetry={query.refetch} /> : null}
 
       <Panel flush>
         {query.isPending ? (

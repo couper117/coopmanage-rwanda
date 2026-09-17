@@ -1,8 +1,10 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router-dom'
 import { RouteErrorBoundary } from '@/app/RouteErrorBoundary'
+import { ShortcutsDialog } from '@/components/ShortcutsDialog'
 import { Skeleton } from '@/components/ui'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useMediaQuery, WIDE_LAYOUT_QUERY } from '@/hooks/useMediaQuery'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/stores/uiStore'
@@ -41,6 +43,10 @@ export function AppShell() {
   const collapsed = !wide || preferCollapsed
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen)
   const location = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const openShortcuts = useCallback(() => setShortcutsOpen(true), [])
+  useKeyboardShortcuts({ onHelp: openShortcuts })
 
   // The drawer must not survive navigation. Escape, the scrim, the focus trap and focus
   // restoration are handled by the dialog primitive inside MobileNavDrawer.
@@ -50,7 +56,19 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-dvh bg-surface-sunken">
-      <a href="#main-content" className="skip-link">
+      {/*
+        The link's own fragment navigation moves the focus starting point in a current browser,
+        but not in every one a cooperative's office computer runs. Focusing the landmark directly
+        makes the next Tab land in the content everywhere, which is the whole point of the link.
+      */}
+      <a
+        href="#main-content"
+        className="skip-link"
+        onClick={(event) => {
+          event.preventDefault()
+          mainRef.current?.focus()
+        }}
+      >
         {t('skipToContent')}
       </a>
 
@@ -69,12 +87,20 @@ export function AppShell() {
       </aside>
 
       <MobileNavDrawer />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div data-print="hide">
           <TopBar />
         </div>
-        <main id="main-content" className="flex-1 px-4 py-5 sm:px-6">
+        <main
+          id="main-content"
+          ref={mainRef}
+          // Focusable by script only, so it can receive the skip link's focus without becoming a
+          // stop in the Tab order — and without a ring around the whole page when it does.
+          tabIndex={-1}
+          className="flex-1 px-4 py-5 outline-none sm:px-6"
+        >
           <div className="mx-auto flex max-w-content flex-col gap-5">
             {/*
               A failure in one screen must not take the shell with it. The boundary sits inside

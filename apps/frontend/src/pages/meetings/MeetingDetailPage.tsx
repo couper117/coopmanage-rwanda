@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -119,7 +120,13 @@ export function MeetingDetailPage() {
   }
 
   if (meeting.isError || !meeting.data) {
-    return <Alert tone="danger">{t('meetings:detail.loadFailed')}</Alert>
+    return (
+      <LoadError
+        error={meeting.error}
+        onRetry={meeting.refetch}
+        title={t('meetings:detail.loadFailed')}
+      />
+    )
   }
 
   const row = meeting.data

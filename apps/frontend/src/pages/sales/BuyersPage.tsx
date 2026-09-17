@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/PageHeader'
+import { LoadError } from '@/components/LoadError'
 import {
   Alert,
   Badge,
@@ -209,7 +210,9 @@ export function BuyersPage() {
         </Alert>
       ) : null}
 
-      {list.isError ? <Alert tone="danger">{describeError(list.error).message}</Alert> : null}
+      {list.isError ? (
+        <LoadError error={list.error} onRetry={list.refetch} describe={describeError} />
+      ) : null}
 
       <Panel flush>
         <div className="flex flex-wrap items-end gap-3 border-b border-line px-4 py-3">
