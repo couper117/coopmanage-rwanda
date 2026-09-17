@@ -109,3 +109,45 @@ describe('environment configuration', () => {
     })
   })
 })
+
+/**
+ * The cookie's `SameSite`, which Phase 15 turned from a hard-coded value into a stated choice.
+ *
+ * The failure it guards against is silent rather than loud: a `lax` cookie deployed across two
+ * sites is never sent, the refresh call fails, and a cooperative is signed out every fifteen
+ * minutes with nothing in any log to say why.
+ */
+describe('the refresh cookie’s SameSite', () => {
+  const REAL_SECRET = 'a'.repeat(48)
+  const PROD = {
+    ...BASE,
+    NODE_ENV: 'production',
+    CORS_ORIGINS: 'https://app.example.rw',
+    JWT_ACCESS_SECRET: REAL_SECRET,
+  }
+
+  it('defaults to the stronger setting', () => {
+    expect(parseEnv(BASE).COOKIE_SAMESITE).toBe('lax')
+  })
+
+  it('refuses SameSite=None over plain HTTP in production', () => {
+    // A browser drops a `SameSite=None` cookie that is not `Secure`, which is the same silent
+    // sign-out by another route.
+    expect(() =>
+      parseEnv({
+        ...PROD,
+        COOKIE_SAMESITE: 'none',
+        APP_BASE_URL: 'http://app.example.rw',
+      }),
+    ).toThrow(/APP_BASE_URL must be https/)
+  })
+
+  it('accepts SameSite=None over HTTPS, for a deliberate cross-site deployment', () => {
+    const parsed = parseEnv({
+      ...PROD,
+      COOKIE_SAMESITE: 'none',
+      APP_BASE_URL: 'https://app.example.rw',
+    })
+    expect(parsed.COOKIE_SAMESITE).toBe('none')
+  })
+})

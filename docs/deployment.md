@@ -28,13 +28,47 @@ state. `.env.example` lists every variable with a safe placeholder.
 **Backend:** `NODE_ENV`, `PORT`, `DATABASE_URL`, `DIRECT_URL`, `JWT_ACCESS_SECRET`,
 `JWT_ACCESS_TTL`, `REFRESH_TOKEN_TTL_DAYS`, `CORS_ORIGINS`, `LOG_LEVEL`, `STORAGE_DRIVER`,
 `STORAGE_LOCAL_PATH`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
-`MAX_UPLOAD_BYTES`, `SMS_PROVIDER`, `SMS_API_KEY`, `SMS_SENDER_ID`, `SMTP_URL`, `SMTP_FROM`,
-`ASSISTANT_PROVIDER`, `ANTHROPIC_API_KEY`, `ENABLE_API_DOCS`, `SEED_DEMO`.
+`MAX_UPLOAD_MB`, `SMS_PROVIDER`, `SMS_SENDER_ID`, `SMTP_URL`, `SMTP_FROM`, `ASSISTANT_PLANNER`,
+`COOKIE_SAMESITE`, `ENABLE_API_DOCS`, `SEED_DEMO`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`,
+`SEED_DEMO_PASSWORD`. The exact list, with each variable's meaning and default, is
+`apps/backend/.env.example`; this paragraph is the summary.
 
 **Frontend:** `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_SENTRY_DSN` (optional).
 
 `DIRECT_URL` is the unpooled Supabase connection used by `prisma migrate`; `DATABASE_URL` is the
 pooled connection used at runtime.
+
+### The two sides must be the same site
+
+The refresh cookie is `SameSite=Lax`, which is the stronger setting and the default. It means the
+browser sends the cookie only on a same-site request — so the browser application and the API
+**must share a registrable domain**: `app.example.rw` and `api.example.rw`, not a default
+`*.vercel.app` beside a default `*.railway.app`.
+
+Deployed across two sites with the default, the cookie is never sent, the silent refresh fails, and
+every session ends when the fifteen-minute access token expires — with nothing in any log to say
+why. The Phase 15 review found this; it is invisible in development, where both sides are
+localhost.
+
+If the two sites genuinely cannot be brought together, set `COOKIE_SAMESITE=none`. The process
+refuses that over plain HTTP, because a browser drops a `SameSite=None` cookie that is not
+`Secure`. What is given up is the `SameSite` lock against cross-site requests; the origin check on
+the two cookie endpoints and the bearer token on every other endpoint are what remain.
+
+### Headers the static host must send
+
+The API sends its own security headers on every response, but a header on an API response does not
+reach a page served from somewhere else. The host serving the browser application must send:
+
+- `Content-Security-Policy` matching the API's: `default-src 'self'`, `script-src 'self'`,
+  `object-src 'none'`, `frame-ancestors 'none'`, with `connect-src` naming the API's origin.
+- `Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()`
+  — the API sends this since Phase 15, for the same reason: a cooperative's records need none of
+  those, and denying them means a compromised dependency cannot ask for them.
+- `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`.
+
+Phase 18 verifies these against the deployed host and records the result here.
 
 ## 3. Release procedure
 

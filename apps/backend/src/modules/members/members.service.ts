@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 import { auditWithin, writeAudit } from '../../lib/audit.js'
 import type { RequestContext } from '../../lib/context.js'
 import { isUniqueViolation } from '../../lib/dbErrors.js'
+import { csvCell } from '../../lib/csv.js'
 import { AppError } from '../../lib/errors.js'
 import { multiply, parseMoney, subtract, sum, toWire, ZERO } from '../../lib/money.js'
 import { prisma } from '../../lib/prisma.js'
@@ -1253,12 +1254,6 @@ export async function exportMembersCsv(
   // invisible character somebody deletes by accident. Excel on Windows needs it to read the
   // Kinyarwanda characters as UTF-8 instead of showing mojibake.
   return `\ufeff${lines.join('\r\n')}\r\n`
-}
-
-function csvCell(value: string): string {
-  const needsGuard = /^[=+\-@]/.test(value)
-  const text = needsGuard ? `'${value}` : value
-  return `"${text.replaceAll('"', '""')}"`
 }
 
 /** Everything the add-member form needs in one request: the income categories a contribution can use. */

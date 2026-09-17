@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client'
 import { normalizeRwandanPhone } from '@coopmanage/shared'
+import { writeAudit } from '../../lib/audit.js'
 import type { RequestContext } from '../../lib/context.js'
 import { AppError } from '../../lib/errors.js'
 import { logger } from '../../lib/logger.js'
@@ -240,13 +241,44 @@ export async function sendToMembers(
     ])
   }
 
-  return sendToRecipients(ctx, {
+  const result = await sendToRecipients(ctx, {
     recipients,
     body: input.body,
     // The client's own key, so pressing Send twice on a hanging request sends once.
     dedupePrefix: `manual:${idempotencyKey}`,
     withoutPhone,
   })
+
+  /**
+   * Written to the trail as well as to the message log.
+   *
+   * The log says what was sent and to whom; the audit trail is what an auditor reads to see who
+   * did what, and sending a batch of messages spends the cooperative's money and reaches people's
+   * telephones. Publishing an announcement has written `announcement.sent` since Phase 12 — this
+   * path had nothing, which the Phase 15 review found.
+   *
+   * The **body is not in the entry**. It is in the log, behind `sms:send`, because a reminder
+   * about an unpaid contribution names the member and the amount; the trail records the act and
+   * its size, which is what it is for.
+   */
+  await writeAudit(
+    { ctx },
+    {
+      action: 'sms.sent',
+      entityType: 'SmsMessage',
+      messageKey: 'audit.sms.sent',
+      messageParams: { count: result.sent, recipients: input.memberIds.length },
+      after: {
+        sent: result.sent,
+        failed: result.failed,
+        alreadySent: result.alreadySent,
+        withoutPhone: result.withoutPhone,
+        segments: result.segments,
+      },
+    },
+  )
+
+  return result
 }
 
 const LOG_SELECT = {

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import type { FinanceKind, FinanceSourceType, PaymentMethod } from '@prisma/client'
 import { auditWithin, writeAudit } from '../../lib/audit.js'
 import type { RequestContext } from '../../lib/context.js'
+import { csvCell } from '../../lib/csv.js'
 import { isUniqueViolation } from '../../lib/dbErrors.js'
 import { AppError } from '../../lib/errors.js'
 import { financePrefixFor, nextFinanceReference, type Db } from '../../lib/references.js'
@@ -1217,12 +1218,6 @@ export async function exportTransactionsCsv(
   // invisible character somebody deletes by accident. Excel on Windows needs it to read the
   // Kinyarwanda characters as UTF-8.
   return `\ufeff${lines.join('\r\n')}\r\n`
-}
-
-function csvCell(value: string): string {
-  const needsGuard = /^[=+\-@]/.test(value)
-  const text = needsGuard ? `'${value}` : value
-  return `"${text.replaceAll('"', '""')}"`
 }
 
 /**

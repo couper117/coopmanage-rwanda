@@ -1,3 +1,4 @@
+import type { IncomingMessage } from 'node:http'
 import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -75,6 +76,27 @@ export function createApp(): Express {
     }),
   )
 
+  /**
+   * Every browser capability this product does not use, switched off.
+   *
+   * A cooperative's records need no camera, no microphone, no location, no payment handler and no
+   * USB. Denying them costs nothing and means a compromised dependency cannot quietly ask a
+   * cooperative's browser for its position or its microphone. Helmet sets no `Permissions-Policy`
+   * of its own, so this is stated rather than inherited.
+   *
+   * It applies to the API's own responses. The browser application is served by the static host,
+   * which `docs/deployment.md` says must send the same header — a value here does not travel to a
+   * page served from somewhere else. Added in the Phase 15 review.
+   */
+  app.use((_req, res, next) => {
+    res.setHeader(
+      'Permissions-Policy',
+      'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), ' +
+        'microphone=(), payment=(), usb=(), interest-cohort=()',
+    )
+    next()
+  })
+
   app.use(compression())
   // The refresh token is the only cookie the API reads, and it is HttpOnly. Nothing is signed
   // here because the value is already an opaque random token verified against its stored hash.
@@ -92,6 +114,36 @@ export function createApp(): Express {
           if (err || res.statusCode >= 500) return 'error'
           if (res.statusCode >= 400) return 'warn'
           return 'info'
+        },
+        /**
+         * The path, and the **names** of the query parameters — never their values.
+         *
+         * `pino-http` logs the whole URL by default, which on this API means
+         * `GET /search?q=Mukamana` writes a member's name into the log, and
+         * `GET /members?q=0788123456` writes a telephone number. Those logs are read by operators
+         * and retained by a hosting platform, and neither needs to know who a cooperative searched
+         * for. The parameter names are kept because "this request was filtered by status and page"
+         * is what a log is actually useful for.
+         *
+         * Found in the Phase 15 review; `docs/security.md` §9 records it.
+         */
+        serializers: {
+          req(req: IncomingMessage & { id?: unknown; url?: string; method?: string }) {
+            const raw = req.url ?? ''
+            const separator = raw.indexOf('?')
+            const path = separator === -1 ? raw : raw.slice(0, separator)
+            const names =
+              separator === -1
+                ? []
+                : [...new URLSearchParams(raw.slice(separator + 1)).keys()].sort()
+
+            return {
+              id: req.id,
+              method: req.method,
+              url: path,
+              ...(names.length > 0 ? { queryNames: names } : {}),
+            }
+          },
         },
         autoLogging: { ignore: (req) => req.url === `${API_PREFIX}/health` },
       }),

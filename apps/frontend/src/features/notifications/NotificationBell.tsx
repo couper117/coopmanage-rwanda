@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Button, Skeleton } from '@/components/ui'
 import { useLazyNamespaces } from '@/hooks/useLazyNamespaces'
 import { AUDIT_MESSAGE_NAMESPACES } from '@/i18n'
+import { internalPath } from '@/lib/internalPath'
 import { toI18nKey, translateParams } from '@/lib/messageKey'
 import { cn } from '@/lib/cn'
 import type { NotificationRow, NotificationSeverity } from './notifications.api'
@@ -199,6 +200,9 @@ export function NotificationLine({
     timeStyle: 'short',
   }).format(new Date(row.createdAt))
 
+  // A destination that is not a path inside this application does not become a link at all.
+  const target = internalPath(row.actionUrl)
+
   const sentence = t(toI18nKey(row.messageKey), {
     ...translateParams(row.messageParams, (key) => t(key)),
     // A notification written by a module this build does not carry strings for still says
@@ -219,9 +223,9 @@ export function NotificationLine({
         <p className="mt-0.5 text-xs text-ink-muted">
           {t(`notifications:type.${row.type}`)} · {when}
         </p>
-        {row.actionUrl ? (
+        {target ? (
           <Link
-            to={row.actionUrl}
+            to={target}
             onClick={() => {
               // Opening the thing it is about is the same as having read it.
               if (row.readAt === null) markRead.mutate(row.id)

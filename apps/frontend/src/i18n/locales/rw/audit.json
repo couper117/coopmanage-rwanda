@@ -88,5 +88,9 @@
     "sent_one": "{{title}} ryoherejwe umunyamuryango umwe kuri SMS",
     "sent": "{{title}} ryoherejwe abanyamuryango {{count}} kuri SMS",
     "archived": "{{title}} ryakuweho: {{reason}}"
+  },
+  "sms": {
+    "sent_one": "Ubutumwa bumwe bwoherejwe ku munyamuryango",
+    "sent": "Ubutumwa {{count}} bwoherejwe ku banyamuryango"
   }
 }

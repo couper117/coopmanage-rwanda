@@ -18,6 +18,10 @@ export const REDACTED_PATHS = [
   '*.refreshToken',
   '*.tokenHash',
   '*.nationalId',
+  // A member's telephone is personal data in the same way their identity number is, and Phase 12
+  // gave the application a reason to hold one in a log line: a message's destination.
+  '*.phone',
+  '*.toPhone',
   '*.secret',
 ]
 

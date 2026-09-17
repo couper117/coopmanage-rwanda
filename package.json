@@ -31,7 +31,8 @@
     "db:reset": "npm run db:reset -w @coopmanage/backend",
     "prepare": "git config core.hooksPath .githooks || true",
     "db:purge-test-data": "npm run --workspace @coopmanage/backend purge-test-data",
-    "inventory:rebuild": "npm run --workspace @coopmanage/backend inventory:rebuild"
+    "inventory:rebuild": "npm run --workspace @coopmanage/backend inventory:rebuild",
+    "check:audit": "node scripts/audit/check.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

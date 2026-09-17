@@ -1591,7 +1591,29 @@ async function main(): Promise<void> {
   await seedUnits()
   await seedPlatformAdmin()
 
-  if (process.env.SEED_DEMO === 'true' || process.env.SEED_DEMO === '1') {
+  const demoRequested = process.env.SEED_DEMO === 'true' || process.env.SEED_DEMO === '1'
+
+  /**
+   * Demonstration data never goes into production, whatever the environment says.
+   *
+   * The demonstration cooperative is five staff accounts sharing one password, 120 members with
+   * invented names, and a year of invented money. On a production system that is a set of working
+   * credentials nobody meant to create and a cooperative nobody can tell from a real one — and
+   * `SEED_DEMO=true` is one copied line in a deployment configuration away.
+   *
+   * Refused rather than skipped: an operator who asked for demonstration data in production has
+   * misunderstood something, and a silent skip would leave them looking for a cooperative that was
+   * never going to appear. Found in the Phase 15 review.
+   */
+  if (demoRequested && process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'SEED_DEMO is set in production. Demonstration data is five accounts sharing one password ' +
+        'and a year of invented money; it must never be created on a production system. Unset ' +
+        'SEED_DEMO, or run this against a development database.',
+    )
+  }
+
+  if (demoRequested) {
     console.log('Seeding demonstration data...')
     await seedDemoCooperative()
   }

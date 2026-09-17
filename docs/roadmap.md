@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 14 complete.** Phase 15 is next.
+Status: **Phase 15 complete.** Phase 16 is next.
 
 ---
 
@@ -840,7 +840,7 @@ next phase that needs them.
 
 ---
 
-### Phase 15 — Security hardening
+### Phase 15 — Security hardening ✅
 
 Full review against `docs/security.md`: authentication, authorization, tenancy, uploads, validation,
 rate limiting, CORS, headers, secrets, logging, injection, XSS, CSRF, access control, audit
@@ -848,6 +848,34 @@ coverage, dependency audit.
 
 **Exit:** every finding is fixed or has a written, accepted risk note. No secret in the repository
 history.
+
+**Met.** `docs/security.md` §12 is the record: what was checked and how, nine findings each fixed,
+four things reviewed and accepted as they are with the reason, and two things out of scope named so
+nobody thinks they were forgotten. No `.env` has ever been added to the repository, and no
+credential-shaped assignment exists in any commit.
+
+The nine, in the order they were found. **CI's dependency audit was failing** on two advisories
+reached only through the Prisma CLI — the fix keeps the threshold and names the exceptions with
+reasons and review dates, and fails the build the day either stops being reported. **Search terms
+were in the log**: `pino-http` records the whole URL, so a member's name or telephone number typed
+into a search box was written to logs operators read and a hosting platform keeps; the request line
+now carries the path and the parameter names only. **`SameSite=Lax` silently breaks sign-in across
+two sites** — a default Vercel domain beside a default Railway one — with nothing in any log;
+invisible in development where both sides are localhost. It is now a stated choice with a guarded
+opt-out and a deployment requirement written down. **`POST /sms/send` wrote no audit entry.**
+**Three copies of the CSV formula guard, two weaker** than the third. **Four screens rendered a
+link target from the server** unfenced — nothing exploitable, now structurally impossible. **No
+`Permissions-Policy` header.** **A telephone number was not redacted from logs.** And
+**`SEED_DEMO=true` in production would have created five accounts sharing one password**, which the
+seed now refuses.
+
+What the review did not find is worth a sentence too: no raw SQL takes an identifier from a caller,
+no HTML is rendered from data, every parameterised route is swept for cross-tenant access by a test
+that fails the build if one is missed, and the two cookie endpoints answer 403 to a hostile origin
+— all checked live rather than assumed.
+
+Not a penetration test. It was a structured pass by the author against a written checklist, and
+§12 says so.
 
 ---
 

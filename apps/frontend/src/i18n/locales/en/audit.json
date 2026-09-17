@@ -88,5 +88,9 @@
     "sent_one": "{{title}} was sent to one member by SMS",
     "sent": "{{title}} was sent to {{count}} members by SMS",
     "archived": "{{title}} was withdrawn: {{reason}}"
+  },
+  "sms": {
+    "sent_one": "One message was sent to a member",
+    "sent": "{{count}} messages were sent to members"
   }
 }

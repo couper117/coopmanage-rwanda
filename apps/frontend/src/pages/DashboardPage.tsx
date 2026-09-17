@@ -20,6 +20,7 @@ import type {
 import { useDashboard, useDashboardError } from '@/features/dashboard/dashboard.hooks'
 import { sentenceParams } from '@/features/dashboard/sentence'
 import { useLazyNamespaces } from '@/hooks/useLazyNamespaces'
+import { internalPath } from '@/lib/internalPath'
 import { AUDIT_MESSAGE_NAMESPACES } from '@/i18n'
 import { toI18nKey, translateParams } from '@/lib/messageKey'
 
@@ -231,9 +232,9 @@ function AttentionPanel({ items }: { items: AttentionItem[] }) {
                 {t(`attention.item.${item.key}`, sentenceParams(item.params))}
               </span>
             </span>
-            {item.href ? (
+            {internalPath(item.href) ? (
               <Button variant="ghost" size="sm" asChild>
-                <Link to={item.href}>
+                <Link to={internalPath(item.href) ?? '/'}>
                   {t('attention.go')}
                   <ArrowRight aria-hidden="true" className="ml-1 size-4" />
                 </Link>
@@ -273,11 +274,12 @@ function Tile({ tile }: { tile: DashboardTile }) {
     </>
   )
 
-  if (!tile.href) return <Panel>{body}</Panel>
+  const target = internalPath(tile.href)
+  if (!target) return <Panel>{body}</Panel>
 
   return (
     <Link
-      to={tile.href}
+      to={target}
       className="rounded-lg border border-line bg-surface p-4 transition-colors hover:border-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
     >
       {body}

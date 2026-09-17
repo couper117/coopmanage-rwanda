@@ -2,12 +2,16 @@ import type { CookieOptions, Request, Response } from 'express'
 import { env, isProduction } from '../../config/env.js'
 
 /**
- * The refresh cookie. `HttpOnly` so no script can read it, `Secure` in production, `SameSite=Lax`
- * so it is not sent on a cross-site request, and scoped to the two paths that consume it rather
- * than to the whole API — a cookie that is never sent to an endpoint cannot be stolen from one.
+ * The refresh cookie. `HttpOnly` so no script can read it, `Secure` in production, and scoped to
+ * the two paths that consume it rather than to the whole API — a cookie that is never sent to an
+ * endpoint cannot be stolen from one.
  *
  * The narrow scope is why the profile screen marks the current device from the access token's
  * session family instead of from this cookie: `GET /auth/sessions` never receives it.
+ *
+ * `SameSite` comes from `COOKIE_SAMESITE` and defaults to `lax`, which is the stronger setting and
+ * requires the browser application and this API to be the same site. The environment schema
+ * explains the choice and refuses the combinations that would drop the cookie silently.
  */
 export const REFRESH_COOKIE_NAME = 'coopmanage.refresh'
 
@@ -17,7 +21,7 @@ function options(maxAgeMs?: number): CookieOptions {
   return {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'lax',
+    sameSite: env.COOKIE_SAMESITE,
     ...(maxAgeMs === undefined ? {} : { maxAge: maxAgeMs }),
   }
 }

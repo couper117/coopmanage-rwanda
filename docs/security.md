@@ -154,7 +154,10 @@ with a `Retry-After` header rather than failing silently.
 ## 9. Logging and privacy
 
 Pino with a redaction list covering `password`, `passwordHash`, `token`, `authorization`, `cookie`,
-`nationalId` and file buffers. No request body is logged at info level. Audit `before` and `after`
+`nationalId`, `phone` and file buffers. The request line carries the path and the **names** of the
+query parameters, never their values: `GET /search?q=Mukamana` is logged as `/search` with
+`queryNames: ["q"]`, because who a cooperative searched for is not something an operator or a
+hosting platform needs to keep. No request body is logged at info level. Audit `before` and `after`
 snapshots pass through the same redaction. Errors log a stack trace and a request id; the user sees
 a translated sentence and the request id, never a stack trace. National identity numbers are stored
 only when supplied, are masked in list responses, and appear in full only on the member detail
@@ -214,16 +217,122 @@ supply-chain surface.
 would have meant shipping Chromium into a Rwandan cooperative's hosting budget — and over `pdf-lib`,
 unmaintained since 2022. `npm audit` reports no new advisory from it.
 
-Two advisories are currently accepted rather than fixed, both inside the Prisma command-line tool,
-which is a development dependency and is not part of any deployed artefact: `deepmerge-ts` reached
-through `@prisma/config`, and `mysql2`, a driver this project never loads because it uses
-PostgreSQL. The only remedy npm offers is a downgrade to Prisma 6, which trades a development-only
-issue for an out-of-date data layer. Both are re-examined at Phase 15 and on every Prisma upgrade.
+### Accepted advisories, and the gate that keeps the list honest
 
-## 12. Phase 15 audit checklist
+Two advisories are accepted rather than fixed, both reached only through the Prisma command-line
+tool — a development dependency that creates migrations and generates the client, and is not part
+of any deployed artefact:
+
+| Module         | Advisory                                 | Why it cannot affect this product                                                                                                                                               | Review by  |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `mysql2`       | GHSA-3f6p-5ww8-9rcr, GHSA-rgwj-5xj2-c3m3 | A MySQL driver. This product is PostgreSQL only, connects through `@prisma/adapter-pg`, never loads `mysql2`, and both advisories require connecting to a hostile MySQL server. | 2026-12-31 |
+| `deepmerge-ts` | GHSA-ggr8-5vv4-36mx                      | Stack exhaustion merging a recursive object, reached when the CLI reads `prisma.config.ts` — our own committed file. No request or upload reaches it.                           | 2026-12-31 |
+
+Prisma pins `mysql2` exactly, so an npm override cannot lift it, and there is no 7.x release with a
+patched pin as of the review date. The only remedy npm offers is a downgrade to Prisma 6, which
+trades a development-only issue for an out-of-date data layer.
+
+**The Phase 15 review found that CI's audit step was failing on these**, because `npm audit
+--omit=dev` at a workspace root still counts a workspace package's development dependencies. The
+tempting fix — lower the threshold — is how an audit stops being read. Instead `scripts/audit/check.mjs`
+keeps the threshold at high and accepts the two modules above by name, each with the reason and
+the review date, and it **fails the build the day either stops being reported**, so the exception is
+deleted rather than left covering an advisory nobody has looked at. `npm run check:audit` is the CI
+step; this table and that file say the same thing, and a change to one is a change to both.
+
+## 12. The Phase 15 review
 
 Authentication flows, authorization matrix, cross-tenant sweep, upload handling, validation
 coverage, rate limits, CORS and headers, secret scanning, log redaction, injection review, XSS
 review of every place HTML could be rendered, CSRF review, access-control review of every route
 added since Phase 2, audit-log coverage of every sensitive action, and a dependency audit. Every
-finding is fixed or carries a written, accepted risk note signed off in the pull request.
+finding is fixed or carries a written, accepted risk note — this section is that record.
+
+### What was checked, and how
+
+| Area               | Method                                                                                                                                 | Result                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Injection          | Every `$queryRaw`/`$executeRaw` read by hand; no `Unsafe` variant exists; every interpolation is a value                               | Clean                                               |
+| XSS                | No `dangerouslySetInnerHTML` or `innerHTML` anywhere; every server-provided link target reviewed                                       | Finding 6 (fenced)                                  |
+| CSV injection      | All three CSV exports guard a leading `= + - @`                                                                                        | Finding 5 (three copies, two weaker — consolidated) |
+| Headers            | Live response inspected: CSP with `object-src 'none'` and `frame-ancestors 'none'`, HSTS, nosniff, DENY, COOP, CORP, no `X-Powered-By` | Finding 7 (`Permissions-Policy` added)              |
+| CORS               | Live: an allowed origin gets credentials and exposed headers; a hostile origin gets nothing; a hostile preflight gets 403              | Clean                                               |
+| CSRF               | Only `/auth/refresh` and `/auth/logout` accept a cookie; both check `Origin` and answer 403 to a hostile one, verified live            | Finding 3 (`SameSite` made explicit)                |
+| Cookies            | `HttpOnly`, `Secure` in production, scoped to the two paths that consume it                                                            | Clean                                               |
+| Passwords          | Argon2id at RFC 9106's memory-constrained parameters, per-password salt, common-password list, 10-character minimum                    | Clean                                               |
+| Secrets in history | No `.env` ever added; credential-shaped assignments across every commit reviewed; gitleaks in CI                                       | Clean                                               |
+| Logging            | Redaction list reviewed against every field added since Phase 2; `pino-http`'s default request line reviewed                           | Findings 2 and 8                                    |
+| Tenancy            | The cross-tenant sweep fails the build for any parameterised route not declared; 23 routes swept                                       | Clean                                               |
+| Authorization      | The route registry fails the build for any route without an access declaration; the role matrix is tested                              | Clean                                               |
+| Validation         | Every body-carrying route compared with its schema; six carry no body by design and validate none                                      | Clean (the six are listed below)                    |
+| Uploads            | One file, one field, a size cap, extension + MIME + magic bytes compared, executables refused first                                    | Clean                                               |
+| Rate limits        | Every documented limit compared with the code                                                                                          | Findings from Phases 12 and 14 already closed       |
+| Audit coverage     | 71 mutating routes cross-checked against 76 audit actions                                                                              | Finding 4                                           |
+| Dependencies       | `npm audit`, production scope                                                                                                          | Finding 1                                           |
+| Seed               | What the seed does under `NODE_ENV=production`                                                                                         | Finding 9                                           |
+
+### Findings
+
+1. **CI's dependency audit was failing** on two advisories reached only through the Prisma CLI.
+   Fixed by the gate described in §11: threshold kept, exceptions named with reasons and review
+   dates, stale exceptions fail the build.
+2. **Search terms were written to the log.** `pino-http` records the whole URL, so
+   `GET /search?q=Mukamana` put a member's name in the log and `GET /members?q=0788123456` a
+   telephone number — logs that operators read and a hosting platform retains. Fixed: the request
+   line carries the path and the **names** of the query parameters, never their values. `*.phone`
+   and `*.toPhone` joined the redaction list beside `*.nationalId`.
+3. **`SameSite=Lax` silently breaks sign-in across two sites.** The refresh cookie was hard-coded
+   `lax`, which is the stronger setting and requires the browser application and the API to be
+   the same site. Deployed on a default Vercel domain and a default Railway one they are not; the
+   cookie is never sent, the refresh fails, and every session ends fifteen minutes in with nothing
+   in any log. Invisible in development, where both are localhost. Fixed: `COOKIE_SAMESITE` is a
+   stated choice defaulting to `lax`, `none` is refused without HTTPS, and `docs/deployment.md`
+   states the same-site requirement.
+4. **`POST /sms/send` wrote no audit entry.** Sending a batch to members spends money and reaches
+   telephones; the message log recorded what was sent, but the trail an auditor reads had no line
+   saying somebody sent it. Publishing an announcement had written one since Phase 12. Fixed:
+   `sms.sent`, carrying the count and never the body.
+5. **Three copies of the CSV formula guard, two weaker.** The report renderer guarded six leading
+   characters; the members and ledger exports guarded four, missing tab and carriage return, which
+   some spreadsheets strip before deciding what a cell is. Fixed: one `csvCell` in `lib/csv.ts`,
+   the strong version, used by all three and pinned by its own tests.
+6. **Four screens rendered a link target that arrived from the server** — a notification's
+   `actionUrl`, a dashboard tile's `href`, an assistant answer's. Every value is written by our
+   own code from a constant, so nothing was exploitable. Fixed anyway: `internalPath` refuses
+   anything that is not a same-origin path, so the day a module writes something
+   attacker-influenced into `notifications.action_url` the link does not render rather than
+   becoming a `javascript:` URL in the cooperative's own chrome.
+7. **No `Permissions-Policy` header.** Helmet sets none. Added: camera, microphone, geolocation,
+   payment, USB and the sensors all denied on every API response, and `docs/deployment.md` asks the
+   static host to send the same.
+8. **`*.phone` was not redacted.** Phase 12 gave the application a reason to hold a telephone
+   number in a log line — the mock provider logs a message's destination at debug level. Fixed as
+   part of finding 2.
+9. **`SEED_DEMO=true` in production would create five accounts sharing one password.** Nothing
+   stopped it; the guard on the platform administrator did not cover the demonstration cooperative.
+   Fixed: the seed refuses, with a message saying why, verified by running it under
+   `NODE_ENV=production`.
+
+### Reviewed and accepted as they are
+
+- **Six routes carry a body method and validate no body:** `POST /auth/refresh`, `POST /auth/logout`,
+  `POST /documents/:id/restore`, `POST /notifications/read-all`, `/:id/read` and `/:id/dismiss`.
+  Each genuinely takes nothing. A body sent to them is parsed and ignored, bounded by the 1 MB
+  body limit and the write rate limit. Adding an empty strict schema would refuse a client that
+  sends `{}` for no gain.
+- **`style-src 'unsafe-inline'` in the CSP.** The hand-drawn charts set bar heights through inline
+  `style` attributes, which `style-src` governs. Inline styles cannot execute script and
+  `script-src` carries no such allowance; the trade is a well-understood one and is bounded to
+  presentation.
+- **A member's telephone number and national identity number are in the audit trail's `before`
+  and `after` snapshots** for a member update, because the trail exists to show what changed.
+  They are redacted from the _log_, masked in list responses, and shown in full only to a holder of
+  `members:update`. That is the design.
+- **The two Prisma CLI advisories**, per §11.
+
+### Not in scope, recorded so nobody thinks it was forgotten
+
+- `prisma migrate reset` from an empty database, which needs explicit consent and belongs to
+  Phase 17.
+- A penetration test by a party who did not write the code. This review was a structured pass by
+  the author against a written checklist; it is not a substitute for one.

@@ -81,10 +81,12 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # High and critical findings fail the build. The two accepted advisories in the Prisma CLI
-      # are documented in docs/architecture.md section 16 and docs/security.md section 11; when
-      # they are resolved upstream this threshold drops to moderate.
-      - run: npm audit --audit-level=high --omit=dev
+      # High and critical findings fail the build, except the two reached only through the Prisma
+      # CLI — which the gate accepts by name, with a written reason and a review date, and which it
+      # will fail on the day they stop being reported so the exception is deleted rather than left
+      # covering an advisory nobody has looked at. docs/security.md §11 carries the same reasons.
+      - name: Dependency gate
+        run: npm run check:audit
       - name: Report development-only advisories without failing
         run: npm audit --audit-level=high || true
 

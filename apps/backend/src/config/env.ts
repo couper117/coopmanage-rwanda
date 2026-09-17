@@ -82,6 +82,26 @@ const envSchema = z
      * which is live — a planner never produces a figure, because every figure comes from a query.
      */
     ASSISTANT_PLANNER: z.enum(['rules']).default('rules'),
+
+    /**
+     * Whether the refresh cookie may travel on a cross-site request.
+     *
+     * `lax` is the default and the stronger setting: the cookie is not sent on a cross-site
+     * request at all, which is a second lock on top of the origin check the refresh and logout
+     * endpoints already make.
+     *
+     * It also requires the browser application and this API to be the **same site** — two
+     * subdomains of one registrable domain, `app.example.rw` and `api.example.rw`. Deployed across
+     * two sites — a default Vercel domain and a default Railway one, say — a `lax` cookie is
+     * silently never sent, the refresh call fails, and every session ends when the access token
+     * expires fifteen minutes in. Nothing errors; people are simply signed out all day.
+     *
+     * That failure is invisible in development, where both sides are localhost and therefore the
+     * same site, which is exactly why this is a stated choice rather than a hard-coded value.
+     * Setting `none` allows the cross-site deployment and gives up the `SameSite` lock; the origin
+     * check and the bearer token on every other endpoint are what remain. Phase 15 found it.
+     */
+    COOKIE_SAMESITE: z.enum(['lax', 'none']).default('lax'),
     /**
      * The name a cooperative's messages appear to come from, where the gateway supports one.
      * Optional: most Rwandan gateways assign a short code, and a made-up sender is worse than none.
@@ -120,6 +140,17 @@ const envSchema = z
           'must be a real random value of at least 32 characters in production, not a placeholder',
       })
     }
+    // `SameSite=None` is only honoured by a browser on a `Secure` cookie, and this API sets
+    // `Secure` from `NODE_ENV`. Over plain HTTP the cookie would be dropped entirely, which is the
+    // same silent sign-out this setting exists to prevent.
+    if (value.COOKIE_SAMESITE === 'none' && !value.APP_BASE_URL.startsWith('https://')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['COOKIE_SAMESITE'],
+        message: 'SameSite=None needs a Secure cookie, so APP_BASE_URL must be https in production',
+      })
+    }
+
     if (value.CORS_ORIGINS.some(isLoopbackOrigin)) {
       ctx.addIssue({
         code: 'custom',

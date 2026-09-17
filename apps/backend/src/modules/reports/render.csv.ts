@@ -1,4 +1,5 @@
 import { reportLabel, type ReportDocument, type ReportRow } from '@coopmanage/shared'
+import { csvRow } from '../../lib/csv.js'
 
 /**
  * A report as a CSV file.
@@ -14,23 +15,6 @@ import { reportLabel, type ReportDocument, type ReportRow } from '@coopmanage/sh
  * for the same reason.
  */
 
-/**
- * Quotes a cell, and defuses a formula.
- *
- * A description beginning `=` or `+` is executed as a formula the moment the file is opened, which
- * is a real way to attack whoever opens a report — and the description of a money entry is typed
- * by a member of staff. Prefixing an apostrophe makes the spreadsheet treat it as text. The same
- * rule as the finance export, which is where this was first needed.
- */
-function cell(value: string): string {
-  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
-  return `"${guarded.replaceAll('"', '""')}"`
-}
-
-function line(values: (string | null)[]): string {
-  return values.map((value) => cell(value ?? '')).join(',')
-}
-
 function rowValues(row: ReportRow, keys: string[]): (string | null)[] {
   return keys.map((key) => row[key] ?? '')
 }
@@ -38,11 +22,11 @@ function rowValues(row: ReportRow, keys: string[]): (string | null)[] {
 export function renderReportCsv(report: ReportDocument): string {
   const lines: string[] = []
 
-  lines.push(line([report.cooperative.name, report.cooperative.code]))
-  lines.push(line([report.title, report.subtitle ?? '']))
-  lines.push(line([report.periodLabel, `${report.from}`, `${report.to}`]))
+  lines.push(csvRow([report.cooperative.name, report.cooperative.code]))
+  lines.push(csvRow([report.title, report.subtitle ?? '']))
+  lines.push(csvRow([report.periodLabel, `${report.from}`, `${report.to}`]))
   lines.push(
-    line([
+    csvRow([
       reportLabel(report.locale, 'report.generatedBy', { name: report.generatedBy }),
       reportLabel(report.locale, 'report.generatedAt', { when: report.generatedAtLabel }),
     ]),
@@ -50,27 +34,27 @@ export function renderReportCsv(report: ReportDocument): string {
 
   for (const section of report.sections) {
     lines.push('')
-    lines.push(line([section.title]))
+    lines.push(csvRow([section.title]))
 
     switch (section.kind) {
       case 'figures':
         for (const figure of section.figures) {
-          lines.push(line([figure.label, figure.value, figure.hint ?? '']))
+          lines.push(csvRow([figure.label, figure.value, figure.hint ?? '']))
         }
         break
 
       case 'table': {
         const keys = section.columns.map((column) => column.key)
-        lines.push(line(section.columns.map((column) => column.label)))
+        lines.push(csvRow(section.columns.map((column) => column.label)))
         if (section.rows.length === 0) {
-          lines.push(line([section.emptyLabel ?? '']))
+          lines.push(csvRow([section.emptyLabel ?? '']))
           break
         }
-        for (const row of section.rows) lines.push(line(rowValues(row, keys)))
-        if (section.total) lines.push(line(rowValues(section.total, keys)))
+        for (const row of section.rows) lines.push(csvRow(rowValues(row, keys)))
+        if (section.total) lines.push(csvRow(rowValues(section.total, keys)))
         if (section.truncatedFrom) {
           lines.push(
-            line([
+            csvRow([
               reportLabel(report.locale, 'report.truncated', {
                 shown: section.rows.length,
                 total: section.truncatedFrom,
@@ -83,7 +67,7 @@ export function renderReportCsv(report: ReportDocument): string {
 
       case 'note':
       case 'withheld':
-        lines.push(line([section.text]))
+        lines.push(csvRow([section.text]))
         break
     }
   }

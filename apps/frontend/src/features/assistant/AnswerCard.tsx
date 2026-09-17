@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { formatMoney, formatQuantity } from '@coopmanage/shared'
 import { Alert, Panel } from '@/components/ui'
+import { internalPath } from '@/lib/internalPath'
 import type { AssistantFigure } from './assistant.api'
 
 /**
@@ -54,6 +55,7 @@ export function AnswerCard({
   if (answerParams.count !== undefined) params.count = Number(answerParams.count)
 
   const refused = tool === null
+  const target = internalPath(href)
 
   return (
     <Panel>
@@ -97,9 +99,9 @@ export function AnswerCard({
           </>
         ) : null}
 
-        {href ? (
+        {target ? (
           <Link
-            to={href}
+            to={target}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:underline"
           >
             {t('assistant:seeForYourself')}
