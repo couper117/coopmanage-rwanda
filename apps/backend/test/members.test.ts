@@ -620,6 +620,55 @@ describe('contributions', () => {
       .expect(409)
   })
 
+  it('lists one member’s contributions with their total, voided ones shown but not counted', async () => {
+    const member = await addMember({ firstName: 'Own', lastName: 'History' })
+    const kept = await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .send({ type: 'SAVINGS', amount: '2500', method: 'CASH', categoryId: incomeCategoryId })
+      .expect(201)
+    await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .send({
+        type: 'MEMBERSHIP_FEE',
+        amount: '5000',
+        method: 'CASH',
+        categoryId: incomeCategoryId,
+      })
+      .expect(201)
+    const voided = await as(accountant, 'post', `/members/${member.id}/contributions`)
+      .send({ type: 'SAVINGS', amount: '9000', method: 'CASH', categoryId: incomeCategoryId })
+      .expect(201)
+    await as(accountant, 'post', `/contributions/${voided.body.data.id as string}/void`)
+      .send({ reason: 'Wrong member' })
+      .expect(200)
+
+    const response = await as(secretary, 'get', `/members/${member.id}/contributions`).expect(200)
+    const body = response.body.data as {
+      items: { id: string; status: string; amount: string }[]
+      total: number
+      totalAmount: string
+    }
+    // The history is complete — a mistake and its correction both stay — and the total is the
+    // money the member actually has in.
+    expect(body.items).toHaveLength(3)
+    expect(body.items.find((row) => row.id === kept.body.data.id)?.status).toBe('POSTED')
+    expect(body.items.find((row) => row.id === voided.body.data.id)?.status).toBe('VOID')
+    expect(body.total).toBe(3)
+    expect(body.totalAmount).toBe('7500.00')
+
+    await as(
+      secretary,
+      'get',
+      '/members/00000000-0000-4000-8000-000000000000/contributions',
+    ).expect(404)
+  })
+
+  it('offers the form the income categories a contribution may be filed under', async () => {
+    const response = await as(secretary, 'get', '/members/form-options').expect(200)
+    const categories = response.body.data.incomeCategories as { id: string; name: string }[]
+    expect(categories.some((row) => row.id === incomeCategoryId)).toBe(true)
+    // Expense categories are not where a contribution goes.
+    expect(categories.some((row) => row.id === expenseCategoryId)).toBe(false)
+  })
+
   it('lets a secretary see contributions but not record them', async () => {
     await as(secretary, 'get', '/contributions').expect(200)
     const member = await addMember({ firstName: 'Secretary', lastName: 'Cannot' })

@@ -57,6 +57,12 @@ jobs:
       - name: Seed again to prove it is idempotent
         run: npm run db:seed
 
+      # A second, throwaway database: migrated from nothing, compared against schema.prisma and
+      # seeded, then dropped. The step above proves the migrations apply; this one proves they
+      # build the schema the code was written against, which is what a first deployment relies on.
+      - name: Verify the migrations from an empty database
+        run: npm run check:migrations
+
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck

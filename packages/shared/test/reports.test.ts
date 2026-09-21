@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   REPORTS,
   auditActionLabel,
+  enumLabel,
   hasAuditActionLabel,
   REPORT_FORMATS,
   REPORT_LABELS,
@@ -136,6 +137,25 @@ describe('formatReportValue', () => {
   it('prints an empty cell for nothing, not the word "null"', () => {
     expect(formatReportValue('text', null, { locale: 'EN' })).toBe('')
     expect(formatReportValue('money', '', { locale: 'EN' })).toBe('')
+  })
+
+  it('writes quantities and counts with separators, and text as it is', () => {
+    expect(formatReportValue('quantity', '1240.500', { locale: 'EN' })).toBe('1,240.5')
+    expect(formatReportValue('number', '412', { locale: 'EN' })).toBe('412')
+    expect(formatReportValue('text', 'Huye', { locale: 'EN' })).toBe('Huye')
+  })
+})
+
+describe('enumLabel', () => {
+  it('puts a database value into words in either language', () => {
+    expect(enumLabel('EN', 'memberStatus', 'ACTIVE')).toBe('Active')
+    expect(enumLabel('RW', 'memberStatus', 'ACTIVE')).not.toBe('ACTIVE')
+    expect(enumLabel('RW', 'memberStatus', 'ACTIVE')).not.toBe('Active')
+  })
+
+  it('prints the raw code for a value it has no words for, never a blank', () => {
+    expect(enumLabel('EN', 'memberStatus', 'RETIRED')).toBe('RETIRED')
+    expect(enumLabel('EN', 'memberStatus', null)).toBe('')
   })
 
   it('keeps a quantity’s three decimals only where they say something', () => {

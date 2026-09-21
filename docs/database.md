@@ -155,26 +155,26 @@ nothing more. Cooperative type must never gate a core feature.
 
 ### Cooperative
 
-| Column                                        | Type                                             | Notes                                       |
-| --------------------------------------------- | ------------------------------------------------ | ------------------------------------------- |
-| id                                            | uuid pk                                          | tenant identifier                           |
-| code                                          | text unique                                      | short slug, used in references              |
-| name                                          | text                                             |                                             |
-| type_id                                       | uuid → CooperativeType RESTRICT                  |                                             |
-| registration_number                           | text null unique                                 | RCA registration                            |
-| tin_number                                    | text null                                        |                                             |
-| province / district / sector / cell / village | text                                             | Rwandan administrative hierarchy            |
-| address_line, phone, email, logo_url          | text null                                        |                                             |
-| founded_on                                    | date null                                        |                                             |
-| status                                        | enum(ACTIVE, SUSPENDED, ARCHIVED) default ACTIVE |                                             |
-| is_demo                                       | boolean default false                            | the whole cooperative is demonstration data |
-| currency                                      | text default 'RWF'                               |                                             |
-| timezone                                      | text default 'Africa/Kigali'                     |                                             |
-| default_locale                                | enum(EN, RW) default RW                          |                                             |
-| member_code_prefix                            | text default 'COOP'                              |                                             |
-| member_code_sequence                          | int default 0                                    | allocated inside a transaction              |
-| fiscal_year_start_month                       | int default 1                                    |                                             |
-| created_at / updated_at                       | timestamptz                                      |                                             |
+| Column                                        | Type                                                           | Notes                                       |
+| --------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------- |
+| id                                            | uuid pk                                                        | tenant identifier                           |
+| code                                          | text unique                                                    | short slug, used in references              |
+| name                                          | text                                                           |                                             |
+| type_id                                       | uuid → CooperativeType RESTRICT                                |                                             |
+| registration_number                           | text null unique                                               | RCA registration                            |
+| tin_number                                    | text null                                                      |                                             |
+| province / district / sector / cell / village | text                                                           | Rwandan administrative hierarchy            |
+| address_line, phone, email, logo_url          | text null                                                      |                                             |
+| founded_on                                    | date null                                                      |                                             |
+| status                                        | enum(ACTIVE, SUSPENDED, ARCHIVED) default ACTIVE               |                                             |
+| is_demo                                       | boolean default false                                          | the whole cooperative is demonstration data |
+| currency                                      | text default 'RWF'                                             |                                             |
+| timezone                                      | text default 'Africa/Kigali'                                   |                                             |
+| default_locale                                | enum(EN, RW) default RW                                        |                                             |
+| member_code_prefix                            | text default 'COOP'; set to the cooperative's code on creation |                                             |
+| member_code_sequence                          | int default 0                                                  | allocated inside a transaction              |
+| fiscal_year_start_month                       | int default 1                                                  |                                             |
+| created_at / updated_at                       | timestamptz                                                    |                                             |
 
 ### CooperativeSetting
 
@@ -329,7 +329,12 @@ Cooperatives may add their own units; nothing in the system assumes kilograms.
 ### ProductCategory
 
 `id`, `cooperative_id` CASCADE, `name`, `name_rw` null, `parent_id` null self-reference RESTRICT,
-`description`, `is_active`, timestamps. Unique (cooperative_id, name, parent_id).
+`description`, `is_active`, timestamps. Unique (cooperative_id, name, parent_id), **plus a partial
+unique index on (cooperative_id, name) where parent_id is null** (M17). The first index never
+fired for two root categories of the same name, because SQL treats every NULL as distinct from
+every other, and a cooperative could file "Grains" twice; the Phase 17 endpoint pass found it.
+Prisma cannot express a partial index, so the migration writes it by hand, the way the check
+constraints on `sales` are written.
 
 ### Product
 
@@ -667,6 +672,7 @@ implies a different phase is wrong.
 | M9 ✅     | 9     | `Document`, `Meeting`, `MeetingAgendaItem`, `MeetingAttendee`, `MeetingDecision`                                                          |
 | M12 ✅    | 12    | `Announcement`, `SmsMessage`                                                                                                              |
 | M14 ✅    | 14    | `AssistantConversation`, `AssistantMessage`                                                                                               |
+| M17 ✅    | 17    | no table: the partial unique index on root product categories                                                                             |
 
 The migration numbers follow the phase rather than a running count: the announcements and SMS
 migration is **M12**, not M10, because it lands in Phase 12 and a name that disagrees with its phase

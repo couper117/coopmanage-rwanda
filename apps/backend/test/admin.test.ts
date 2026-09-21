@@ -3,6 +3,7 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { HEADERS } from '@coopmanage/shared'
 import { API_PREFIX } from '../src/app.js'
+import { memberCodePrefixFrom } from '../src/modules/admin/admin.service.js'
 import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
 import {
@@ -153,6 +154,20 @@ describe('cooperatives', () => {
     })
     expect(staff.role.key).toBe('MANAGER')
     expect(staff.status).toBe('ACTIVE')
+
+    // Its member codes start with its own code, not with the column's generic default.
+    const cooperative = await prisma.cooperative.findUniqueOrThrow({
+      where: { code },
+      select: { memberCodePrefix: true },
+    })
+    expect(cooperative.memberCodePrefix).toBe(code)
+  })
+
+  it('cuts a long code down to a prefix that fits, never ending on a hyphen', () => {
+    expect(memberCodePrefixFrom('ABAHUZAMUGAMBI-HUYE-2026')).toBe('ABAHUZAMUGAM')
+    expect(memberCodePrefixFrom('KOPERATIVE-NSHYA-KIGALI')).toBe('KOPERATIVE-N')
+    expect(memberCodePrefixFrom('ABCDEFGHIJK-XYZ')).toBe('ABCDEFGHIJK')
+    expect(memberCodePrefixFrom('COF')).toBe('COF')
   })
 
   it('makes the new manager able to sign in only after setting a password', async () => {

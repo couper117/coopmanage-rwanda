@@ -25,3 +25,4 @@ backups/
 test-results/
 playwright-report/
 storage-test/
+apps/backend/test/.route-coverage/

@@ -459,9 +459,7 @@ export async function updateDocument(
       ...(changes.visibility === undefined ? {} : { visibility: changes.visibility }),
       ...(changes.memberId === undefined ? {} : { memberId: changes.memberId }),
       ...(changes.meetingId === undefined ? {} : { meetingId: changes.meetingId }),
-      ...(changes.tags === undefined
-        ? {}
-        : { tags: changes.tags.map((tag) => tag.trim().toLowerCase()) }),
+      ...(changes.tags === undefined ? {} : { tags: changes.tags }),
     },
     select: ROW_SELECT,
   })

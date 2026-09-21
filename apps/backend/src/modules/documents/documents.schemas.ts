@@ -57,20 +57,24 @@ const optionalUuid = z
  * Trimmed, emptied entries dropped, lower-cased so a search for "contract" finds "Contract", and
  * de-duplicated. Capped at ten, because a document with thirty tags has none.
  */
+function normaliseTags(tags: string[]): string[] {
+  return Array.from(
+    new Set(tags.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0)),
+  ).slice(0, 10)
+}
+
 const tagList = z
   .string()
   .max(400)
-  .transform((value) =>
-    Array.from(
-      new Set(
-        value
-          .split(',')
-          .map((tag) => tag.trim().toLowerCase())
-          .filter((tag) => tag.length > 0 && tag.length <= 40),
-      ),
-    ).slice(0, 10),
-  )
+  .transform((value) => normaliseTags(value.split(',').filter((tag) => tag.trim().length <= 40)))
   .optional()
+
+/**
+ * Tags as JSON, on an edit. The same rule as the form field — the Phase 17 endpoint pass found
+ * that an edit lower-cased its tags but did not de-duplicate them, so `['AGM', 'agm']` was stored
+ * twice where an upload would have stored it once.
+ */
+const tagArray = z.array(z.string().trim().min(1).max(40)).max(10).transform(normaliseTags)
 
 export const uploadDocumentSchema = z
   .object({
@@ -102,7 +106,7 @@ export const updateDocumentSchema = z
     visibility: z.enum(DOCUMENT_VISIBILITIES).optional(),
     memberId: z.uuid().nullable().optional(),
     meetingId: z.uuid().nullable().optional(),
-    tags: z.array(z.string().trim().min(1).max(40)).max(10).optional(),
+    tags: tagArray.optional(),
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, {

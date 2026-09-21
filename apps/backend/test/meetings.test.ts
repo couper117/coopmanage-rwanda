@@ -640,6 +640,43 @@ describe('the minutes', () => {
   })
 })
 
+describe('one meeting', () => {
+  it('is read back whole: agenda, register, decisions and papers together', async () => {
+    const meeting = await schedule({ title: 'Assembly read back in one piece' })
+    await as(manager, 'put', `/meetings/${meeting.id}/agenda`)
+      .send({ items: [{ title: 'Opening' }, { title: 'The maize dryer' }] })
+      .expect(200)
+    await as(manager, 'put', `/meetings/${meeting.id}/attendance`)
+      .send({
+        entries: [
+          { memberId: memberIds[0], status: 'PRESENT' },
+          { memberId: memberIds[1], status: 'ABSENT' },
+        ],
+      })
+      .expect(200)
+
+    const response = await as(accountant, 'get', `/meetings/${meeting.id}`).expect(200)
+    const detail = response.body.data as Detail
+    expect(detail.id).toBe(meeting.id)
+    expect(detail.reference).toBe(meeting.reference)
+    expect(detail.agenda.map((item) => item.title)).toEqual(['Opening', 'The maize dryer'])
+    expect(detail.attendees).toHaveLength(2)
+    expect(detail.presentCount).toBe(1)
+    expect(detail.decisions).toEqual([])
+    expect(detail.documents).toEqual([])
+
+    // The list carries the same present count, so a screen need not open each meeting.
+    const listed = await as(accountant, 'get', `/meetings?q=${meeting.reference}`).expect(200)
+    const row = (listed.body.data as { id: string; presentCount: number }[]).find(
+      (candidate) => candidate.id === meeting.id,
+    )
+    expect(row?.presentCount).toBe(1)
+
+    await as(manager, 'get', '/meetings/00000000-0000-4000-8000-000000000000').expect(404)
+    await as(otherManager, 'get', `/meetings/${meeting.id}`, other).expect(404)
+  })
+})
+
 describe('the list', () => {
   it('finds a meeting by number, title or place', async () => {
     const meeting = await schedule({ title: 'Assembly about the coffee washing station' })

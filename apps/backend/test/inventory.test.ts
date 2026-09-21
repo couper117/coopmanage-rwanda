@@ -248,6 +248,129 @@ describe('the catalogue', () => {
       .send({ name: 'Not allowed', unitId: kilogram })
       .expect(403)
   })
+
+  it('lets a cooperative rename and retire a unit of its own', async () => {
+    const created = await as(manager, 'post', '/units')
+      .send({ key: 'CRATE', nameEn: 'Crate', nameRw: 'Agasanduku', symbol: 'crate', precision: 0 })
+      .expect(201)
+    const id = created.body.data.id as string
+
+    const renamed = await as(manager, 'patch', `/units/${id}`)
+      .send({ nameEn: 'Wooden crate', isActive: false })
+      .expect(200)
+    expect(renamed.body.data.nameEn).toBe('Wooden crate')
+    expect(renamed.body.data.isActive).toBe(false)
+
+    // A retired unit is out of the list a form offers, and still there when asked for.
+    const offered = await as(manager, 'get', '/units').expect(200)
+    expect((offered.body.data as { id: string }[]).some((row) => row.id === id)).toBe(false)
+    const all = await as(manager, 'get', '/units?includeInactive=true').expect(200)
+    expect((all.body.data as { id: string }[]).some((row) => row.id === id)).toBe(true)
+
+    // Nothing to change is a mistake, not a no-op.
+    await as(manager, 'patch', `/units/${id}`).send({}).expect(422)
+  })
+
+  it('keeps product categories as a tree the cooperative shapes itself', async () => {
+    const parent = await as(manager, 'post', '/product-categories')
+      .send({ name: 'Grains', nameRw: 'Ibinyampeke' })
+      .expect(201)
+    const child = await as(manager, 'post', '/product-categories')
+      .send({ name: 'Cereals', parentId: parent.body.data.id })
+      .expect(201)
+
+    const listed = await as(viewer, 'get', '/product-categories').expect(200)
+    const rows = listed.body.data as { id: string; name: string; parentId: string | null }[]
+    expect(rows.find((row) => row.id === child.body.data.id)?.parentId).toBe(parent.body.data.id)
+
+    const renamed = await as(storekeeper, 'patch', `/product-categories/${child.body.data.id}`)
+      .send({ name: 'Cereal grains', isActive: false })
+      .expect(200)
+    expect(renamed.body.data.name).toBe('Cereal grains')
+    expect(renamed.body.data.isActive).toBe(false)
+
+    // Retired categories are out of the default list and back with the flag.
+    const active = await as(viewer, 'get', '/product-categories').expect(200)
+    expect(
+      (active.body.data as { id: string }[]).some((row) => row.id === child.body.data.id),
+    ).toBe(false)
+    const everything = await as(viewer, 'get', '/product-categories?includeInactive=true').expect(
+      200,
+    )
+    expect(
+      (everything.body.data as { id: string }[]).some((row) => row.id === child.body.data.id),
+    ).toBe(true)
+
+    await as(viewer, 'patch', `/product-categories/${child.body.data.id}`)
+      .send({ name: 'Not allowed' })
+      .expect(403)
+  })
+
+  it('refuses a code already on the label of something else, by name', async () => {
+    // Somebody's own product code, category name or store code is taken exactly once. The second
+    // attempt is a 409 that names the field, not a bare constraint error from the database.
+    await as(manager, 'post', '/products')
+      .send({ name: 'Coffee cherry', sku: 'CHERRY-A', unitId: kilogram })
+      .expect(201)
+    const sku = await as(manager, 'post', '/products')
+      .send({ name: 'Coffee cherry, grade A', sku: 'cherry-a', unitId: kilogram })
+      .expect(409)
+    expect(sku.body.error.messageKey).toBe('errors.catalogue.skuTaken')
+
+    const second = await as(manager, 'post', '/products')
+      .send({ name: 'Coffee cherry, grade B', sku: 'CHERRY-B', unitId: kilogram })
+      .expect(201)
+    const renamed = await as(manager, 'patch', `/products/${second.body.data.id as string}`)
+      .send({ sku: 'CHERRY-A' })
+      .expect(409)
+    expect(renamed.body.error.messageKey).toBe('errors.catalogue.skuTaken')
+
+    await as(manager, 'post', '/product-categories').send({ name: 'Pulses' }).expect(201)
+    const category = await as(manager, 'post', '/product-categories')
+      .send({ name: 'Pulses' })
+      .expect(409)
+    expect(category.body.error.messageKey).toBe('errors.catalogue.categoryNameTaken')
+    const other = await as(manager, 'post', '/product-categories')
+      .send({ name: 'Tubers' })
+      .expect(201)
+    const categoryRenamed = await as(
+      manager,
+      'patch',
+      `/product-categories/${other.body.data.id as string}`,
+    )
+      .send({ name: 'Pulses' })
+      .expect(409)
+    expect(categoryRenamed.body.error.messageKey).toBe('errors.catalogue.categoryNameTaken')
+
+    await as(manager, 'post', '/warehouses')
+      .send({ name: 'Drying shed', code: 'SHED-1' })
+      .expect(201)
+    const store = await as(manager, 'post', '/warehouses')
+      .send({ name: 'Second shed', code: 'SHED-1' })
+      .expect(409)
+    expect(store.body.error.messageKey).toBe('errors.catalogue.warehouseCodeTaken')
+    const shed = await as(manager, 'post', '/warehouses')
+      .send({ name: 'Third shed', code: 'SHED-3' })
+      .expect(201)
+    const storeRenamed = await as(manager, 'patch', `/warehouses/${shed.body.data.id as string}`)
+      .send({ code: 'SHED-1' })
+      .expect(409)
+    expect(storeRenamed.body.error.messageKey).toBe('errors.catalogue.warehouseCodeTaken')
+  })
+
+  it('answers a single product with the same shape as the list', async () => {
+    const one = await as(viewer, 'get', `/products/${maize}`).expect(200)
+    expect(one.body.data.id).toBe(maize)
+    expect(one.body.data.name).toBe('Maize grain')
+    expect(one.body.data.unitSymbol).toBe('kg')
+    expect(one.body.data.trackInventory).toBe(true)
+
+    const listed = await as(viewer, 'get', '/products').expect(200)
+    const fromList = (listed.body.data as { id: string }[]).find((row) => row.id === maize)
+    expect(Object.keys(fromList ?? {}).sort()).toEqual(Object.keys(one.body.data).sort())
+
+    await as(viewer, 'get', '/products/00000000-0000-4000-8000-000000000000').expect(404)
+  })
 })
 
 describe('stores', () => {

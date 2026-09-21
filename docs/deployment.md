@@ -77,6 +77,9 @@ Phase 18 verifies these against the deployed host and records the result here.
 3. Backend deploys; `/health/ready` must return healthy before traffic is shifted.
 4. Frontend builds and deploys.
 5. Smoke test: log in, open the dashboard, record a test expense in a staging cooperative, void it.
+6. Before a release that changes a screen: walk the critical flows in a browser by keyboard and
+   with a screen reader — the part of `docs/ui-system.md` §9 that jsdom cannot check — and note it
+   in the release notes.
 
 Migrations are additive first. A destructive migration requires a written rollback note and a fresh
 backup taken immediately before the release.

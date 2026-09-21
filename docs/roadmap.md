@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 16 complete.** Phase 17 is next.
+Status: **Phase 17 complete.** Phase 18 is next.
 
 ---
 
@@ -921,7 +921,7 @@ The optional dark theme is not shipped; §2 records the decision and why.
 
 ---
 
-### Phase 17 — Testing and quality assurance
+### Phase 17 — Testing and quality assurance ✅
 
 Unit tests for money, stock, permissions, code allocation and report arithmetic. Integration tests
 for every endpoint. End-to-end tests for the nine critical flows: login, create cooperative, add
@@ -929,6 +929,33 @@ member, record income, record expense, add product, receive stock, create sale, 
 
 **Exit:** all suites green, coverage meaningful on business logic rather than on generated code,
 migrations verified from empty, and no known broken functionality.
+
+**Met.** `docs/testing.md` is the record. Shared 81, backend 770, frontend 516, all green.
+
+**Every endpoint** is now proven to have a test by the suite itself: the route registry records
+every response during a run, and the teardown fails the run naming any of the 144 routes no test
+reached with a successful response. Nine routes had none when the gate was first switched on; each
+has one now. **Code allocation** has its own suite, driving the allocators inside real
+transactions: forty simultaneous registrations, thirty simultaneous postings, counters per
+cooperative and per year. **The nine flows** are one end-to-end story through the API, from the
+platform creating the cooperative to the month's report, with every figure on the report checked
+against the steps that produced it.
+
+**Coverage** is measured on the business logic only — the shared package entire, every backend
+service and library, the frontend's client, stores and hooks — and enforced as a floor: shared
+100% of statements, backend 90%, frontend 84%. A phase that ships a service nobody tests now fails
+the build.
+
+**Migrations are verified from empty** without `prisma migrate reset`: `npm run check:migrations`
+builds a throwaway database beside the development one, migrates it from nothing, checks the
+result against `schema.prisma`, seeds it and drops it. It never touches a developer's data, so CI
+runs it on every push and nobody has to consent to losing anything.
+
+Writing a test for every endpoint is a review of every endpoint, and it found five defects, all
+fixed: members of a platform-created cooperative were numbered `COOP-`; document edits did not
+de-duplicate tags where uploads did; two root product categories could share a name (migration
+M17); product and store codes were compared case-sensitively; and four kinds of search result had
+never been asserted on. No known broken functionality remains.
 
 ---
 

@@ -19,6 +19,30 @@ const optionalText = (max: number) =>
     .nullable()
     .optional()
 
+/**
+ * A code somebody writes on a label — a product's SKU, a store's code. Upper-cased, the way the
+ * generated ones already are, so `cherry-a` and `CHERRY-A` are one code and not two products: the
+ * Phase 17 endpoint pass found that the uniqueness check was case-sensitive and a typed code could
+ * slip past one differing only in case.
+ */
+const labelCode = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((value) => (value.length === 0 ? null : value.toUpperCase()))
+    .nullable()
+    .optional()
+
+const requiredLabelCode = (max: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(max)
+    .transform((value) => value.toUpperCase())
+    .optional()
+
 const decimalString = z.union([z.string().trim().min(1), z.number()])
 
 export const PRODUCT_TYPES = ['GOODS', 'SERVICE'] as const
@@ -137,7 +161,7 @@ export type ListProductsQuery = z.infer<typeof listProductsSchema>
 export const createProductSchema = z
   .object({
     /** Left out to be generated from the name, because most cooperatives have no codes yet. */
-    sku: optionalText(40),
+    sku: labelCode(40),
     name: z.string().trim().min(1).max(120),
     nameRw: optionalText(120),
     categoryId: z.uuid().nullable().optional(),
@@ -173,7 +197,7 @@ export type CreateProductInput = z.infer<typeof createProductSchema>
  */
 export const updateProductSchema = z
   .object({
-    sku: z.string().trim().min(1).max(40).optional(),
+    sku: requiredLabelCode(40),
     name: z.string().trim().min(1).max(120).optional(),
     nameRw: optionalText(120),
     categoryId: z.uuid().nullable().optional(),
@@ -205,7 +229,7 @@ export type ListWarehousesQuery = z.infer<typeof listWarehousesSchema>
 export const createWarehouseSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
-    code: optionalText(20),
+    code: labelCode(20),
     district: optionalText(60),
     sector: optionalText(60),
     /** Making this the default moves the flag off whichever store held it. */
@@ -218,7 +242,7 @@ export type CreateWarehouseInput = z.infer<typeof createWarehouseSchema>
 export const updateWarehouseSchema = z
   .object({
     name: z.string().trim().min(1).max(80).optional(),
-    code: z.string().trim().min(1).max(20).optional(),
+    code: requiredLabelCode(20),
     district: optionalText(60),
     sector: optionalText(60),
     isDefault: z.boolean().optional(),

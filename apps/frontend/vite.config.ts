@@ -93,5 +93,17 @@ export default defineConfig(({ command }) => ({
     include: ['test/**/*.test.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
     globals: true,
     css: false,
+    /**
+     * The frontend's own logic, not its rendering: the API client and its retry rule, the
+     * stores, the hooks, the i18n plumbing and the small pure helpers. Screens are covered by
+     * the tests that render them, but a line percentage over JSX says little, so it is not
+     * a threshold.
+     */
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/**', 'src/stores/**', 'src/hooks/**', 'src/i18n/*.ts', 'src/app/*.ts'],
+      reporter: ['text-summary', 'html'],
+      thresholds: { statements: 80, branches: 70, functions: 80, lines: 80 },
+    },
   },
 }))

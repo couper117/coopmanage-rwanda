@@ -805,6 +805,9 @@ model ProductCategory {
   children    ProductCategory[] @relation("CategoryParent")
   products    Product[]
 
+  /// Siblings are unique by name. At the root, where parent_id is NULL and SQL counts every NULL
+  /// as distinct, migration m17 adds a partial unique index on (cooperative_id, name) that Prisma
+  /// cannot express here.
   @@unique([cooperativeId, name, parentId])
   @@index([cooperativeId, isActive])
   @@map("product_categories")

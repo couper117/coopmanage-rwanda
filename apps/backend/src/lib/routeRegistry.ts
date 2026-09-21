@@ -25,8 +25,10 @@ export function permission(key: PermissionKey): RouteAccess {
   return { kind: 'PERMISSION', permission: key }
 }
 
+type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+
 export interface RegisteredRoute {
-  method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+  method: Method
   /** Full path below the API prefix, for example `/health/ready`. */
   path: string
   access: RouteAccess
@@ -38,12 +40,35 @@ export function registeredRoutes(): readonly RegisteredRoute[] {
   return registry
 }
 
+/**
+ * Told about every response a registered route sends, with the route as registered rather than as
+ * requested — `/members/:id`, not `/members/7c9e…`.
+ *
+ * Installed by the test suite only, which uses it to prove that every endpoint the application
+ * exposes is exercised by at least one passing test (`test/routeCoverage.ts`). Nothing installs it
+ * in production, and an uninstalled observer costs one undefined check per request.
+ */
+export type RouteObserver = (hit: { method: Method; path: string; status: number }) => void
+
+let observer: RouteObserver | undefined
+
+export function observeRoutes(fn: RouteObserver | undefined): void {
+  observer = fn
+}
+
+function observed(method: Method, path: string): RequestHandler {
+  return (_req, res, next) => {
+    if (observer) {
+      res.on('finish', () => observer?.({ method, path, status: res.statusCode }))
+    }
+    next()
+  }
+}
+
 function joinPath(base: string, path: string): string {
   const combined = `${base}/${path}`.replace(/\/{2,}/g, '/')
   return combined.length > 1 ? combined.replace(/\/$/, '') : combined
 }
-
-type Method = RegisteredRoute['method']
 
 export interface ModuleRouter {
   readonly router: ExpressRouter
@@ -68,7 +93,9 @@ export function createModuleRouter(basePath: string): ModuleRouter {
     access: RouteAccess,
     handlers: RequestHandler[],
   ): void {
-    registry.push({ method, path: joinPath(basePath, path), access })
+    const fullPath = joinPath(basePath, path)
+    registry.push({ method, path: fullPath, access })
+    handlers = [observed(method, fullPath), ...handlers]
     switch (method) {
       case 'GET':
         router.get(path, ...handlers)

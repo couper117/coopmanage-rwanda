@@ -141,6 +141,17 @@ export interface CreateCooperativeResult {
  * does: a cooperative with no manager cannot be administered, and an orphaned manager row would
  * be a membership of nothing.
  */
+/**
+ * The prefix a cooperative's member codes start with, taken from its own code so that the first
+ * card printed reads `ABAHUZA-00001` rather than `COOP-00001` — which is what the column's default
+ * gave every cooperative until the Phase 17 end-to-end run read a new cooperative's first member
+ * back. A code may be longer than the twelve characters the settings form allows for a prefix, so
+ * it is cut to fit, never ending on a hyphen. The cooperative can change it in its settings.
+ */
+export function memberCodePrefixFrom(code: string): string {
+  return code.slice(0, 12).replace(/-+$/, '')
+}
+
 export async function createCooperative(
   ctx: RequestContext,
   input: CreateCooperativeInput,
@@ -186,6 +197,7 @@ export async function createCooperative(
           cell: input.cell,
           village: input.village,
           defaultLocale: input.defaultLocale ?? settings.defaultCooperativeLocale,
+          memberCodePrefix: memberCodePrefixFrom(input.code),
         },
         select: { id: true },
       })

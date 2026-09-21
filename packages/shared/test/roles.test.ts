@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { COOPERATIVE_PERMISSIONS, PLATFORM_PERMISSIONS } from '../src/permissions.js'
-import { resolvePermissions, ROLE_KEYS, ROLE_PERMISSIONS, ROLE_SCOPE } from '../src/roles.js'
+import {
+  isRoleKey,
+  resolvePermissions,
+  ROLE_KEYS,
+  ROLE_PERMISSIONS,
+  ROLE_SCOPE,
+} from '../src/roles.js'
 
 /**
  * These expectations are transcribed from the role matrix in docs/permissions.md section 3. If the
@@ -108,5 +114,13 @@ describe('resolvePermissions', () => {
       { permission: 'finance:create', effect: 'DENY' },
     ])
     expect(set.has('finance:create')).toBe(false)
+  })
+})
+
+describe('isRoleKey', () => {
+  it('recognises every role and nothing else', () => {
+    for (const key of ROLE_KEYS) expect(isRoleKey(key)).toBe(true)
+    expect(isRoleKey('manager')).toBe(false)
+    expect(isRoleKey('OWNER')).toBe(false)
   })
 })

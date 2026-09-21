@@ -205,6 +205,44 @@ describe('buyers', () => {
     await as(viewer, 'get', `/buyers/${buyer}/summary`).expect(200)
   })
 
+  it('lists buyers by name, searched and paged, with the retired ones only on request', async () => {
+    await as(manager, 'post', '/buyers')
+      .send({ name: 'Zulu trading', phone: '0788123456' })
+      .expect(201)
+    const retired = await as(manager, 'post', '/buyers').send({ name: 'Zulu retired' }).expect(201)
+    await as(manager, 'patch', `/buyers/${retired.body.data.id as string}`)
+      .send({ isActive: false })
+      .expect(200)
+
+    const listed = await as(viewer, 'get', '/buyers?q=zulu').expect(200)
+    const names = (listed.body.data as { name: string }[]).map((row) => row.name)
+    expect(names).toEqual(['Zulu trading'])
+    expect(listed.body.meta.total).toBe(1)
+
+    const everyone = await as(
+      viewer,
+      'get',
+      '/buyers?q=zulu&includeInactive=true&sort=-name',
+    ).expect(200)
+    expect((everyone.body.data as { name: string }[]).map((row) => row.name)).toEqual([
+      'Zulu trading',
+      'Zulu retired',
+    ])
+
+    // A page is a page: the second of size one is the second buyer.
+    const second = await as(
+      viewer,
+      'get',
+      '/buyers?q=zulu&includeInactive=true&page=2&pageSize=1',
+    ).expect(200)
+    expect(second.body.data).toHaveLength(1)
+    expect(second.body.meta.page).toBe(2)
+    expect(second.body.meta.totalPages).toBe(2)
+
+    // A filter the list does not know is refused rather than ignored.
+    await as(viewer, 'get', '/buyers?district=Huye').expect(422)
+  })
+
   it('lets a storekeeper manage buyers but not a viewer', async () => {
     await as(storekeeper, 'post', '/buyers').send({ name: 'Added by the store' }).expect(201)
     await as(viewer, 'post', '/buyers').send({ name: 'Not allowed' }).expect(403)

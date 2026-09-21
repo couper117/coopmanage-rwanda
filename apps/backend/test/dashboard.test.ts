@@ -443,6 +443,64 @@ describe('the search', () => {
     expect(kinds.has('product')).toBe(true)
   })
 
+  it('finds a buyer, a sale, a document and a meeting, each with the screen it lives on', async () => {
+    const sale = await as(manager, 'post', '/sales')
+      .send({
+        buyerId: buyer,
+        warehouseId: store,
+        lines: [{ productId: maize, quantity: '5', unitPrice: '450' }],
+      })
+      .expect(201)
+    const pdf = Buffer.concat([Buffer.from('%PDF-1.7\n'), Buffer.from('trailer\n%%EOF\n')])
+    await as(manager, 'post', '/documents')
+      .attach('file', pdf, {
+        filename: 'washing-station-lease.pdf',
+        contentType: 'application/pdf',
+      })
+      .field('title', 'Lease of the washing station')
+      .field('category', 'CONTRACT')
+      .expect(201)
+    const meeting = await as(manager, 'post', '/meetings')
+      .send({
+        title: 'Assembly on the washing station',
+        type: 'GENERAL_ASSEMBLY',
+        scheduledFor: '2026-10-03T09:00:00.000Z',
+      })
+      .expect(201)
+
+    const buyerName = (await as(manager, 'get', `/buyers/${buyer}`).expect(200)).body.data
+      .name as string
+    const expectations: [string, string, string][] = [
+      [buyerName, 'buyer', `/buyers/${buyer}`],
+      [sale.body.data.reference as string, 'sale', `/sales/${sale.body.data.id as string}`],
+      ['washing station', 'document', '/documents'],
+      [
+        meeting.body.data.reference as string,
+        'meeting',
+        `/meetings/${meeting.body.data.id as string}`,
+      ],
+    ]
+    for (const [term, kind, href] of expectations) {
+      const response = await as(manager, 'get', `/search?q=${encodeURIComponent(term)}`).expect(200)
+      const hits = response.body.data.hits as { kind: string; href: string; title: string }[]
+      const hit = hits.find((candidate) => candidate.kind === kind)
+      expect(hit, `${kind} for "${term}"`).toBeDefined()
+      expect(hit?.href).toBe(href)
+    }
+
+    // A sale is titled by its reference, and subtitled by who bought and for how much — the two
+    // things somebody looking for it remembers.
+    const found = await as(
+      manager,
+      'get',
+      `/search?q=${sale.body.data.reference as string}`,
+    ).expect(200)
+    const saleHit = (found.body.data.hits as { kind: string; subtitle: string }[]).find(
+      (hit) => hit.kind === 'sale',
+    )
+    expect(saleHit?.subtitle).toBe(`${buyerName} · 2250.00`)
+  })
+
   it('finds nothing belonging to another cooperative', async () => {
     const response = await as(otherManager, 'get', '/search?q=Uwase', other).expect(200)
     expect(response.body.data.hits).toEqual([])
