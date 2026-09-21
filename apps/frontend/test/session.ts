@@ -17,7 +17,7 @@ export const TEST_COOPERATIVE_ID = '3f2a1c88-0b1e-4d2a-9f77-2c5d4e6a7b81'
 
 export function signInAs(
   roleKey: RoleKey = 'MANAGER',
-  options: { permissions?: PermissionKey[]; isDemo?: boolean } = {},
+  options: { permissions?: PermissionKey[]; isDemo?: boolean; mustChangePassword?: boolean } = {},
 ): void {
   const membership: Membership = {
     cooperativeId: TEST_COOPERATIVE_ID,
@@ -40,7 +40,7 @@ export function signInAs(
       phone: null,
       locale: 'EN',
       isPlatformAdmin: false,
-      mustChangePassword: false,
+      mustChangePassword: options.mustChangePassword ?? false,
       lastLoginAt: '2026-09-10T07:15:00.000Z',
     },
     memberships: [membership],

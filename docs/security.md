@@ -35,8 +35,14 @@ value shipped in `.env.example`, on any loopback CORS origin, or on a secret sho
 characters. API documentation defaults to closed in production and must be switched on deliberately.
 
 Password rules: minimum 10 characters, checked against a list of the most common passwords, no
-composition rules that push people towards `Password1!`. Invited staff must change the password on
-first login.
+composition rules that push people towards `Password1!`. An account whose password somebody else
+chose — the seeded administrator's bootstrap password, or one an operator handed over — carries
+`mustChangePassword`, and **the API refuses every request but its own session's** (`/auth/me`,
+`/auth/change-password`, `/auth/sessions`, `/auth/logout`) with `PASSWORD_CHANGE_REQUIRED` until it
+has set its own; the interface holds it at a change-password screen with no navigation. The flag
+had been recorded since Phase 2 and enforced nowhere, which the Phase 18 walk-through found when
+the rehearsed administrator could administer the platform on the bootstrap password. Invited staff
+and new managers never have a usable password at all: they receive a single-use link.
 
 The Argon2id parameters are 19 MiB of memory and three passes, which is what RFC 9106 recommends
 for a memory-constrained server. **Under `NODE_ENV=test` only, the cost drops to the library

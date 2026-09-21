@@ -23,8 +23,8 @@ import pg from 'pg'
  *    administrator, whose bootstrap password comes from the environment.
  * 5. Starts the image with `NODE_ENV=production` and a production-shaped environment, and waits
  *    for the health check `railway.json` names.
- * 6. Signs in as the administrator, reads the session back, and checks the security headers
- *    `docs/security.md` promises are on the response.
+ * 6. Signs in as the administrator, finds the account held to a password change, sets one,
+ *    reads the session back, and checks the security headers `docs/security.md` promises.
  * 7. Creates the first cooperative through the platform API and checks that its manager's
  *    password link arrived by e-mail (a mail catcher stands in for the SMTP provider) and that
  *    nothing of it reached the log.
@@ -268,12 +268,32 @@ try {
   if (session.data.user.mustChangePassword !== true) {
     throw new Error('the bootstrap password should be single-use in production')
   }
+  // Until the bootstrap password is replaced, the account can reach nothing but its own session.
+  const held = await fetch(`${base}/admin/cooperatives`, {
+    headers: { authorization: `Bearer ${session.data.accessToken}` },
+  })
+  if (held.status !== 403 || (await held.json()).error?.code !== 'PASSWORD_CHANGE_REQUIRED') {
+    throw new Error('the bootstrap account was not held to a password change')
+  }
+  const changed = await fetch(`${base}/auth/change-password`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${session.data.accessToken}`,
+    },
+    body: JSON.stringify({
+      currentPassword: adminPassword,
+      newPassword: randomBytes(18).toString('base64url'),
+    }),
+  })
+  if (changed.status !== 204) throw new Error(`change-password answered ${changed.status}`)
   const me = await fetch(`${base}/auth/me`, {
     headers: { authorization: `Bearer ${session.data.accessToken}` },
   })
   if (me.status !== 200) throw new Error(`/auth/me answered ${me.status}`)
   const meBody = await me.json()
   if (meBody.data.user.isPlatformAdmin !== true) throw new Error('not a platform administrator')
+  if (meBody.data.user.mustChangePassword !== false) throw new Error('the hold was not lifted')
 
   const expectedHeaders = {
     'content-security-policy': /default-src 'self'/,

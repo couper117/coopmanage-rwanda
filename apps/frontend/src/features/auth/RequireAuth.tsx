@@ -14,6 +14,7 @@ import { SessionLoading } from './SessionLoading'
  */
 export function RequireAuth({ children }: { children: ReactNode }) {
   const status = useAuthStore((state) => state.status)
+  const mustChangePassword = useAuthStore((state) => state.user?.mustChangePassword ?? false)
   const location = useLocation()
 
   if (status === 'unknown') return <SessionLoading />
@@ -21,6 +22,11 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     // Where they were going is remembered, so signing in takes them there rather than to the
     // dashboard and a second navigation.
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
+  }
+  // An account still on a password somebody else chose is held at the change-password screen.
+  // The server refuses everything else in the meantime, so this is a courtesy, not the lock.
+  if (mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />
   }
   return <>{children}</>
 }

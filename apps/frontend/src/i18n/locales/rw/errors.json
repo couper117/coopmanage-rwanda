@@ -8,6 +8,7 @@
   "routeNotFound": "Iyi paji ntibaho.",
   "unauthenticated": "Banza winjire kugira ngo ukomeze.",
   "forbidden": "Nta burenganzira ufite bwo gukora ibi.",
+  "passwordChangeRequired": "Shyiraho ijambobanga ryawe bwite mbere yo gukomeza.",
   "noCooperativeAccess": "Nta burenganzira ufite kuri iyi koperative.",
   "originNotAllowed": "Uru rubuga ntarwemerewe gukoresha serivisi ya CoopManage.",
   "validationFailed": "Hari amakuru atari yo. Reba ahagaragajwe.",

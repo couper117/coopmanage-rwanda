@@ -42,6 +42,11 @@ COPY --from=build /repo/apps/backend/prisma.config.ts apps/backend/
 COPY --from=build /repo/apps/backend/prisma apps/backend/prisma
 COPY --from=build /repo/apps/backend/dist apps/backend/dist
 WORKDIR /repo/apps/backend
+# The one place the image is written to at runtime: the backup service's local copy of a dump
+# before it is uploaded. Everything else is read-only to the process, which is the point of
+# running as `node` rather than root.
+RUN mkdir -p /var/backups/coopmanage && chown node:node /var/backups/coopmanage
+ENV BACKUP_DIR=/var/backups/coopmanage
 # Not root: the process needs nothing the node user cannot do.
 USER node
 EXPOSE 4000

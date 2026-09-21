@@ -75,6 +75,11 @@ const ForgotPasswordPage = lazy(async () => ({
 const ResetPasswordPage = lazy(async () => ({
   default: (await import('@/pages/auth/ResetPasswordPage')).ResetPasswordPage,
 }))
+const ChangePasswordPage = lazy(async () => {
+  // The form's own strings live with the profile screen, which is where it is otherwise used.
+  await loadNamespaces(['profile'])
+  return { default: (await import('@/pages/auth/ChangePasswordPage')).ChangePasswordPage }
+})
 
 /**
  * Three kinds of route.
@@ -148,6 +153,18 @@ export const routes: RouteObject[] = [
       <Anonymous>
         <ResetPasswordPage />
       </Anonymous>
+    ),
+  },
+  {
+    // Inside the session guard but outside the shell: the account is signed in and may go
+    // nowhere else until it has set its own password.
+    path: '/change-password',
+    element: (
+      <RequireAuth>
+        <Anonymous>
+          <ChangePasswordPage />
+        </Anonymous>
+      </RequireAuth>
     ),
   },
   {

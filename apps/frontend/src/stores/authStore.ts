@@ -33,6 +33,8 @@ interface AuthState {
   setAccessToken: (token: string | null) => void
   applySession: (summary: SessionSummary) => void
   setActiveCooperative: (cooperativeId: string | null) => void
+  /** The account has replaced the password somebody else chose for it; the lock is lifted. */
+  passwordChanged: () => void
   signedOut: () => void
 }
 
@@ -80,6 +82,11 @@ export const useAuthStore = create<AuthState>()(
           roleKey: null,
           permissions: EMPTY_PERMISSIONS,
         }),
+
+      passwordChanged: () =>
+        set((state) => ({
+          user: state.user ? { ...state.user, mustChangePassword: false } : state.user,
+        })),
 
       signedOut: () =>
         set({

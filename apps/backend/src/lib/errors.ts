@@ -126,6 +126,20 @@ export class AppError extends Error {
     })
   }
 
+  /**
+   * The account may not do anything but set its own password. A bootstrap credential — the
+   * seeded administrator's, or one an operator handed over — is single-use, and this is what
+   * makes it so: every other route answers this until the change is made.
+   */
+  static passwordChangeRequired(): AppError {
+    return new AppError({
+      status: 403,
+      code: 'PASSWORD_CHANGE_REQUIRED',
+      messageKey: 'errors.passwordChangeRequired',
+      message: 'Set your own password before continuing.',
+    })
+  }
+
   static forbidden(permission?: string): AppError {
     return new AppError({
       status: 403,

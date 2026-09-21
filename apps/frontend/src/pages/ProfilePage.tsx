@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { checkPassword, LOCALES, MIN_PASSWORD_LENGTH } from '@coopmanage/shared'
+import { LOCALES } from '@coopmanage/shared'
 import { PageHeader } from '@/components/PageHeader'
 import {
   Alert,
@@ -17,12 +17,8 @@ import {
   Panel,
   SkeletonText,
 } from '@/components/ui'
-import {
-  changePassword,
-  listSessions,
-  revokeSession,
-  updateProfile,
-} from '@/features/auth/auth.api'
+import { listSessions, revokeSession, updateProfile } from '@/features/auth/auth.api'
+import { PasswordForm } from '@/features/auth/PasswordForm'
 import { loadSession, useActiveMembership, useSession } from '@/features/auth/useSession'
 import { useApiError } from '@/hooks/useApiErrorMessage'
 import { describeDevice } from '@/lib/device'
@@ -146,99 +142,11 @@ function DetailsPanel() {
   )
 }
 
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1),
-    newPassword: z.string(),
-    confirmPassword: z.string(),
-  })
-  .superRefine((value, ctx) => {
-    const problem = checkPassword(value.newPassword)
-    if (problem) ctx.addIssue({ code: 'custom', path: ['newPassword'], message: problem })
-    if (value.newPassword !== value.confirmPassword) {
-      ctx.addIssue({ code: 'custom', path: ['confirmPassword'], message: 'mismatch' })
-    }
-  })
-
-type PasswordForm = z.infer<typeof passwordSchema>
-
 function PasswordPanel() {
-  const { t } = useTranslation(['profile', 'common', 'validation'])
-  const describeError = useApiError()
-  const [done, setDone] = useState(false)
-  const [failure, setFailure] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-
-  const form = useForm<PasswordForm>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
-  })
-
-  const mutation = useMutation({
-    mutationFn: (values: PasswordForm) =>
-      changePassword(values.currentPassword, values.newPassword),
-    onSuccess: () => {
-      setFailure(null)
-      setFieldErrors({})
-      setDone(true)
-      form.reset()
-    },
-    onError: (error) => {
-      setDone(false)
-      const described = describeError(error)
-      setFailure(described.message)
-      setFieldErrors(described.fieldErrors)
-    },
-  })
-
-  const newPasswordError = form.formState.errors.newPassword?.message
-  const confirmError = form.formState.errors.confirmPassword?.message
-
+  const { t } = useTranslation('profile')
   return (
     <Panel title={t('profile:password.title')} description={t('profile:password.description')}>
-      <form
-        noValidate
-        onSubmit={(event) => void form.handleSubmit((values) => mutation.mutate(values))(event)}
-        className="flex max-w-md flex-col gap-4"
-      >
-        {failure ? <Alert tone="danger">{failure}</Alert> : null}
-        {done ? <Alert tone="success">{t('profile:password.changed')}</Alert> : null}
-
-        <FormField label={t('profile:fields.currentPassword')} error={fieldErrors.currentPassword}>
-          <Input
-            type="password"
-            autoComplete="current-password"
-            {...form.register('currentPassword')}
-          />
-        </FormField>
-
-        <FormField
-          label={t('profile:fields.newPassword')}
-          hint={t('validation:password.hint', { min: MIN_PASSWORD_LENGTH })}
-          error={newPasswordError ? t(`validation:password.${newPasswordError}`) : undefined}
-        >
-          <Input type="password" autoComplete="new-password" {...form.register('newPassword')} />
-        </FormField>
-
-        <FormField
-          label={t('profile:fields.confirmPassword')}
-          error={confirmError ? t('validation:password.mismatch') : undefined}
-        >
-          <Input
-            type="password"
-            autoComplete="new-password"
-            {...form.register('confirmPassword')}
-          />
-        </FormField>
-
-        <Alert tone="info">{t('profile:password.signsOutOtherDevices')}</Alert>
-
-        <div>
-          <Button type="submit" loading={mutation.isPending}>
-            {t('profile:password.submit')}
-          </Button>
-        </div>
-      </form>
+      <PasswordForm />
     </Panel>
   )
 }

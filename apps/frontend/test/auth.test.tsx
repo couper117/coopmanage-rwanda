@@ -101,6 +101,38 @@ describe('the guard on every screen', () => {
   })
 })
 
+describe('an account still on a password somebody else chose', () => {
+  it('is held at the change-password screen, with no navigation, until it sets its own', async () => {
+    signInAs('MANAGER', { mustChangePassword: true })
+    authApi.changePassword.mockResolvedValue(undefined)
+
+    renderApp('/members')
+    // Sent to the hold screen, not the register; the shell and its navigation are not rendered.
+    expect(
+      await screen.findByRole('heading', { name: 'Set your own password' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Main navigation' })).toBeNull()
+
+    await userEvent.type(screen.getByLabelText('Current password'), 'chosen-by-somebody-else')
+    await userEvent.type(screen.getByLabelText('New password'), 'a-password-of-my-own-choosing')
+    await userEvent.type(
+      screen.getByLabelText('Confirm new password'),
+      'a-password-of-my-own-choosing',
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Set password and continue' }))
+
+    await waitFor(() =>
+      expect(authApi.changePassword).toHaveBeenCalledWith(
+        'chosen-by-somebody-else',
+        'a-password-of-my-own-choosing',
+      ),
+    )
+    // The lock is lifted locally as well as on the server, and the application opens.
+    await waitFor(() => expect(useAuthStore.getState().user?.mustChangePassword).toBe(false))
+    expect(await screen.findByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument()
+  })
+})
+
 describe('signing in', () => {
   beforeEach(() => {
     signOutForTests()

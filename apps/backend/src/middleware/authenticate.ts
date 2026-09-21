@@ -10,6 +10,9 @@ import { verifyAccessToken } from '../lib/tokens.js'
  * An expired token is reported as `TOKEN_EXPIRED` rather than `UNAUTHENTICATED`, so the client
  * knows to refresh silently instead of dropping the user on the login screen mid-sentence.
  */
+/** The session's own endpoints, which a locked-to-password-change account may still use. */
+const PASSWORD_CHANGE_ALLOWED = /^\/api\/v1\/auth\/(me|change-password|sessions|logout)(\/|\?|$)/
+
 export async function authenticate(
   req: Request,
   _res: Response,
@@ -40,6 +43,7 @@ export async function authenticate(
       isPlatformAdmin: true,
       locale: true,
       status: true,
+      mustChangePassword: true,
     },
   })
 
@@ -59,6 +63,15 @@ export async function authenticate(
   })
   if (!familyIsLive) {
     next(AppError.unauthenticated())
+    return
+  }
+
+  // An account that must still set its own password can reach its own session — read it,
+  // change the password, sign out — and nothing else. The flag is set on an account created
+  // with a credential somebody else chose: the seeded administrator in production, a member of
+  // staff invited with a temporary password. `docs/security.md` §2.
+  if (user.mustChangePassword && !PASSWORD_CHANGE_ALLOWED.test(req.originalUrl)) {
+    next(AppError.passwordChangeRequired())
     return
   }
 

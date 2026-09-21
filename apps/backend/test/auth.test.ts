@@ -1,5 +1,6 @@
 import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { HEADERS } from '@coopmanage/shared'
 import { API_PREFIX } from '../src/app.js'
 import { testApp } from './server.js'
 import { disconnectPrisma, prisma } from '../src/lib/prisma.js'
@@ -578,6 +579,44 @@ async function issueResetToken(userId: string, expiresAt?: Date): Promise<string
   })
   return token
 }
+
+describe('an account that must still set its own password', () => {
+  it('can reach its own session and nothing else until it has', async () => {
+    const cooperative = await createCooperative('Bootstrap Cooperative')
+    const manager = await createStaffSession(app, cooperative, 'MANAGER')
+    await prisma.user.update({ where: { id: manager.id }, data: { mustChangePassword: true } })
+
+    const as = (method: 'get' | 'post', path: string) =>
+      request(app)
+        [method](`${API_PREFIX}${path}`)
+        .set('Authorization', `Bearer ${manager.accessToken}`)
+        .set(HEADERS.cooperativeId, cooperative.id)
+
+    // What the hold screen needs: who am I, and my devices.
+    const me = await as('get', '/auth/me').expect(200)
+    expect(me.body.data.user.mustChangePassword).toBe(true)
+    await as('get', '/auth/sessions').expect(200)
+
+    // Everything else is refused with a code the interface can act on — not a bare 403.
+    for (const path of [
+      '/members',
+      '/dashboard',
+      '/finance/summary?from=2026-01-01&to=2026-01-31',
+    ]) {
+      const refused = await as('get', path).expect(403)
+      expect(refused.body.error.code).toBe('PASSWORD_CHANGE_REQUIRED')
+      expect(refused.body.error.messageKey).toBe('errors.passwordChangeRequired')
+    }
+
+    // Setting a password of one's own lifts the hold, on the same session.
+    await as('post', '/auth/change-password')
+      .send({ currentPassword: TEST_PASSWORD, newPassword: 'a-password-of-my-own-choosing' })
+      .expect(204)
+    const after = await as('get', '/auth/me').expect(200)
+    expect(after.body.data.user.mustChangePassword).toBe(false)
+    await as('get', '/members').expect(200)
+  })
+})
 
 describe('platform administrators in the session', () => {
   /**
