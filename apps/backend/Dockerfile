@@ -20,7 +20,9 @@ RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/backend/package.json apps/backend/
-RUN npm ci --workspace @coopmanage/shared --workspace @coopmanage/backend
+# --ignore-scripts: the sources are not in the context yet, so the packages' postinstall builds
+# (the shared package's compile, the Prisma client) would fail here; both run in the build below.
+RUN npm ci --ignore-scripts --workspace @coopmanage/shared --workspace @coopmanage/backend
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/backend apps/backend
