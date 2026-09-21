@@ -43,6 +43,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      # `npm ci` generates the Prisma client through the backend's postinstall script. Prisma 7
+      # no longer does it on install by itself, and without it `@prisma/client` is a stub with no
+      # `Prisma` namespace — which is how the first run of this workflow failed at the seed.
       - run: npm ci
 
       - name: Build the shared package
