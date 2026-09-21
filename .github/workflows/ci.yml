@@ -74,8 +74,62 @@ jobs:
       - name: Check the translations
         run: npm run check:translations
 
+      # An S3-compatible store for the storage driver's tests, which run against a real endpoint
+      # or not at all. `quay.io/minio/minio` needs its `server` argument, which a service
+      # container cannot be given, so it is started here.
+      - name: Start an object store
+        run: |
+          docker run -d --name minio -p 9100:9000 \
+            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+            quay.io/minio/minio:latest server /data
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:9100/minio/health/live && break; sleep 1; done
+
+      # A mail server that requires credentials, for the SMTP driver's tests.
+      - name: Start a mail catcher
+        run: |
+          docker run -d --name mailpit -p 1025:1025 -p 8025:8025 \
+            -e MP_SMTP_AUTH=user:pass -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:latest
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8025/api/v1/info && break; sleep 1; done
+
       - run: npm run test
+        env:
+          S3_TEST_ENDPOINT: http://127.0.0.1:9100
+          SMTP_TEST_URL: smtp://user:pass@127.0.0.1:1025
       - run: npm run build
+
+  rehearsal:
+    name: Deployment rehearsal
+    runs-on: ubuntu-latest
+    needs: quality
+
+    # The production image, a production environment and an empty database: Phase 18's exit
+    # criterion, run on every push so the first real deployment is never the first time.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: coopmanage
+          POSTGRES_PASSWORD: coopmanage
+          POSTGRES_DB: coopmanage
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U coopmanage -d coopmanage"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://coopmanage:coopmanage@localhost:5435/coopmanage?schema=public
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run deploy:rehearse
 
   audit:
     name: Dependency audit

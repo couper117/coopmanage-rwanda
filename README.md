@@ -9,27 +9,30 @@ system on their behalf.
 
 ## Status
 
-**Phase 2 complete — authentication, users and authorization.** You can sign in, and what you see
-afterwards depends on your role. Phase 3 adds the cooperative and staff modules.
+**All eighteen phases complete.** The product is built, tested, reviewed and rehearsed for
+deployment; `docs/roadmap.md` records each phase's exit criterion and how it was met.
 
-What exists today:
+What exists:
 
-- npm workspaces monorepo with strict TypeScript, ESLint, Prettier and a pre-commit hook
-- Express API with request ids, structured logging, security headers, rate limiting, a single
-  response envelope and a single error path, plus liveness and readiness endpoints
-- Sign in and out, Argon2id hashing, rotating refresh sessions with family revocation, progressive
-  lockout, single-use password reset tokens, and a signed-in device list
-- Role-based authorization enforced on every route, per-staff grant and deny overrides, and tenant
-  resolution that refuses a cooperative the caller is not staff of
-- An append-only audit trail, enforced by the database rather than by convention
-- PostgreSQL with two migrations and an idempotent seed: 58 permissions, 6 roles, 10 cooperative
-  types, 12 units, and a demonstration cooperative with staff in each role
-- React application with the login, password-reset, profile and audit screens, permission-filtered
-  navigation, and silent session refresh — all in English and Kinyarwanda
-- 253 tests across the three packages
-
-Navigation shows every planned module. Screens that are not built yet say so plainly and name the
-phase that delivers them, rather than showing a mock-up.
+- **Members, finance, inventory, sales, reports, documents, meetings, announcements, dashboard,
+  search and an assistant** — the common core every cooperative shares, adapted by configuration,
+  never forked by type. Members and farmers need no account, no smartphone and no telephone number.
+- **English and Kinyarwanda** as equals: every string in both, every report and every message in
+  the reader's language, checked by a script that fails the build on a key present in one and not
+  the other.
+- **Money as decimal strings, never floats; void and reverse, never delete; an append-only audit
+  trail** enforced by the database.
+- **Four-layer tenancy**, with a route sweep that fails the build if any parameterised route lets
+  one cooperative reach another's row.
+- **Offline resilience**: cached screens, saved drafts, an honest connection indicator, and
+  idempotent writes so a retried submission cannot double-post.
+- **1,384 tests** across the three packages, including an end-to-end run of the nine critical
+  flows, an accessibility gate (axe), a keyboard walkthrough, and a gate that fails the run if any
+  of the 144 endpoints has no passing test. Coverage is measured on business logic only and
+  enforced as a floor.
+- **A rehearsed deployment**: `npm run deploy:rehearse` builds the production image and deploys it
+  from an empty database against an object store and a mail server, then signs in and creates the
+  first cooperative. CI does it on every push. Backup and restore have been executed for real.
 
 ## Documentation
 
@@ -99,18 +102,26 @@ five roles — manager, accountant, secretary, inventory officer and viewer — 
 seen as each role sees it. The cooperative is flagged as demonstration data and labelled as such
 wherever its name appears. Re-running the seed never resets a password it did not set.
 
-Password reset has no delivery channel until Phase 12. Outside production the reset link is written
-to the API log, which is where to find it while developing.
+Password-setting links go out by e-mail (`MAIL_DRIVER=smtp`). Outside production the default
+console driver writes the whole message to the API log instead, which is where to find the link
+while developing.
 
 Ports are 5435 for the database, 4000 for the API and 5175 for the web application. They avoid the
 ports other projects on this machine already use, and Vite runs with `strictPort` so a clash fails
 loudly rather than moving the application somewhere unexpected.
 
-Quality gate. All four must pass before a phase is considered complete:
+Quality gate. All of it must pass before a change is merged, and CI runs the same:
 
 ```bash
-npm run lint && npm run typecheck && npm run test && npm run build
+npm run lint && npm run typecheck && npm run check:translations && npm run test && npm run build
+npm run check:audit        # dependency advisories, with a reviewed exception list
+npm run check:migrations   # the migrations build the schema from an empty database
+npm run deploy:rehearse    # the production image, deployed from empty (needs Docker)
 ```
+
+Two of the backend suites run against real services when they are present and skip themselves
+otherwise: the S3 storage driver against MinIO (`S3_TEST_ENDPOINT`) and the SMTP driver against
+Mailpit (`SMTP_TEST_URL`). `docs/testing.md` §6 has the two `docker run` lines.
 
 ## Conventions
 

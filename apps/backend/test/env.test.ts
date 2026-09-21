@@ -5,6 +5,15 @@ const BASE = {
   DATABASE_URL: 'postgresql://user:pass@localhost:5435/db',
 }
 
+/** An object store, which production requires. */
+const S3 = {
+  STORAGE_DRIVER: 's3',
+  S3_ENDPOINT: 'https://project.supabase.co/storage/v1/s3',
+  S3_BUCKET: 'documents',
+  S3_ACCESS_KEY_ID: 'key',
+  S3_SECRET_ACCESS_KEY: 'secret',
+}
+
 describe('environment configuration', () => {
   it('applies documented defaults', () => {
     const env = parseEnv(BASE)
@@ -42,7 +51,7 @@ describe('environment configuration', () => {
   })
 
   describe('production guards', () => {
-    const PROD = { ...BASE, NODE_ENV: 'production', CORS_ORIGINS: 'https://app.example' }
+    const PROD = { ...BASE, NODE_ENV: 'production', CORS_ORIGINS: 'https://app.example', ...S3 }
 
     it('refuses the development JWT secret', () => {
       expect(() => parseEnv(PROD as NodeJS.ProcessEnv)).toThrow(/JWT_ACCESS_SECRET/)
@@ -107,6 +116,60 @@ describe('environment configuration', () => {
       })
       expect(env.NODE_ENV).toBe('production')
     })
+
+    it('refuses to keep documents on a container disk in production', () => {
+      // The disk is replaced on the next deployment, and a cooperative's documents with it.
+      expect(() =>
+        parseEnv({ ...PROD, JWT_ACCESS_SECRET: 'a'.repeat(48), STORAGE_DRIVER: 'local' }),
+      ).toThrow(/STORAGE_DRIVER/)
+    })
+  })
+
+  describe('the e-mail channel', () => {
+    it('needs a URL and a From address when it is SMTP, and the URL has to be SMTP', () => {
+      expect(() => parseEnv({ ...BASE, MAIL_DRIVER: 'smtp' })).toThrow(/SMTP_URL/)
+      expect(() => parseEnv({ ...BASE, MAIL_DRIVER: 'smtp' })).toThrow(/SMTP_FROM/)
+      expect(() =>
+        parseEnv({
+          ...BASE,
+          MAIL_DRIVER: 'smtp',
+          SMTP_URL: 'https://mail.example',
+          SMTP_FROM: 'x@example.test',
+        }),
+      ).toThrow(/smtp:\/\//)
+      const ok = parseEnv({
+        ...BASE,
+        MAIL_DRIVER: 'smtp',
+        SMTP_URL: 'smtps://user:pass@mail.example:465',
+        SMTP_FROM: 'CoopManage <no-reply@example.rw>',
+      })
+      expect(ok.MAIL_DRIVER).toBe('smtp')
+    })
+
+    it('defaults to the console, in production too — loudly, but it starts', () => {
+      expect(parseEnv({ ...BASE }).MAIL_DRIVER).toBe('console')
+      expect(
+        parseEnv({
+          ...BASE,
+          ...S3,
+          NODE_ENV: 'production',
+          CORS_ORIGINS: 'https://a.example',
+          JWT_ACCESS_SECRET: 'a'.repeat(48),
+        }).MAIL_DRIVER,
+      ).toBe('console')
+    })
+  })
+
+  describe('the object store', () => {
+    it('is accepted in development with the four values it needs', () => {
+      expect(parseEnv({ ...BASE, ...S3 }).STORAGE_DRIVER).toBe('s3')
+    })
+
+    it('names each value that is missing rather than failing on the first upload', () => {
+      const { S3_SECRET_ACCESS_KEY: _secret, S3_BUCKET: _bucket, ...partial } = S3
+      expect(() => parseEnv({ ...BASE, ...partial })).toThrow(/S3_SECRET_ACCESS_KEY/)
+      expect(() => parseEnv({ ...BASE, ...partial })).toThrow(/S3_BUCKET/)
+    })
   })
 })
 
@@ -121,6 +184,7 @@ describe('the refresh cookie’s SameSite', () => {
   const REAL_SECRET = 'a'.repeat(48)
   const PROD = {
     ...BASE,
+    ...S3,
     NODE_ENV: 'production',
     CORS_ORIGINS: 'https://app.example.rw',
     JWT_ACCESS_SECRET: REAL_SECRET,

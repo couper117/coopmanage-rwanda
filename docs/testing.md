@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Testing
 
-Status: **Phase 17 complete.** How the product is tested, what the suites prove, and what they do
+Status: **Phase 18 complete.** How the product is tested, what the suites prove, and what they do
 not.
 
 ---
@@ -13,7 +13,7 @@ every push.
 | Suite      | Where                  | Against                           | Count at Phase 17 |
 | ---------- | ---------------------- | --------------------------------- | ----------------- |
 | `shared`   | `packages/shared/test` | pure functions                    | 81                |
-| `backend`  | `apps/backend/test`    | the HTTP API on a real PostgreSQL | 770               |
+| `backend`  | `apps/backend/test`    | the HTTP API on a real PostgreSQL | 787               |
 | `frontend` | `apps/frontend/test`   | screens in jsdom, network stubbed | 516               |
 
 **The backend suite is integration testing throughout.** Every test sends real HTTP through
@@ -117,13 +117,15 @@ percentage across route wiring, generated code and JSX flatters the figure, so t
 counted, and the thresholds are a floor under what Phase 17 measured rather than a target: a phase
 that ships a service nobody tests fails the build instead of lowering the average.
 
-| Workspace  | Measured on                                                           | Statements | Branches | Functions | Lines | Floor (S/B/F/L) |
-| ---------- | --------------------------------------------------------------------- | ---------- | -------- | --------- | ----- | --------------- |
-| `shared`   | everything                                                            | 100%       | 96%      | 100%      | 100%  | 90/80/90/90     |
-| `backend`  | `src/lib/**`, every `*.service.ts`                                    | 90%        | 77%      | 96%       | 93%   | 85/70/90/88     |
-| `frontend` | `src/lib`, `src/stores`, `src/hooks`, `src/i18n/*.ts`, `src/app/*.ts` | 84%        | 82%      | 82%       | 88%   | 80/70/80/80     |
+| Workspace  | Measured on                                                           | Statements | Branches | Functions | Lines  | Floor (S/B/F/L) |
+| ---------- | --------------------------------------------------------------------- | ---------- | -------- | --------- | ------ | --------------- |
+| `shared`   | everything                                                            | 100%       | 96%      | 100%      | 100%   | 90/80/90/90     |
+| `backend`  | `src/lib/**`, every `*.service.ts`                                    | 88–90%     | 76–77%   | 93–96%    | 92–93% | 85/70/90/88     |
+| `frontend` | `src/lib`, `src/stores`, `src/hooks`, `src/i18n/*.ts`, `src/app/*.ts` | 84%        | 82%      | 82%       | 88%    | 80/70/80/80     |
 
-The lowest service on the backend is the catalogue at 79% of statements; what is uncovered there
+The backend range is the two optional suites: the lower figure is without the object store and
+the mail server present, the higher with them. The lowest service is the catalogue at 79% of
+statements; what is uncovered there
 is mostly the fallback branches behind pre-checks — a unique violation the pre-check already
 refused — which Phase 17 closed where it was a real path (duplicate SKUs, category names and store
 codes, all now refused by name).
@@ -171,6 +173,20 @@ npm run check:migrations       # migrations from an empty database
 npm run check:translations     # both languages complete
 npm run check:audit            # dependency advisories
 ```
+
+Two backend suites run against a real service when one is present and skip themselves, saying so,
+otherwise — a mock of a protocol tests the mock:
+
+```
+docker run -d --name minio -p 9100:9000 -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+  quay.io/minio/minio:latest server /data
+docker run -d --name mailpit -p 1025:1025 -p 8025:8025 -e MP_SMTP_AUTH=user:pass \
+  -e MP_SMTP_AUTH_ALLOW_INSECURE=1 axllent/mailpit:latest
+S3_TEST_ENDPOINT=http://127.0.0.1:9100 SMTP_TEST_URL=smtp://user:pass@127.0.0.1:1025 npm test
+```
+
+`test/storage.test.ts` also checks the SigV4 signer against Amazon's published test vector, which
+needs no service. CI starts both containers.
 
 The backend suite needs the development database up (`docker compose up -d`). It creates what it
 needs under `@example.test` addresses and a `test-` tag, and removes all of it at the end; a run

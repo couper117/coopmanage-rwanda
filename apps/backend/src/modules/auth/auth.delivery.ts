@@ -1,21 +1,20 @@
-import { env, isProduction } from '../../config/env.js'
-import { logger } from '../../lib/logger.js'
+import type { Locale } from '@coopmanage/shared'
+import { env } from '../../config/env.js'
+import { mail } from '../../lib/mail/index.js'
+import { passwordSetupMessage } from '../../lib/mail/templates.js'
 
 /**
- * Where a password reset link is sent.
+ * Where a password reset link is sent: the e-mail channel, whichever driver is live.
  *
- * Phase 2 delivers the token lifecycle — single use, sixty minutes, uniform responses — but the
- * platform has no message channel yet: SMS arrives in Phase 12 and email with it. Rather than
- * pretend, this module is the one place delivery happens, behind a named port, so adding a channel
- * later is a change here and nowhere else.
- *
- * Outside production the link is written to the server log, which is how a developer completes the
- * flow. In production, with no channel configured, the attempt is recorded as a warning and the
- * link is never logged: writing a working reset link into a production log file would be a way in.
+ * Phase 2 delivered the token lifecycle — single use, sixty minutes, uniform responses — behind
+ * this port with no channel behind it. Phase 18 put SMTP behind it. The console driver keeps the
+ * earlier behaviour for development (the link in the log) and for a production deployment that
+ * has no SMTP account yet (a warning, and never the link).
  */
 export interface PasswordResetMessage {
   email: string
   fullName: string
+  locale: Locale
   token: string
   expiresAt: Date
 }
@@ -25,17 +24,16 @@ export function resetLinkFor(token: string): string {
 }
 
 export async function deliverPasswordReset(message: PasswordResetMessage): Promise<void> {
-  if (isProduction) {
-    logger.warn(
-      { email: message.email },
-      'password reset requested but no delivery channel is configured; the link was not sent',
-    )
-    return
-  }
-
-  logger.info(
-    { email: message.email, resetLink: resetLinkFor(message.token), expiresAt: message.expiresAt },
-    'password reset link (development delivery)',
+  await mail().send(
+    passwordSetupMessage({
+      to: { email: message.email, name: message.fullName },
+      locale: message.locale,
+      link: resetLinkFor(message.token),
+      expiresInMinutes: Math.max(
+        1,
+        Math.round((message.expiresAt.getTime() - Date.now()) / 60_000),
+      ),
+      appName: 'CoopManage Rwanda',
+    }),
   )
-  return Promise.resolve()
 }

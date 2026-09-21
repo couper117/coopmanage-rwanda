@@ -1,6 +1,6 @@
 # CoopManage Rwanda — Feature Map and Development Roadmap
 
-Status: **Phase 17 complete.** Phase 18 is next.
+Status: **All eighteen phases complete.**
 
 ---
 
@@ -959,7 +959,7 @@ never been asserted on. No known broken functionality remains.
 
 ---
 
-### Phase 18 — Production preparation
+### Phase 18 — Production preparation ✅
 
 Production environment variables, Supabase database and storage, migration deployment, seed
 strategy, Vercel and Railway configuration, `scripts/backup-db.mjs` with the restore procedure
@@ -967,6 +967,44 @@ executed once for real, monitoring and log retention, and the deployment runbook
 
 **Exit:** a clean deployment from an empty production database succeeds, the restore procedure has
 actually been executed, and no secret is exposed.
+
+**Met.** `docs/deployment.md` is the runbook, and everything in it that a hosting platform runs
+has been executed on the reference machine with the production artefact:
+
+- **The deployment, rehearsed.** `npm run deploy:rehearse` builds the image from
+  `apps/backend/Dockerfile`, creates an empty database, an empty object store (MinIO) and a mail
+  server that requires credentials (Mailpit), runs `prisma migrate deploy` in the image (13
+  migrations from nothing), seeds it, starts it with `NODE_ENV=production`, waits for the health
+  check, signs in as the administrator, checks the six security headers, the cookie flags, that
+  the API documentation is closed and the right drivers started, creates the first cooperative,
+  and reads its manager's password link back from the mail server — confirming nothing of it
+  reached the log. Then it drops everything. CI runs it on every push. Passed.
+- **The restore, executed.** `db:backup` dumped the development database with a checksum and
+  copied it to a bucket; `db:restore` verified the checksum, restored into a fresh database, ran
+  `prisma migrate status` (up to date), printed the row counts, and `inventory:rebuild` found
+  every stock level agreeing with its history. Both scripts refuse the live database as a target.
+- **No secret exposed.** The history was re-scanned by hand; gitleaks runs in CI over the whole
+  history; the image is built from a `.dockerignore` that drops every `.env`; the bootstrap
+  administrator password is single-use in production; `npm run check:env` validates a production
+  environment file offline, echoing no value.
+
+Two drivers the earlier phases had deliberately left unbuilt — "a driver written against no real
+endpoint is a driver nobody has run" — were built once there was a real endpoint to run them
+against, in a container: the **S3 storage driver**, with a hand-written SigV4 signer checked
+against Amazon's published test vector and exercised by the whole documents suite through MinIO;
+and the **SMTP e-mail channel** through nodemailer, delivering the password-setting message in the
+reader's language and read back from Mailpit. Production refuses local storage, requires the
+`S3_*` values, probes both the bucket and the mail server at startup, and forbids the demo seed.
+
+What a first deployment still needs are the accounts: a Supabase project, a Railway service and a
+Vercel project. `docs/deployment.md` §3 is the nine steps, with what to check at each; `vercel.json`
+and `railway.json` carry the configuration, including the one rewrite that keeps the browser
+application and the API on one site.
+
+Two things were struck rather than built, with the reason recorded: `VITE_SENTRY_DSN` (error
+tracking needs a data-processing agreement before a third party receives request context) and a
+real SMS gateway (it lands with the account). `scripts/backup-db.mjs` became
+`apps/backend/src/scripts/backup-db.ts`, so it ships in the image and shares the storage signer.
 
 ---
 

@@ -1,0 +1,17 @@
+# What the backend image must never contain. `.env` above all: the image is pushed to a registry.
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/dist
+**/coverage
+# The upload store and test stores, by path: `**/storage` would also drop src/lib/storage.
+apps/backend/storage
+apps/backend/storage-test
+apps/backend/backups
+apps/backend/test
+**/.route-coverage
+apps/frontend
+docs
+.git
+.github

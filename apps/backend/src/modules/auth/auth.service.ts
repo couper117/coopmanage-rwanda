@@ -525,7 +525,7 @@ export async function changePassword(
 export async function requestPasswordReset(email: string, req: Request): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true, fullName: true, status: true },
+    select: { id: true, email: true, fullName: true, locale: true, status: true },
   })
   if (!user || user.status !== 'ACTIVE') return
 
@@ -547,6 +547,7 @@ export async function requestPasswordReset(email: string, req: Request): Promise
   await deliverPasswordReset({
     email: user.email,
     fullName: user.fullName,
+    locale: user.locale,
     token,
     expiresAt,
   })

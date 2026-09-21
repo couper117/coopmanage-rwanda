@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
@@ -16,6 +16,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
+    "db:backup": "tsx src/scripts/backup-db.ts",
+    "db:restore": "tsx src/scripts/restore-db.ts",
+    "check:env": "tsx src/scripts/check-env.ts",
     "prisma:generate": "prisma generate",
     "purge-test-data": "tsx test/purge-cli.ts",
     "inventory:rebuild": "tsx src/scripts/rebuild-stock.ts"
@@ -35,10 +38,13 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
+    "nodemailer": "^10.0.10",
     "pdfkit": "^0.20.2",
     "pg": "^8.23.0",
     "pino": "^10.0.0",
     "pino-http": "^11.0.0",
+    "prisma": "7.10.0",
+    "tsx": "^4.19.0",
     "write-excel-file": "^4.1.1",
     "zod": "^4.6.0"
   },
@@ -54,9 +60,7 @@
     "@types/supertest": "^6.0.2",
     "@vitest/coverage-v8": "^5.0.0",
     "pino-pretty": "^13.0.0",
-    "prisma": "7.10.0",
     "supertest": "^7.2.2",
-    "tsx": "^4.19.0",
     "vitest": "^5.0.0"
   }
 }

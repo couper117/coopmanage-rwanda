@@ -203,9 +203,18 @@ entry a cooperative believes was recorded.
 ## 10. Secrets
 
 No secret is committed. `.env` is gitignored, `.env.example` carries placeholders, and a
-`gitleaks` scan runs in CI and as a pre-commit hook. Secrets live in the hosting platform's
-environment configuration. The environment schema fails the boot if a production secret is missing
-or is still the example value.
+`gitleaks` scan runs in CI over the whole history on every push, beside a pre-commit hook that
+refuses the obvious shapes of a credential in staged files. Secrets live in the
+hosting platform's environment configuration. The environment schema fails the boot if a production
+secret is missing or is still the example value, and `npm run check:env` runs the same check on a
+file before it is pasted anywhere. Phase 18 re-scanned the history by hand for secret-shaped
+assignments and found only placeholders, test values and documentation.
+
+The production image is built from a `.dockerignore` that excludes every `.env` but
+`.env.example`, the test directories and the upload store, so an image pushed to a registry carries
+no credential and no cooperative's file. The seeded administrator's bootstrap password is
+single-use in production (`mustChangePassword`), and the runbook removes it from the environment
+once used.
 
 ## 11. Dependencies
 
@@ -332,7 +341,8 @@ finding is fixed or carries a written, accepted risk note — this section is th
 
 ### Not in scope, recorded so nobody thinks it was forgotten
 
-- `prisma migrate reset` from an empty database, which needs explicit consent and belongs to
-  Phase 17.
+- `prisma migrate reset` from an empty database. Phase 17 answered it without a reset:
+  `npm run check:migrations` builds a throwaway database from nothing and compares it with the
+  schema, and Phase 18's rehearsal deploys the production image against one.
 - A penetration test by a party who did not write the code. This review was a structured pass by
   the author against a written checklist; it is not a substitute for one.

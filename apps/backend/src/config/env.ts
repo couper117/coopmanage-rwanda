@@ -53,14 +53,21 @@ const envSchema = z
     APP_BASE_URL: z.string().url().default('http://localhost:5175'),
 
     /**
-     * Where uploaded documents are kept. `local` writes to `STORAGE_LOCAL_PATH`; `s3` is the
-     * Supabase Storage driver, which lands in Phase 18 with the bucket it needs. The value is
-     * refused rather than accepted-and-ignored, because silently falling back to the local disk in
-     * production would mean a cooperative's documents were written to a container that is replaced
-     * on the next deployment.
+     * Where uploaded documents are kept. `local` writes to `STORAGE_LOCAL_PATH`; `s3` is any
+     * S3-compatible store — Supabase Storage in production, MinIO on a developer's machine — and
+     * needs the four `S3_*` values below, which the refinement checks. Production refuses `local`,
+     * because a container's disk is replaced on the next deployment and a cooperative's documents
+     * with it.
      */
     STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
     STORAGE_LOCAL_PATH: z.string().min(1).default('./storage'),
+    /** The store's endpoint, e.g. `https://<project>.supabase.co/storage/v1/s3`. */
+    S3_ENDPOINT: z.string().url().optional(),
+    S3_BUCKET: z.string().min(1).optional(),
+    /** Supabase's S3 endpoint expects the project's region; MinIO accepts anything. */
+    S3_REGION: z.string().min(1).default('us-east-1'),
+    S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+    S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
     /** The cap on one uploaded file. 10 MB covers a scanned certificate and a long PDF. */
     MAX_UPLOAD_MB: z.coerce.number().int().min(1).max(100).default(10),
 
@@ -73,6 +80,18 @@ const envSchema = z
      * adapter written against nothing and never run.
      */
     SMS_PROVIDER: z.enum(['mock']).default('mock'),
+
+    /**
+     * How a password-setting link reaches the person it is for. `console` writes it to the log
+     * outside production and warns without it in production; `smtp` sends it and needs the two
+     * values below. Production may run on `console` — a platform without e-mail can still be
+     * administered by relaying links by hand — but says so at startup and on every message.
+     */
+    MAIL_DRIVER: z.enum(['console', 'smtp']).default('console'),
+    /** `smtp://user:pass@host:587` or `smtps://user:pass@host:465`. */
+    SMTP_URL: z.string().url().optional(),
+    /** The From header, `CoopManage <no-reply@example.rw>`. */
+    SMTP_FROM: z.string().min(3).optional(),
     /**
      * Which planner reads a question and picks a tool for the assistant.
      *
@@ -115,15 +134,51 @@ const envSchema = z
   })
   .superRefine((value, ctx) => {
     if (value.STORAGE_DRIVER === 's3') {
+      for (const key of [
+        'S3_ENDPOINT',
+        'S3_BUCKET',
+        'S3_ACCESS_KEY_ID',
+        'S3_SECRET_ACCESS_KEY',
+      ] as const) {
+        if (!value[key]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required when STORAGE_DRIVER is s3`,
+          })
+        }
+      }
+    }
+
+    if (value.MAIL_DRIVER === 'smtp') {
+      for (const key of ['SMTP_URL', 'SMTP_FROM'] as const) {
+        if (!value[key]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required when MAIL_DRIVER is smtp`,
+          })
+        }
+      }
+      if (value.SMTP_URL && !/^smtps?:\/\//.test(value.SMTP_URL)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['SMTP_URL'],
+          message: 'SMTP_URL must start with smtp:// or smtps://',
+        })
+      }
+    }
+
+    if (value.NODE_ENV !== 'production') return
+
+    if (value.STORAGE_DRIVER === 'local') {
       ctx.addIssue({
         code: 'custom',
         path: ['STORAGE_DRIVER'],
         message:
-          'the S3-compatible driver arrives in Phase 18 with the Supabase bucket; use local until then',
+          'production must keep documents in an object store (STORAGE_DRIVER=s3); a container disk is replaced on the next deployment',
       })
     }
-
-    if (value.NODE_ENV !== 'production') return
 
     // Production must never fall back to a development default or to a value copied out of
     // .env.example, which is the mistake this guard exists to catch.

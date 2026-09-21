@@ -297,12 +297,19 @@ Uploads go through a storage abstraction with two drivers: a local filesystem dr
 development and an S3-compatible driver (Supabase Storage) for production. Nothing in a module
 imports a storage SDK directly.
 
-As of Phase 9 the local driver is built and the S3-compatible one is not: it lands in Phase 18 with
-the bucket it needs, because a signing implementation written against no real endpoint is a driver
-nobody has run. Until then `STORAGE_DRIVER=s3` refuses at startup rather than falling back to the
-local disk, which in production would mean a cooperative's documents were written to a container
-that is replaced on the next deployment. The interface has deliberately no `url()` method:
+Both drivers exist since Phase 18. The S3-compatible one signs every request itself (AWS
+Signature Version 4, `lib/storage/sigv4.ts`, checked against Amazon's published test vector)
+rather than carrying the AWS SDK, and is tested against a real store — MinIO in a container, in
+the suite and in CI — and run against one in the deployment rehearsal. Production refuses
+`STORAGE_DRIVER=local`, because a container's disk is replaced on the next deployment and a
+cooperative's documents with it, and the server probes the bucket at startup so a wrong key fails
+the boot rather than the first upload. The interface has deliberately no `url()` method:
 `docs/documents-and-meetings.md` §3.
+
+E-mail follows the same pattern (`lib/mail`): a console driver for development and SMTP through
+nodemailer for production, one message — the password-setting link — in both languages, and a
+startup probe that authenticates to the host. SMS still has only its mock driver; a gateway lands
+with the account it needs.
 
 Documents are **never** publicly readable. Files are stored under an unguessable key and served
 through `GET /api/v1/documents/:id/download`, which authenticates, checks tenant, checks

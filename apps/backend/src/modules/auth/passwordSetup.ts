@@ -18,7 +18,7 @@ import { deliverPasswordReset } from './auth.delivery.js'
 export async function issuePasswordSetupLink(userId: string): Promise<void> {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { email: true, fullName: true },
+    select: { email: true, fullName: true, locale: true },
   })
 
   const token = generateOpaqueToken()
@@ -39,6 +39,7 @@ export async function issuePasswordSetupLink(userId: string): Promise<void> {
   await deliverPasswordReset({
     email: user.email,
     fullName: user.fullName,
+    locale: user.locale,
     token,
     expiresAt,
   })

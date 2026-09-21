@@ -257,6 +257,11 @@ async function upsertUser(input: {
 
   const password = input.envPassword ?? generatePassword()
   const passwordHash = await argon2.hash(password, HASH_OPTIONS)
+  // In production the password handed in through the environment is a bootstrap credential, not
+  // the administrator's own: it sits in a hosting dashboard and in whoever's terminal set it. The
+  // account therefore opens on the change-password screen, and docs/deployment.md has the operator
+  // remove SEED_ADMIN_PASSWORD from the environment once they have signed in.
+  const mustChangePassword = process.env.NODE_ENV === 'production'
   const user = await prisma.user.upsert({
     where: { email: input.email },
     create: {
@@ -266,6 +271,7 @@ async function upsertUser(input: {
       phone: input.phone ?? null,
       locale: input.locale,
       isPlatformAdmin: input.isPlatformAdmin,
+      mustChangePassword,
     },
     update: {
       passwordHash,
@@ -273,6 +279,7 @@ async function upsertUser(input: {
       phone: input.phone ?? null,
       locale: input.locale,
       isPlatformAdmin: input.isPlatformAdmin,
+      mustChangePassword,
     },
     select: { id: true },
   })
