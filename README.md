@@ -38,6 +38,7 @@ What exists:
 
 | Document                                     | What it settles                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------ |
+| [docs/handover.md](docs/handover.md)         | **Start here** — current state, what is open, how to run it              |
 | [docs/architecture.md](docs/architecture.md) | System shape, layering, tenancy, money handling, transactions, toolchain |
 | [docs/database.md](docs/database.md)         | Every table, column, constraint and index, and the migration plan        |
 | [docs/permissions.md](docs/permissions.md)   | Permission catalogue and the role matrix                                 |
@@ -47,6 +48,7 @@ What exists:
 | [docs/security.md](docs/security.md)         | Threat model and the controls each phase is built against                |
 | [docs/deployment.md](docs/deployment.md)     | Environments, release, backup and restore                                |
 | [docs/roadmap.md](docs/roadmap.md)           | Feature map and the 18 phases with exit criteria                         |
+| [docs/testing.md](docs/testing.md)           | What the suites prove, coverage, and what is not tested                  |
 
 Five modules carry enough of their own reasoning to be written down separately:
 
