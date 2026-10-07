@@ -13,15 +13,15 @@ running in five minutes.
 **All eighteen phases are complete.** The product is built, tested, reviewed, and its deployment
 has been rehearsed with the real production image. Nothing is half-finished in the working tree.
 
-|               |                                                                                |
-| ------------- | ------------------------------------------------------------------------------ |
-| Branch        | `main`, clean, nothing uncommitted                                             |
-| Latest commit | `21aaf1c` — build the shared package on install, so a fresh clone runs         |
-| Remote        | `git@github.com:couper117/coopmanage-rwanda.git` — pushed, nothing outstanding |
-| Tests         | shared 81 · backend 787 · frontend 517 — all green locally                     |
-| Build         | both applications build; first load 263 kB gzipped                             |
+|             |                                                                                |
+| ----------- | ------------------------------------------------------------------------------ |
+| Branch      | `main`, clean, nothing uncommitted                                             |
+| Latest work | Phase 18 and the two fixes below; `git log --oneline -6` for the current tip   |
+| Remote      | `git@github.com:couper117/coopmanage-rwanda.git` — pushed, nothing outstanding |
+| Tests       | shared 81 · backend 787 · frontend 517 — all green locally                     |
+| Build       | both applications build; first load 263 kB gzipped                             |
 
-The last five commits, newest first:
+The commits that closed the project out, newest first:
 
 | Commit    | What it did                                                                                    |
 | --------- | ---------------------------------------------------------------------------------------------- |
